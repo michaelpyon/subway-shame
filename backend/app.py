@@ -603,9 +603,14 @@ def build_status() -> dict:
 # Flask app
 # ---------------------------------------------------------------------------
 
+# In Docker, static files are at ./static/; locally at ../frontend/dist
+_static = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+if not os.path.isdir(_static):
+    _static = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+
 app = Flask(
     __name__,
-    static_folder="../frontend/dist",
+    static_folder=_static,
     static_url_path="",
 )
 CORS(app)
