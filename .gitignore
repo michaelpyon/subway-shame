@@ -1,0 +1,19 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/data.json
+backend/data.json.tmp
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# Env
+.env
+.env.*

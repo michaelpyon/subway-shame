@@ -1,0 +1,12 @@
+@keyframes trophy-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.trophy-float {
+  animation: trophy-float 3s ease-in-out infinite;
+}
+
+.trophy-card {
+  box-shadow: 0 0 60px -12px rgba(255, 255, 255, 0.05);
+}
