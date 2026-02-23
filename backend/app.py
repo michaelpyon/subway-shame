@@ -68,14 +68,14 @@ CATEGORY_SCORES = {
 
 # Ordered list: first match wins
 _CATEGORY_RULES = [
-    ("No Service",     ["no [", "suspended"]),
-    ("Delays",         ["running with delays", "delays"]),
-    ("Slow Speeds",    ["slow"]),
-    ("Skip Stop",      ["skip"]),
-    ("Rerouted",       ["runs via", "reroute"]),
-    ("Runs Local",     ["runs local"]),
-    ("Reduced Freq",   ["runs every", "less frequently"]),
-    ("Platform Change", ["board from", "platform"]),
+    ("No Service",     ["no [", "no trains", "no service", "suspended", "out of service", "service suspended", "not running"]),
+    ("Delays",         ["running with delays", "delays", "running late", "experiencing delays", "longer travel times", "held at", "holding at"]),
+    ("Slow Speeds",    ["slow", "reduced speed", "running slowly"]),
+    ("Skip Stop",      ["skip", "bypassing", "not stopping at", "skipping"]),
+    ("Rerouted",       ["runs via", "reroute", "rerouted", "diverted", "alternate route"]),
+    ("Runs Local",     ["runs local", "running local", "making local stops"]),
+    ("Reduced Freq",   ["runs every", "less frequently", "reduced service", "fewer trains", "running every"]),
+    ("Platform Change", ["board from", "platform", "change at"]),
 ]
 
 _UPTOWN_KEYWORDS = [
@@ -102,6 +102,8 @@ def _classify_alert(header: str) -> tuple[str, int, str]:
         if any(kw in h for kw in keywords):
             category = cat
             break
+    if category == "Other":
+        log.debug(f"Unclassified alert (scored as Other): {header[:120]}")
     score = CATEGORY_SCORES[category]
 
     # Direction
