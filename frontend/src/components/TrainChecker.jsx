@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { LINE_COLORS, LINE_DIRECTIONS, getScoreTier, CATEGORY_CONFIG, CATEGORY_ORDER } from "../constants/lines";
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
@@ -16,6 +16,8 @@ const ALL_LINES = [
   ["S"],
   ["SI"],
 ];
+
+const ALL_LINE_IDS = ALL_LINES.flat();
 
 const GOOD_RESPONSES = [
   "Your train is running fine. Enjoy it while it lasts.",
@@ -54,11 +56,57 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Parse hash into { line, dir } — dir is 0 (uptown) or 1 (downtown) or null
+function parseHash() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return { line: null, dir: null };
+  const params = new URLSearchParams(hash);
+  const line = params.get("line");
+  const dirStr = params.get("dir");
+  const dir = dirStr === "uptown" ? 0 : dirStr === "downtown" ? 1 : null;
+  return {
+    line: line && ALL_LINE_IDS.includes(line) ? line : null,
+    dir,
+  };
+}
+
 export default function TrainChecker({ lines }) {
   const [selectedLine, setSelectedLine] = useState(null);
   const [selectedDirection, setSelectedDirection] = useState(null);
   const [verdict, setVerdict] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [animKey, setAnimKey] = useState(0); // increment to re-trigger animation
+
+  // On mount: restore state from URL hash
+  useEffect(() => {
+    const { line, dir } = parseHash();
+    if (line) {
+      setSelectedLine(line);
+      if (dir !== null) setSelectedDirection(dir);
+    }
+
+    // Listen for back/forward navigation
+    const onHashChange = () => {
+      const { line: l, dir: d } = parseHash();
+      setSelectedLine(l);
+      setSelectedDirection(d !== null ? d : null);
+      setVerdict(null);
+      setShowResult(false);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  // Update hash when selection changes
+  useEffect(() => {
+    if (!selectedLine) {
+      history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+    const dirStr = selectedDirection === 0 ? "uptown" : selectedDirection === 1 ? "downtown" : null;
+    const hash = dirStr ? `#line=${selectedLine}&dir=${dirStr}` : `#line=${selectedLine}`;
+    history.replaceState(null, "", hash);
+  }, [selectedLine, selectedDirection]);
 
   const directions = useMemo(() => {
     if (!selectedLine) return null;
@@ -87,11 +135,9 @@ export default function TrainChecker({ lines }) {
     let message, isBad;
 
     if (dailyScore === 0) {
-      // Line is fine
       isBad = false;
       message = pickRandom(GOOD_RESPONSES);
     } else if (dirKey) {
-      // User picked a direction
       const dirData = byDir[dirKey] || { score: 0 };
       const otherKey = dirKey === "uptown" ? "downtown" : "uptown";
       const otherData = byDir[otherKey] || { score: 0 };
@@ -107,14 +153,25 @@ export default function TrainChecker({ lines }) {
         message = pickRandom(GOOD_RESPONSES);
       }
     } else {
-      // No direction selected but line has issues
       isBad = true;
       message = pickRandom(BAD_RESPONSES);
     }
 
     setVerdict({ message, isBad, score: dailyScore });
     setShowResult(true);
+    setAnimKey(k => k + 1); // re-trigger animation on each check
   }
+
+  const handleShare = useCallback(() => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: "Is My Train Fucked?", url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Link copied!");
+      });
+    }
+  }, []);
 
   // Get relevant alerts for the selected direction
   const relevantAlerts = useMemo(() => {
@@ -146,6 +203,7 @@ export default function TrainChecker({ lines }) {
               <button
                 key={lineId}
                 onClick={() => handleLineSelect(lineId)}
+                aria-label={`${lineId} train`}
                 className={`transition-all ${
                   selectedLine === lineId
                     ? "scale-110 ring-2 ring-white/40 rounded-full"
@@ -196,11 +254,14 @@ export default function TrainChecker({ lines }) {
 
         {/* Verdict */}
         {showResult && verdict && (
-          <div className={`mt-5 rounded-xl p-5 text-center border ${
-            verdict.isBad
-              ? "bg-red-950/30 border-red-900/40"
-              : "bg-green-950/30 border-green-900/40"
-          }`}>
+          <div
+            key={animKey}
+            className={`mt-5 rounded-xl p-5 text-center border ${
+              verdict.isBad
+                ? "bg-red-950/30 border-red-900/40 verdict-shake"
+                : "bg-green-950/30 border-green-900/40 verdict-pulse-green"
+            }`}
+          >
             {/* Icon */}
             <div className="text-4xl mb-3">
               {verdict.isBad ? "💀" : "✅"}
@@ -223,6 +284,14 @@ export default function TrainChecker({ lines }) {
                 {" "}has racked up <span className="font-bold text-white">{verdict.score}</span> shame points today.
               </p>
             )}
+
+            {/* Share button */}
+            <button
+              onClick={handleShare}
+              className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+            >
+              Share this verdict
+            </button>
 
             {/* Relevant alerts */}
             {relevantAlerts.length > 0 && verdict.isBad && (

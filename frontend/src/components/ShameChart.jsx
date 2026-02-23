@@ -217,25 +217,26 @@ export default function ShameChart({ timeseries }) {
         Cumulative shame points over time — which line is pulling ahead?
       </p>
 
-      <div className="bg-gray-900 rounded-lg p-4 sm:p-6">
-        <ResponsiveContainer width="100%" height={360}>
+      <div className="bg-gray-900 rounded-lg p-4 sm:p-6 overflow-x-auto">
+        <div className="min-w-[320px]">
+        <ResponsiveContainer width="100%" height={280} minHeight={220}>
           <LineChart
             data={chartData}
-            margin={{ top: 5, right: 30, bottom: 5, left: 0 }}
+            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
             <XAxis
               dataKey="time"
               stroke="#4b5563"
-              tick={{ fill: "#6b7280", fontSize: 11 }}
+              tick={{ fill: "#6b7280", fontSize: 10 }}
               tickLine={false}
             />
             <YAxis
               stroke="#4b5563"
-              tick={{ fill: "#6b7280", fontSize: 11 }}
+              tick={{ fill: "#6b7280", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
-              width={40}
+              width={30}
             />
             <Tooltip content={<CustomTooltip />} />
             {sortedLines.map((lineId) => {
@@ -267,6 +268,7 @@ export default function ShameChart({ timeseries }) {
             })}
           </LineChart>
         </ResponsiveContainer>
+        </div>
 
         {/* Legend */}
         <div className="flex flex-wrap gap-2 mt-4 justify-center">
