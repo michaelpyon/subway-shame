@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    // Target modern browsers — Vite handles transpilation for older ones
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    // Module system
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // JSX — react-jsx uses the modern automatic transform (no import React)
+    "jsx": "react-jsx",
+
+    // Incremental TypeScript adoption:
+    // .ts/.tsx files are strictly type-checked; .js/.jsx files pass through
+    "allowJs": true,
+    "checkJs": false,
+
+    // Paths / resolution
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+
+    // Strict type checking for .ts files
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Vite handles emit — tsc is type-check only
+    "noEmit": true,
+    "isolatedModules": true,
+
+    // Speed / compat
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
