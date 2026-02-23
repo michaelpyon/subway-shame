@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -219,11 +219,23 @@ export default function ShameChart({ timeseries }) {
 
       <div className="bg-gray-900 rounded-lg p-4 sm:p-6 overflow-x-auto">
         <div className="min-w-[320px]">
-        <ResponsiveContainer width="100%" height={280} minHeight={220}>
-          <LineChart
+        <ResponsiveContainer width="100%" height={300} minHeight={240}>
+          <AreaChart
             data={chartData}
             margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
+            {/* Gradient defs for each active line */}
+            <defs>
+              {sortedLines.map((lineId) => {
+                const color = getLineColor(lineId);
+                return (
+                  <linearGradient key={lineId} id={`grad-${lineId}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={color} stopOpacity={0.02} />
+                  </linearGradient>
+                );
+              })}
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
             <XAxis
               dataKey="time"
@@ -241,17 +253,19 @@ export default function ShameChart({ timeseries }) {
             <Tooltip content={<CustomTooltip />} />
             {sortedLines.map((lineId) => {
               const color = getLineColor(lineId);
+              const isHovered = hoveredLine === lineId;
+              const isDimmed = hoveredLine && !isHovered;
 
               return (
-                <Line
+                <Area
                   key={lineId}
                   type="monotone"
                   dataKey={lineId}
                   stroke={color}
-                  strokeWidth={hoveredLine === lineId ? 4 : 2.5}
-                  strokeOpacity={
-                    hoveredLine && hoveredLine !== lineId ? 0.15 : 1
-                  }
+                  strokeWidth={isHovered ? 3.5 : 2}
+                  strokeOpacity={isDimmed ? 0.12 : 1}
+                  fill={`url(#grad-${lineId})`}
+                  fillOpacity={isDimmed ? 0.05 : 1}
                   dot={(props) => (
                     <EndpointBadge
                       {...props}
@@ -266,7 +280,7 @@ export default function ShameChart({ timeseries }) {
                 />
               );
             })}
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
         </div>
 

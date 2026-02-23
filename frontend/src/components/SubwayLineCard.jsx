@@ -121,19 +121,42 @@ function DirectionColumn({ label, arrow, data }) {
   );
 }
 
-export default function SubwayLineCard({ line }) {
+export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
   const [expanded, setExpanded] = useState(false);
   const color = LINE_COLORS[line.id] || "#808183";
   const dailyScore = line.daily_score || 0;
   const tier = getScoreTier(dailyScore);
   const hasContent = dailyScore > 0;
+  const scorePercent = maxScore > 0 ? (dailyScore / maxScore) * 100 : 0;
 
   return (
     <div
-      className="bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800/80 transition-colors"
+      className="bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800/80 transition-colors relative"
       style={{ borderLeft: `4px solid ${color}` }}
       onClick={() => hasContent && setExpanded(!expanded)}
     >
+      {/* Relative score background bar */}
+      {dailyScore > 0 && (
+        <div
+          className="absolute inset-y-0 left-0 opacity-[0.07] pointer-events-none transition-all duration-500"
+          style={{
+            width: `${scorePercent}%`,
+            background: `linear-gradient(90deg, ${color}, transparent)`,
+          }}
+        />
+      )}
+      {/* Rank badge */}
+      {rank !== null && rank <= 3 && dailyScore > 0 && (
+        <div
+          className="absolute top-2 right-2 text-[10px] font-black rounded px-1 py-0.5 leading-none"
+          style={{
+            backgroundColor: rank === 1 ? "#EF444420" : rank === 2 ? "#F9731620" : "#EAB30820",
+            color: rank === 1 ? "#EF4444" : rank === 2 ? "#F97316" : "#EAB308",
+          }}
+        >
+          #{rank}
+        </div>
+      )}
       <div className="p-4 flex items-center gap-3">
         <LineBadge lineId={line.id} size="md" />
         <div className="flex-1 min-w-0">

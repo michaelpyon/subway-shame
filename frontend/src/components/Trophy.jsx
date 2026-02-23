@@ -40,6 +40,15 @@ export default function Trophy({ winner }) {
           border: `2px solid ${color}40`,
         }}
       >
+        {/* LIVE badge */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-gray-900/80 rounded-full px-2.5 py-1 border border-gray-700/60">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300">Live</span>
+        </div>
+
         {/* Glow effect */}
         <div
           className="absolute inset-0 opacity-20 blur-3xl"

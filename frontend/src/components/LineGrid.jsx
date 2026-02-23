@@ -22,8 +22,13 @@ export default function LineGrid({ lines }) {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {sorted.map((line) => (
-          <SubwayLineCard key={line.id} line={line} />
+        {sorted.map((line, idx) => (
+          <SubwayLineCard
+            key={line.id}
+            line={line}
+            rank={idx + 1}
+            maxScore={sorted[0]?.daily_score || 1}
+          />
         ))}
       </div>
     </div>
