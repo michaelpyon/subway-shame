@@ -151,27 +151,33 @@ export default function SubwayLineCard({ line }) {
             {dailyScore > 0 ? line.status : "Good Service"}
           </span>
         </div>
-        <div className="text-right flex items-center gap-1.5">
+        <div className="text-right flex items-center gap-1.5 shrink-0">
           {dailyScore > 0 && (
             <>
-              <span className="text-lg">{tier.emoji}</span>
+              <span className="text-base">{tier.emoji}</span>
               <div className="text-right">
                 <span
-                  className="text-xl font-bold tabular-nums"
+                  className="text-xl font-black tabular-nums block leading-none"
                   style={{ color: tier.color }}
                 >
                   {dailyScore}
                 </span>
-                {line.score > 0 && line.score !== dailyScore && (
-                  <span className="text-[10px] text-gray-600 block">
-                    {line.score} now
-                  </span>
-                )}
+                <span
+                  className="text-[9px] font-semibold uppercase tracking-wide"
+                  style={{ color: `${tier.color}90` }}
+                >
+                  {tier.label}
+                </span>
               </div>
             </>
           )}
           {dailyScore === 0 && (
-            <span className="text-green-500 text-xl">✓</span>
+            <div className="text-right">
+              <span className="text-green-500 text-lg">✓</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wide text-green-700 block">
+                On time
+              </span>
+            </div>
           )}
         </div>
         {hasContent && (

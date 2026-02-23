@@ -3,6 +3,7 @@
 body {
   margin: 0;
   min-width: 320px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Skeleton shimmer */
