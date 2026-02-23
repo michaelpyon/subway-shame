@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   LINE_COLORS,
   SHAME_HEADLINES,
@@ -10,9 +10,10 @@ import {
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
 
-export default function Trophy({ winner }) {
+export default function Trophy({ winner, lines = [] }) {
   const color = LINE_COLORS[winner.id] || "#808183";
   const tier = getScoreTier(winner.daily_score);
+  const [shareState, setShareState] = useState("idle"); // idle | copied | shared | error
 
   const headline = useMemo(() => {
     const idx = Math.floor(Math.random() * SHAME_HEADLINES.length);
@@ -30,6 +31,48 @@ export default function Trophy({ winner }) {
 
   const dirs = LINE_DIRECTIONS[winner.id] || ["Uptown", "Downtown"];
   const byDir = winner.by_direction || {};
+
+  // Compute line counts for share text
+  const worstCount = lines.filter((l) => (l.daily_score || 0) > 0).length;
+  const goodCount = lines.length - worstCount;
+
+  const handleShare = useCallback(async () => {
+    const date = new Date().toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+    const lineName = `${winner.id} Train`;
+    const shareText = `🚇 Subway Shame — ${date}\n🏆 Worst: ${lineName} (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://michaelpyon.github.io/subway-shame/`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ text: shareText, title: "Subway Shame NYC" });
+        setShareState("shared");
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        setShareState("copied");
+      }
+    } catch (err) {
+      // User cancelled or clipboard failed — try fallback
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setShareState("copied");
+      } catch {
+        setShareState("error");
+      }
+    }
+    setTimeout(() => setShareState("idle"), 2500);
+  }, [winner, worstCount, goodCount]);
+
+  const shareLabel =
+    shareState === "copied"
+      ? "✓ Copied!"
+      : shareState === "shared"
+      ? "✓ Shared!"
+      : shareState === "error"
+      ? "Try again"
+      : "📸 Share Today's Shame";
 
   return (
     <div className="px-4 pt-8 pb-2 max-w-2xl mx-auto">
@@ -173,7 +216,7 @@ export default function Trophy({ winner }) {
 
           {/* Alerts */}
           {alertsToShow.length > 0 && (
-            <div className="space-y-2 text-left max-w-lg mx-auto">
+            <div className="space-y-2 text-left max-w-lg mx-auto mb-5">
               {alertsToShow.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = a.category
@@ -201,6 +244,35 @@ export default function Trophy({ winner }) {
               })}
             </div>
           )}
+
+          {/* Share button */}
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
+            style={{
+              backgroundColor:
+                shareState === "idle"
+                  ? `${color}18`
+                  : shareState === "error"
+                  ? "#EF444418"
+                  : "#16A34A18",
+              border: `1px solid ${
+                shareState === "idle"
+                  ? `${color}50`
+                  : shareState === "error"
+                  ? "#EF444450"
+                  : "#16A34A50"
+              }`,
+              color:
+                shareState === "idle"
+                  ? color
+                  : shareState === "error"
+                  ? "#EF4444"
+                  : "#16A34A",
+            }}
+          >
+            {shareLabel}
+          </button>
         </div>
       </div>
     </div>

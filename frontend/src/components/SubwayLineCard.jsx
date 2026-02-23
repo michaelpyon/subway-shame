@@ -145,19 +145,20 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
           }}
         />
       )}
-      {/* Rank badge */}
-      {rank !== null && rank <= 3 && dailyScore > 0 && (
-        <div
-          className="absolute top-2 right-2 text-[10px] font-black rounded px-1 py-0.5 leading-none"
-          style={{
-            backgroundColor: rank === 1 ? "#EF444420" : rank === 2 ? "#F9731620" : "#EAB30820",
-            color: rank === 1 ? "#EF4444" : rank === 2 ? "#F97316" : "#EAB308",
-          }}
-        >
-          #{rank}
-        </div>
-      )}
       <div className="p-4 flex items-center gap-3">
+        {/* Rank column — left side, only visible for top 3 */}
+        <div className="w-6 shrink-0 text-center">
+          {rank !== null && rank <= 3 && dailyScore > 0 && (
+            <span
+              className="text-xs font-black leading-none"
+              style={{
+                color: rank === 1 ? "#EF4444" : rank === 2 ? "#F97316" : "#EAB308",
+              }}
+            >
+              #{rank}
+            </span>
+          )}
+        </div>
         <LineBadge lineId={line.id} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">

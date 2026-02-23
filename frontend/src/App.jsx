@@ -66,7 +66,7 @@ export default function App() {
         <>
           {data.winner ? (
             <>
-              <Trophy winner={data.winner} />
+              <Trophy winner={data.winner} lines={data.lines || []} />
               {data.podium && data.podium.length > 1 && (
                 <Podium podium={data.podium} date={data.date} />
               )}
