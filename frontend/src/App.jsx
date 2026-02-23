@@ -8,6 +8,8 @@ import ShameChart from "./components/ShameChart";
 import LineGrid from "./components/LineGrid";
 import ScoringExplainer from "./components/ScoringExplainer";
 import TrainChecker from "./components/TrainChecker";
+import OfflineState from "./components/OfflineState";
+import SkeletonLoader from "./components/SkeletonLoader";
 import "./App.css";
 
 export default function App() {
@@ -18,6 +20,11 @@ export default function App() {
     []
   );
 
+  // Full offline state — backend is down, no data yet
+  if (error && !data) {
+    return <OfflineState onRetry={refresh} loading={loading} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white antialiased">
       <Header
@@ -25,33 +32,30 @@ export default function App() {
         secondsUntilRefresh={secondsUntilRefresh}
         onRefresh={refresh}
         loading={loading}
+        error={error}
       />
 
-      {/* Loading state (first load only) */}
-      {loading && !data && (
-        <div className="text-center py-20">
-          <div className="inline-block w-8 h-8 border-2 border-gray-700 border-t-white rounded-full animate-spin" />
-          <p className="text-gray-500 mt-4 text-sm">
-            Checking which train is disappointing everyone...
-          </p>
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <div className="max-w-md mx-auto px-4 py-8">
-          <div className="bg-red-950/50 border border-red-900 rounded-lg p-4 text-center">
-            <p className="text-red-400 text-sm">
-              Couldn't reach the MTA feeds. Even the data is delayed.
+      {/* Soft error banner when we have stale data */}
+      {error && data && (
+        <div className="max-w-2xl mx-auto px-4 mb-2">
+          <div className="bg-yellow-950/40 border border-yellow-900/50 rounded-lg px-4 py-2 flex items-center justify-between gap-3">
+            <p className="text-yellow-600 text-xs">
+              Showing last known data — live feed temporarily unavailable.
             </p>
             <button
               onClick={refresh}
-              className="mt-3 px-4 py-1.5 bg-red-900/50 hover:bg-red-900 text-red-300 text-sm rounded transition-colors"
+              disabled={loading}
+              className="text-yellow-600 text-xs underline hover:text-yellow-500 disabled:opacity-40 shrink-0"
             >
-              Try again
+              Retry
             </button>
           </div>
         </div>
+      )}
+
+      {/* Loading state (first load only) */}
+      {loading && !data && (
+        <SkeletonLoader />
       )}
 
       {/* Train checker — always show when data is loaded */}

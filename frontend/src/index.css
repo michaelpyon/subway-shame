@@ -5,6 +5,12 @@ body {
   min-width: 320px;
 }
 
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Verdict animations */
 @keyframes verdict-shake {
   0%, 100% { transform: translateX(0); }
