@@ -28,6 +28,9 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
         <p className="text-gray-500 mt-1.5 text-sm sm:text-base">
           Which NYC subway line is ruining the most commutes right now?
         </p>
+        <p className="text-gray-700 mt-1 text-xs">
+          Higher shame score = more delays, longer delays. Resets every midnight.
+        </p>
 
         {/* Status row */}
         <div className="flex items-center justify-center gap-3 mt-3 text-xs text-gray-600">

@@ -2,15 +2,15 @@ import { useState } from "react";
 import { CATEGORY_CONFIG, CATEGORY_ORDER, SCORE_TIERS } from "../constants/lines";
 
 const SCORING_DATA = [
-  { cat: "No Service", pts: 50, desc: "Line gave up. Not even pretending to run." },
-  { cat: "Delays", pts: 30, desc: "Running late — as is tradition." },
-  { cat: "Slow Speeds", pts: 20, desc: "Moving at a pace that insults the concept of transit." },
-  { cat: "Skip Stop", pts: 15, desc: "Your stop? Never heard of it." },
-  { cat: "Rerouted", pts: 15, desc: "Taking the scenic route nobody asked for." },
-  { cat: "Runs Local", pts: 10, desc: "Express train having an identity crisis." },
-  { cat: "Reduced Freq", pts: 10, desc: "Trains arriving on a 'whenever we feel like it' schedule." },
-  { cat: "Platform Change", pts: 2, desc: "Surprise! Go find another platform." },
-  { cat: "Other", pts: 5, desc: "Something's wrong but even the MTA isn't sure what." },
+  { cat: "No Service",     pts: 50, desc: "Line completely stopped. Maximum shame." },
+  { cat: "Delays",         pts: 30, desc: "Running late — as is tradition." },
+  { cat: "Slow Speeds",    pts: 20, desc: "Speed restrictions slowing all trains on this route." },
+  { cat: "Skip Stop",      pts: 15, desc: "Trains bypassing certain stations without warning." },
+  { cat: "Rerouted",       pts: 15, desc: "Running an alternate route instead of the normal one." },
+  { cat: "Runs Local",     pts: 10, desc: "Express train making all local stops instead." },
+  { cat: "Reduced Freq",   pts: 10, desc: "Fewer trains than scheduled — longer waits." },
+  { cat: "Platform Change",pts: 2,  desc: "Trains using a different platform than expected." },
+  { cat: "Other",          pts: 5,  desc: "MTA issued an alert but didn't specify the cause." },
 ];
 
 export default function ScoringExplainer() {

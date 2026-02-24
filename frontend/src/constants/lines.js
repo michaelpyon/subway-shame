@@ -64,17 +64,19 @@ export function getScoreTier(score) {
   return SCORE_TIERS.find(t => score >= t.min) || SCORE_TIERS[SCORE_TIERS.length - 1];
 }
 
-// Category colors and labels for score breakdown
+// Category colors and labels for score breakdown.
+// label = short display name (plain English, no jargon)
+// sublabel = what it actually means in plain terms
 export const CATEGORY_CONFIG = {
-  "No Service":      { color: "#EF4444", icon: "🚫", label: "Dead" },
-  "Delays":          { color: "#F97316", icon: "🐌", label: "Delays" },
-  "Slow Speeds":     { color: "#F59E0B", icon: "🐢", label: "Crawling" },
-  "Skip Stop":       { color: "#EAB308", icon: "⏭️", label: "Ghosting You" },
-  "Rerouted":        { color: "#A855F7", icon: "↪️", label: "Lost" },
-  "Runs Local":      { color: "#6366F1", icon: "🔄", label: "Demoted" },
-  "Reduced Freq":    { color: "#8B5CF6", icon: "⏳", label: "Rare Sighting" },
-  "Platform Change":  { color: "#6B7280", icon: "🔀", label: "Hiding" },
-  "Other":           { color: "#9CA3AF", icon: "⚠️", label: "Mystery" },
+  "No Service":     { color: "#EF4444", icon: "🚫", label: "No Service",       sublabel: "Not running" },
+  "Delays":         { color: "#F97316", icon: "🐌", label: "Delays",            sublabel: "Running late" },
+  "Slow Speeds":    { color: "#F59E0B", icon: "🐢", label: "Slow Speeds",       sublabel: "Speed restrictions" },
+  "Skip Stop":      { color: "#EAB308", icon: "⏭️", label: "Skipping Stops",   sublabel: "Bypassing stations" },
+  "Rerouted":       { color: "#A855F7", icon: "↪️", label: "Rerouted",          sublabel: "Running alternate route" },
+  "Runs Local":     { color: "#6366F1", icon: "🔄", label: "Running Local",     sublabel: "Express running local" },
+  "Reduced Freq":   { color: "#8B5CF6", icon: "⏳", label: "Reduced Service",   sublabel: "Fewer trains running" },
+  "Platform Change":{ color: "#6B7280", icon: "🔀", label: "Platform Change",   sublabel: "Different platform" },
+  "Other":          { color: "#9CA3AF", icon: "⚠️", label: "Other Issue",       sublabel: "Unspecified problem" },
 };
 
 // Sort order for breakdown display (worst first)

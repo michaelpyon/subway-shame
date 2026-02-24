@@ -191,17 +191,16 @@ export default function ShameChart({ timeseries }) {
     return (
       <div className="px-4 py-6 max-w-5xl mx-auto">
         <h2 className="text-lg font-semibold text-gray-400 mb-3">
-          Shame Race
+          Today's Shame Race
         </h2>
         <div className="bg-gray-900 rounded-lg p-8 text-center">
           <p className="text-gray-600 text-sm">
-            Collecting data points... Chart appears after 2+ intervals (15 min
-            each).
+            Chart builds throughout the day as data is collected.
           </p>
           <p className="text-gray-700 text-xs mt-2">
             {timeseries.length === 1
-              ? "1 data point so far. Next one in ~15 min."
-              : "No data yet. Check back soon."}
+              ? "1 reading captured — check back in ~15 min for the trend line."
+              : "No readings yet. The chart will appear once data starts coming in."}
           </p>
         </div>
       </div>
@@ -212,10 +211,10 @@ export default function ShameChart({ timeseries }) {
 
   return (
     <div className="px-4 py-6 max-w-5xl mx-auto">
-      <h2 className="text-lg font-semibold text-gray-400 mb-1">Shame Race</h2>
+      <h2 className="text-lg font-semibold text-gray-400 mb-1">Today's Shame Race</h2>
       <p className="text-xs text-gray-600 mb-4">
-        Cumulative shame points over time — which line pulled ahead today?
-        <span className="ml-2 text-gray-700">(Points reset at midnight)</span>
+        How shame points have accumulated since midnight — higher line = worse performance today.
+        Points reset at midnight.
       </p>
 
       <div className="bg-gray-900 rounded-lg p-4 sm:p-6 overflow-x-auto">

@@ -53,7 +53,7 @@ export default function SkeletonLoader() {
       </div>
 
       <p className="text-gray-600 text-xs text-center animate-pulse">
-        Checking which train is disappointing everyone…
+        Fetching live MTA alerts and calculating today's shame scores…
       </p>
     </div>
   );

@@ -238,7 +238,7 @@ export default function Trophy({ winner, lines = [] }) {
                 : { backgroundColor: "transparent", border: "1px solid transparent" }
             }
           >
-            ⭐ Hall of Fame
+            ⭐ Hall of Shame
           </button>
         </div>
 
@@ -306,7 +306,7 @@ export default function Trophy({ winner, lines = [] }) {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                   </span>
                   <span className="text-xs text-gray-400">
-                    +{winner.score} pts this snapshot (live)
+                    +{winner.score} pts currently active
                   </span>
                 </div>
               )}
@@ -353,7 +353,7 @@ export default function Trophy({ winner, lines = [] }) {
                             style={{ backgroundColor: cfg.color }}
                           />
                           <span className="text-gray-400">{cfg.label}</span>
-                          <span className="text-gray-600">{breakdown[cat]}</span>
+                          <span className="text-gray-600">{breakdown[cat].toLocaleString()} pts</span>
                         </span>
                       );
                     })}
@@ -474,15 +474,26 @@ export default function Trophy({ winner, lines = [] }) {
               <h2 className="text-xl font-bold text-center text-white mb-1">
                 ⭐ Hall of Shame
               </h2>
-              <p className="text-xs text-gray-500 text-center mb-6">
-                Your browser's personal record of the worst days
+              <p className="text-xs text-gray-500 text-center mb-1">
+                Worst daily offender since you started visiting
               </p>
+              {/* Browser-local note — always visible */}
+              <div className="flex items-center justify-center gap-1.5 mb-5">
+                <svg className="w-3 h-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="text-[10px] text-gray-700">Saved in your browser only — private to you, not a global record</span>
+              </div>
 
               {!hasHof ? (
-                <div className="text-center py-8">
-                  <p className="text-4xl mb-3">📭</p>
-                  <p className="text-gray-500 text-sm">
-                    No history yet. Check back after a few visits!
+                <div className="text-center py-6">
+                  <p className="text-4xl mb-3">📅</p>
+                  <p className="text-gray-400 text-sm font-medium mb-2">
+                    Nothing recorded yet
+                  </p>
+                  <p className="text-gray-600 text-xs max-w-xs mx-auto leading-relaxed">
+                    Each day you visit, the worst line that day gets saved here automatically.
+                    Come back tomorrow to start building your record.
                   </p>
                 </div>
               ) : (
@@ -536,13 +547,16 @@ export default function Trophy({ winner, lines = [] }) {
 
                           {/* Score */}
                           <div className="text-right shrink-0">
-                            <span
-                              className="text-xl font-black tabular-nums"
-                              style={{ color: entryTier.color }}
-                            >
-                              {entry.score}
-                            </span>
-                            <p className="text-[10px] text-gray-600">pts</p>
+                            <div className="flex items-baseline gap-0.5 justify-end">
+                              <span
+                                className="text-xl font-black tabular-nums"
+                                style={{ color: entryTier.color }}
+                              >
+                                {entry.score.toLocaleString()}
+                              </span>
+                              <span className="text-[9px] text-gray-600">pts</span>
+                            </div>
+                            <p className="text-[10px]" style={{ color: `${entryTier.color}90` }}>{entryTier.label}</p>
                           </div>
                         </div>
                       );

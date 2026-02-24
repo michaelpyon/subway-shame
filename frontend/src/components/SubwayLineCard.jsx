@@ -135,6 +135,15 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
   const hasContent = dailyScore > 0;
   const scorePercent = maxScore > 0 ? (dailyScore / maxScore) * 100 : 0;
 
+  // Status text: if there are active issues, show the current status.
+  // If issues happened earlier today but the line is currently OK, say so explicitly.
+  const statusText =
+    dailyScore === 0
+      ? "Good Service"
+      : liveScore > 0
+      ? line.status                     // currently active — show current status
+      : "Issues earlier today";         // had issues, now resolved
+
   return (
     <div
       className={`bg-gray-900 rounded-lg overflow-hidden transition-colors relative ${
@@ -176,8 +185,8 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
               {line.id === "SI" ? "SIR" : `${line.id} Train`}
             </span>
           </div>
-          <span className="text-sm" style={{ color: tier.color }}>
-            {dailyScore > 0 ? line.status : "Good Service"}
+          <span className="text-sm" style={{ color: liveScore === 0 && dailyScore > 0 ? "#9CA3AF" : tier.color }}>
+            {statusText}
           </span>
         </div>
         <div className="text-right flex items-center gap-1.5 shrink-0">

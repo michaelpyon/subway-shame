@@ -204,9 +204,9 @@ export default function TrainChecker({ lines }) {
                 key={lineId}
                 onClick={() => handleLineSelect(lineId)}
                 aria-label={`${lineId} train`}
-                className={`transition-all ${
+                className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
                   selectedLine === lineId
-                    ? "scale-110 ring-2 ring-white/40 rounded-full"
+                    ? "scale-110 ring-2 ring-white/40"
                     : selectedLine
                       ? "opacity-40 hover:opacity-70"
                       : "hover:scale-105"
@@ -227,7 +227,7 @@ export default function TrainChecker({ lines }) {
                 <button
                   key={dir}
                   onClick={() => setSelectedDirection(selectedDirection === i ? null : i)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all border min-h-[44px] flex items-center ${
                     selectedDirection === i
                       ? "bg-white/10 border-white/30 text-white"
                       : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300"

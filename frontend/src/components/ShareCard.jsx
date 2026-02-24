@@ -117,16 +117,18 @@ export default function ShareCard({ winner, lines = [], date }) {
             >
               WORST LINE · {date}
             </div>
-            <div
-              style={{
-                fontSize: "56px",
-                fontWeight: "900",
-                color: tier.color,
-                lineHeight: "1",
-                marginBottom: "2px",
-              }}
-            >
-              {winner.daily_score}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "2px" }}>
+              <div
+                style={{
+                  fontSize: "56px",
+                  fontWeight: "900",
+                  color: tier.color,
+                  lineHeight: "1",
+                }}
+              >
+                {winner.daily_score.toLocaleString()}
+              </div>
+              <div style={{ fontSize: "18px", fontWeight: "700", color: "#6b7280" }}>pts</div>
             </div>
             <div style={{ fontSize: "13px", color: "#6b7280" }}>
               {tier.emoji}&nbsp;{tier.label.toUpperCase()}

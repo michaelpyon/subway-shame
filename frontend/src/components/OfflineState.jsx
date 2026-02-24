@@ -1,14 +1,15 @@
 import LineBadge from "./LineBadge";
 import { getScoreTier } from "../constants/lines";
 
-// Preview lines to show in the "coming soon" demo — realistic data
+// Preview lines — scores calibrated to the current tier thresholds so colors look right
+// Dumpster Fire ≥5000 | Rough Day ≥1500 | Running Late ≥300 | Minor Issues ≥1 | Good Service = 0
 const PREVIEW_LINES = [
-  { id: "A",  dailyScore: 87, status: "Suspended",    tier: "🔥" },
-  { id: "F",  dailyScore: 62, status: "Major Delays", tier: "🔥" },
-  { id: "7",  dailyScore: 44, status: "Delays",       tier: "😤" },
-  { id: "L",  dailyScore: 31, status: "Delays",       tier: "😤" },
-  { id: "N",  dailyScore: 18, status: "Minor Issues", tier: "😒" },
-  { id: "G",  dailyScore: 0,  status: "Good Service", tier: null },
+  { id: "A",  dailyScore: 5800, status: "No Service" },
+  { id: "F",  dailyScore: 2100, status: "Delays" },
+  { id: "7",  dailyScore: 750,  status: "Delays" },
+  { id: "L",  dailyScore: 150,  status: "Slow Speeds" },
+  { id: "N",  dailyScore: 0,    status: "Good Service" },
+  { id: "G",  dailyScore: 0,    status: "Good Service" },
 ];
 
 const MTA_LINE_COLORS = [
@@ -72,14 +73,14 @@ export default function OfflineState({ onRetry, loading }) {
               <div className="absolute inset-0 w-3 h-3 rounded-full bg-yellow-500 animate-ping opacity-60" />
             </div>
             <span className="text-yellow-500 text-sm font-semibold">
-              Connecting to live data…
+              Backend unreachable
             </span>
           </div>
 
           <p className="text-gray-400 text-sm leading-relaxed mb-5">
-            The MTA data backend is spinning up. Live delay scores will appear
-            once the feed is connected. The trains themselves are probably also
-            delayed — so you'll fit right in.
+            Can't reach the live MTA feed right now. This usually means the
+            backend is waking up after a quiet period (Railway free tier hibernates).
+            Try again in 30 seconds — it should come back on its own.
           </p>
 
           <button
@@ -134,7 +135,7 @@ export default function OfflineState({ onRetry, loading }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {PREVIEW_LINES.map(({ id, dailyScore, status, tier }, idx) => {
+          {PREVIEW_LINES.map(({ id, dailyScore, status }, idx) => {
             const scoreTier = getScoreTier(dailyScore);
             const barWidths = PREVIEW_BAR_WIDTHS[idx];
             const hasScore = dailyScore > 0;
@@ -163,16 +164,27 @@ export default function OfflineState({ onRetry, loading }) {
                     <div className="text-right flex items-center gap-1.5">
                       {hasScore ? (
                         <>
-                          <span className="text-base">{tier}</span>
-                          <span
-                            className="text-xl font-bold tabular-nums"
-                            style={{ color: scoreTier.color }}
-                          >
-                            {dailyScore}
-                          </span>
+                          <span className="text-base">{scoreTier.emoji}</span>
+                          <div className="text-right">
+                            <div className="flex items-baseline gap-0.5 justify-end">
+                              <span
+                                className="text-xl font-bold tabular-nums leading-none"
+                                style={{ color: scoreTier.color }}
+                              >
+                                {dailyScore.toLocaleString()}
+                              </span>
+                              <span className="text-[9px]" style={{ color: `${scoreTier.color}80` }}>pts</span>
+                            </div>
+                            <span className="text-[9px] uppercase font-semibold tracking-wide" style={{ color: `${scoreTier.color}90` }}>
+                              {scoreTier.label}
+                            </span>
+                          </div>
                         </>
                       ) : (
-                        <span className="text-green-500 text-lg">✓</span>
+                        <div className="text-right">
+                          <span className="text-green-500 text-lg">✓</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-wide text-green-700 block">On time</span>
+                        </div>
                       )}
                     </div>
                   </div>

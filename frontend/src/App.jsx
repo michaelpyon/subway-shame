@@ -40,7 +40,7 @@ export default function App() {
         <div className="max-w-2xl mx-auto px-4 mb-2">
           <div className="bg-yellow-950/40 border border-yellow-900/50 rounded-lg px-4 py-2 flex items-center justify-between gap-3">
             <p className="text-yellow-600 text-xs">
-              Showing last known data — live feed temporarily unavailable.
+              Showing last known data — live feed unavailable. Backend may be waking up; auto-retries every 5 min.
             </p>
             <button
               onClick={refresh}
