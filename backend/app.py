@@ -62,6 +62,7 @@ CATEGORY_SCORES = {
     "Rerouted": 15,
     "Runs Local": 10,
     "Reduced Freq": 10,
+    "Planned Work": 5,
     "Platform Change": 2,
     "Other": 5,
 }
@@ -69,12 +70,13 @@ CATEGORY_SCORES = {
 # Ordered list: first match wins
 _CATEGORY_RULES = [
     ("No Service",     ["no [", "no trains", "no service", "suspended", "out of service", "service suspended", "not running"]),
-    ("Delays",         ["running with delays", "delays", "running late", "experiencing delays", "longer travel times", "held at", "holding at"]),
+    ("Delays",         ["running with delays", "delays", "running late", "experiencing delays", "longer travel times", "slow speeds", "held at", "holding at", "held"]),
     ("Slow Speeds",    ["slow", "reduced speed", "running slowly"]),
     ("Skip Stop",      ["skip", "bypassing", "not stopping at", "skipping"]),
     ("Rerouted",       ["runs via", "reroute", "rerouted", "diverted", "alternate route"]),
     ("Runs Local",     ["runs local", "running local", "making local stops"]),
     ("Reduced Freq",   ["runs every", "less frequently", "reduced service", "fewer trains", "running every"]),
+    ("Planned Work",   ["shuttle", "express skips"]),
     ("Platform Change", ["board from", "platform", "change at"]),
 ]
 
@@ -103,7 +105,8 @@ def _classify_alert(header: str) -> tuple[str, int, str]:
             category = cat
             break
     if category == "Other":
-        log.debug(f"Unclassified alert (scored as Other): {header[:120]}")
+        log.info(f"Unclassified alert: {header[:100]}")
+        return ("Other", 1, "both")
     score = CATEGORY_SCORES[category]
 
     # Direction
