@@ -286,20 +286,29 @@ export default function Trophy({ winner, lines = [] }) {
 
               {/* Daily score */}
               <div className="mb-2">
-                <span
-                  className="text-5xl sm:text-6xl font-black tabular-nums"
-                  style={{ color: tier.color }}
-                >
-                  {winner.daily_score}
-                </span>
-                <p className="text-sm text-gray-500 mt-1">shame points today</p>
+                <div className="flex items-baseline justify-center gap-1.5">
+                  <span
+                    className="text-5xl sm:text-6xl font-black tabular-nums"
+                    style={{ color: tier.color }}
+                  >
+                    {winner.daily_score.toLocaleString()}
+                  </span>
+                  <span className="text-xl font-bold text-gray-500">pts</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">accumulated shame today · resets at midnight</p>
               </div>
 
-              {/* Live score if different */}
+              {/* Live score — clarified as "right now" snapshot */}
               {winner.score > 0 && (
-                <p className="text-xs text-gray-600 mb-3">
-                  ({winner.score} right now)
-                </p>
+                <div className="inline-flex items-center gap-1.5 bg-gray-900/60 rounded-full px-3 py-1 mb-3 border border-gray-800">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    +{winner.score} pts this snapshot (live)
+                  </span>
+                </div>
               )}
 
               {/* Status */}

@@ -82,8 +82,8 @@ export default function App() {
           {data.timeseries && data.timeseries.length > 0 && (
             <ShameChart timeseries={data.timeseries} />
           )}
-          <LineGrid lines={data.lines} />
           <ScoringExplainer />
+          <LineGrid lines={data.lines} />
         </>
       )}
 

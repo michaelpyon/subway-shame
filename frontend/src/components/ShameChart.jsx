@@ -155,7 +155,7 @@ function CustomTooltip({ active, payload, label }) {
                 </span>
               </div>
               <span className="text-white font-bold tabular-nums">
-                {entry.value}
+                {entry.value.toLocaleString()} pts
               </span>
             </div>
           );
@@ -214,7 +214,8 @@ export default function ShameChart({ timeseries }) {
     <div className="px-4 py-6 max-w-5xl mx-auto">
       <h2 className="text-lg font-semibold text-gray-400 mb-1">Shame Race</h2>
       <p className="text-xs text-gray-600 mb-4">
-        Cumulative shame points over time — which line is pulling ahead?
+        Cumulative shame points over time — which line pulled ahead today?
+        <span className="ml-2 text-gray-700">(Points reset at midnight)</span>
       </p>
 
       <div className="bg-gray-900 rounded-lg p-4 sm:p-6 overflow-x-auto">
@@ -248,7 +249,15 @@ export default function ShameChart({ timeseries }) {
               tick={{ fill: "#6b7280", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
-              width={30}
+              width={45}
+              tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}
+              label={{
+                value: "shame pts",
+                angle: -90,
+                position: "insideLeft",
+                offset: 12,
+                style: { fill: "#374151", fontSize: 9, textAnchor: "middle" },
+              }}
             />
             <Tooltip content={<CustomTooltip />} />
             {sortedLines.map((lineId) => {

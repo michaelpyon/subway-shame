@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CATEGORY_CONFIG, CATEGORY_ORDER } from "../constants/lines";
+import { CATEGORY_CONFIG, CATEGORY_ORDER, SCORE_TIERS } from "../constants/lines";
 
 const SCORING_DATA = [
   { cat: "No Service", pts: 50, desc: "Line gave up. Not even pretending to run." },
@@ -43,13 +43,41 @@ export default function ScoringExplainer() {
           <h3 className="text-sm font-semibold text-gray-300 mb-1">
             The Shame Point System
           </h3>
-          <p className="text-xs text-gray-500 mb-4">
-            Each active MTA alert earns shame points based on severity. Points
-            accumulate throughout the day — a line with problems all morning
-            racks up way more shame than one with a brief hiccup. Resets at
-            midnight.
-          </p>
 
+          {/* How it works — top-line explanation */}
+          <div className="bg-gray-800/50 rounded-lg px-3 py-2.5 mb-4 space-y-1">
+            <p className="text-xs text-gray-400">
+              <strong className="text-gray-200">How it works:</strong> Every ~60 seconds the backend polls the MTA
+              and adds points for each active alert. A brief delay earns 30 pts.
+              A 1-hour delay earns ~1,800 pts. Scores reset at midnight.
+            </p>
+            <p className="text-xs text-gray-500">
+              Think of it like a tab at a bar — the longer the MTA keeps messing up, the bigger the bill.
+            </p>
+          </div>
+
+          {/* Tier legend */}
+          <div className="mb-4">
+            <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Score tiers (daily total)</p>
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+              {[...SCORE_TIERS].reverse().slice(1).map((tier) => (
+                <div
+                  key={tier.label}
+                  className="flex items-center gap-2 rounded px-2 py-1.5"
+                  style={{ backgroundColor: `${tier.color}12`, border: `1px solid ${tier.color}25` }}
+                >
+                  <span className="text-sm">{tier.emoji}</span>
+                  <div>
+                    <p className="text-[11px] font-semibold" style={{ color: tier.color }}>{tier.label}</p>
+                    <p className="text-[9px] text-gray-600">{tier.min.toLocaleString()}+ pts</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Per-alert points */}
+          <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Points per alert type (per poll)</p>
           <div className="space-y-1.5">
             {SCORING_DATA.map(({ cat, pts, desc }) => {
               const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
@@ -59,10 +87,10 @@ export default function ScoringExplainer() {
                   className="flex items-center gap-3 py-1.5 border-b border-gray-800 last:border-0"
                 >
                   <span
-                    className="w-12 text-right text-sm font-bold tabular-nums shrink-0"
+                    className="w-14 text-right text-sm font-bold tabular-nums shrink-0"
                     style={{ color: cfg.color }}
                   >
-                    +{pts}
+                    +{pts} pts
                   </span>
                   <span
                     className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0"
@@ -93,9 +121,8 @@ export default function ScoringExplainer() {
             <div className="flex items-start gap-2">
               <span className="text-gray-600 text-xs mt-0.5">⏱️</span>
               <p className="text-xs text-gray-500">
-                <strong className="text-gray-400">Accumulation:</strong> Points
-                are added every ~60 seconds while the alert is active. A 30-minute delay
-                earns way more shame than a 2-minute blip.
+                <strong className="text-gray-400">Accumulation:</strong> 300 pts ≈ 10 min of delays.
+                1,500 pts ≈ 50 min. 5,000+ pts means the line has been a disaster for hours.
               </p>
             </div>
             <div className="flex items-start gap-2">
