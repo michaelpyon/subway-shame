@@ -4,7 +4,7 @@ const MTA_COLORS = [
   "#6CBE45", "#996633", "#A7A9AC", "#808183",
 ];
 
-export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, error }) {
+export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error }) {
   const timeAgo = lastUpdated ? formatTimeAgo(lastUpdated) : null;
   const countdown = formatCountdown(secondsUntilRefresh);
 
@@ -37,7 +37,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           {/* Live / stale indicator */}
           {timeAgo ? (
             <span className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : "bg-green-600 animate-pulse"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : refreshing ? "bg-green-500 animate-pulse" : "bg-green-600"}`} />
               <span>Updated {timeAgo}</span>
             </span>
           ) : (
@@ -81,8 +81,9 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
   );
 }
 
-function formatTimeAgo(isoString) {
-  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
+function formatTimeAgo(date) {
+  const ms = date instanceof Date ? date.getTime() : new Date(date).getTime();
+  const diff = Math.floor((Date.now() - ms) / 1000);
   if (diff < 60) return "just now";
   if (diff < 120) return "1 min ago";
   if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;

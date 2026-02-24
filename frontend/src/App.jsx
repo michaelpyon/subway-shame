@@ -13,7 +13,7 @@ import SkeletonLoader from "./components/SkeletonLoader";
 import "./App.css";
 
 export default function App() {
-  const { data, loading, error, secondsUntilRefresh, refresh } = useSubwayData();
+  const { data, loading, error, lastUpdated, refreshing, secondsUntilRefresh, refresh } = useSubwayData();
 
   const allGoodMsg = useMemo(
     () => ALL_GOOD_MESSAGES[Math.floor(Math.random() * ALL_GOOD_MESSAGES.length)],
@@ -28,10 +28,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-950 text-white antialiased">
       <Header
-        lastUpdated={data?.timestamp}
+        lastUpdated={lastUpdated}
         secondsUntilRefresh={secondsUntilRefresh}
         onRefresh={refresh}
         loading={loading}
+        refreshing={refreshing}
         error={error}
       />
 

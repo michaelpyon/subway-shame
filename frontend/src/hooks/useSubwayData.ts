@@ -12,10 +12,14 @@ const API_BASE =
 export interface UseSubwayDataReturn {
   /** Full API response, or null before the first successful fetch. */
   data: ApiResponse | null;
-  /** True while a fetch is in-flight. */
+  /** True while the initial fetch is in-flight. */
   loading: boolean;
   /** Error message string, or null when no error. */
   error: string | null;
+  /** When the last successful fetch completed (local client time). */
+  lastUpdated: Date | null;
+  /** True while a background refresh is in flight (distinct from initial loading). */
+  refreshing: boolean;
   /** Seconds until the next automatic refresh. */
   secondsUntilRefresh: number;
   /** Manually trigger an immediate refresh. */
@@ -30,29 +34,44 @@ export function useSubwayData(): UseSubwayDataReturn {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState<number>(
     POLL_INTERVAL / 1000
   );
   const lastFetchRef = useRef<number>(Date.now());
+  const hasLoadedRef = useRef<boolean>(false);
 
   const fetchData = useCallback(async (): Promise<void> => {
-    try {
+    const isRefresh = hasLoadedRef.current;
+    // For initial load use `loading`; for background refreshes use `refreshing`
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
       setLoading(true);
-      setError(null);
+    }
+    setError(null);
+    try {
       const res = await fetch(`${API_BASE}/api/status`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: ApiResponse = await res.json();
       setData(json);
+      setLastUpdated(new Date());
       lastFetchRef.current = Date.now();
       setSecondsUntilRefresh(POLL_INTERVAL / 1000);
+      hasLoadedRef.current = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
 
-  // Initial fetch + polling
+  // Initial fetch + auto-polling every 5 minutes
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, POLL_INTERVAL);
@@ -69,5 +88,5 @@ export function useSubwayData(): UseSubwayDataReturn {
     return () => clearInterval(tick);
   }, []);
 
-  return { data, loading, error, secondsUntilRefresh, refresh: fetchData };
+  return { data, loading, error, lastUpdated, refreshing, secondsUntilRefresh, refresh: fetchData };
 }
