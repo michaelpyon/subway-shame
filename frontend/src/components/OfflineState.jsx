@@ -51,46 +51,24 @@ export default function OfflineState({ onRetry, loading }) {
           Which NYC subway line is ruining the most commutes right now?
         </p>
 
-        {/* Line color dots */}
-        <div className="flex justify-center gap-1.5 mt-4">
-          {MTA_LINE_COLORS.map((color, i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full opacity-60"
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
+
       </div>
 
-      {/* Status card */}
+      {/* Status note */}
       <div className="max-w-md mx-auto px-4 mt-2">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
-          {/* Animated status dot */}
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="relative">
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="absolute inset-0 w-3 h-3 rounded-full bg-yellow-500 animate-ping opacity-60" />
-            </div>
-            <span className="text-yellow-500 text-sm font-semibold">
-              Backend unreachable
-            </span>
+        <div className="text-center py-3">
+          <div className="flex items-center justify-center gap-1.5 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="text-gray-500 text-xs">Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
           </div>
-
-          <p className="text-gray-400 text-sm leading-relaxed mb-5">
-            Can't reach the live MTA feed right now. This usually means the
-            backend is waking up after a quiet period (Railway free tier hibernates).
-            Try again in 30 seconds — it should come back on its own.
-          </p>
-
           <button
             onClick={onRetry}
             disabled={loading}
-            className="px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-100 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-xs text-gray-500 border border-gray-800 rounded-full hover:border-gray-600 hover:text-gray-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="inline-block w-3.5 h-3.5 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin" />
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-2.5 h-2.5 border border-gray-500 border-t-gray-300 rounded-full animate-spin" />
                 Checking…
               </span>
             ) : (
