@@ -199,7 +199,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
                     className="text-xl font-black tabular-nums leading-none"
                     style={{ color: tier.color }}
                   >
-                    {dailyScore}
+                    {dailyScore.toLocaleString()}
                   </span>
                   <span
                     className="text-[9px] font-medium"
@@ -261,7 +261,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
           {liveScore > 0 && (
             <div className="flex items-center justify-between text-xs text-gray-600 bg-gray-950/50 rounded-lg px-3 py-2">
               <span>🔴 Live (right now)</span>
-              <span className="font-bold text-gray-400">{liveScore} pts this snapshot</span>
+              <span className="font-bold text-gray-400">{liveScore.toLocaleString()} pts this snapshot</span>
             </div>
           )}
 

@@ -47,9 +47,9 @@ export default function ScoringExplainer() {
           {/* How it works — top-line explanation */}
           <div className="bg-gray-800/50 rounded-lg px-3 py-2.5 mb-4 space-y-1">
             <p className="text-xs text-gray-400">
-              <strong className="text-gray-200">How it works:</strong> Every ~60 seconds the backend polls the MTA
-              and adds points for each active alert. A brief delay earns 30 pts.
-              A 1-hour delay earns ~1,800 pts. Scores reset at midnight.
+              <strong className="text-gray-200">How it works:</strong> Every 5 minutes the app polls the MTA
+              and adds points for each active alert. A brief delay earns 30 pts per poll.
+              A 1-hour delay earns ~360 pts. Scores reset at midnight ET.
             </p>
             <p className="text-xs text-gray-500">
               Think of it like a tab at a bar — the longer the MTA keeps messing up, the bigger the bill.
@@ -121,8 +121,8 @@ export default function ScoringExplainer() {
             <div className="flex items-start gap-2">
               <span className="text-gray-600 text-xs mt-0.5">⏱️</span>
               <p className="text-xs text-gray-500">
-                <strong className="text-gray-400">Accumulation:</strong> 300 pts ≈ 10 min of delays.
-                1,500 pts ≈ 50 min. 5,000+ pts means the line has been a disaster for hours.
+                <strong className="text-gray-400">Accumulation:</strong> 300 pts ≈ 50 min of delays.
+                1,500 pts ≈ 4 hours. 5,000+ pts means the line has been a disaster all day.
               </p>
             </div>
             <div className="flex items-start gap-2">

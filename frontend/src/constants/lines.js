@@ -41,9 +41,9 @@ export const ALL_GOOD_MESSAGES = [
 /**
  * SCORE TIERS — calibrated for DAILY CUMULATIVE shame points.
  *
- * How scores accumulate: every ~60 seconds the backend polls the MTA.
+ * How scores accumulate: every ~5 minutes the app polls the MTA.
  * Each active alert adds points (e.g. Delays = 30 pts/poll).
- * So 300 pts ≈ 10 minutes of delays. 1500 pts ≈ 50 minutes.
+ * So 300 pts ≈ 50 minutes of delays. 1500 pts ≈ 4 hours.
  *
  * Tiers:
  *   0         → Good Service  (no issues)

@@ -104,6 +104,17 @@ export default function App() {
         <p className="mt-1">
           For entertainment purposes. The MTA has enough problems.
         </p>
+        <p className="mt-2">
+          Built by{" "}
+          <a
+            href="https://pyon.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-500"
+          >
+            Michael Pyon
+          </a>
+        </p>
       </footer>
     </div>
   );
