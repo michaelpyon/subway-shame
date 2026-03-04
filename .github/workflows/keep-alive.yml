@@ -1,0 +1,23 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # Ping every 20 minutes — Railway sleeps after ~5 min inactivity
+    - cron: '*/20 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Subway Shame backend
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://web-production-be47b.up.railway.app/api/status" \
+            --max-time 30)
+          echo "Response status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Backend returned $STATUS — may be waking up"
+          else
+            echo "Backend is warm ✓"
+          fi

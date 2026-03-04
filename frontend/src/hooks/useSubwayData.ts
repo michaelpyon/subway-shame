@@ -44,30 +44,52 @@ export function useSubwayData(): UseSubwayDataReturn {
 
   const fetchData = useCallback(async (): Promise<void> => {
     const isRefresh = hasLoadedRef.current;
-    // For initial load use `loading`; for background refreshes use `refreshing`
     if (isRefresh) {
       setRefreshing(true);
     } else {
       setLoading(true);
     }
     setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/api/status`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json: ApiResponse = await res.json();
-      setData(json);
-      setLastUpdated(new Date());
-      lastFetchRef.current = Date.now();
-      setSecondsUntilRefresh(POLL_INTERVAL / 1000);
-      hasLoadedRef.current = true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
+
+    // Retry up to 4 times with exponential backoff — handles Railway cold starts
+    // which can take 5–15s and return 502/503 before the dyno is warm.
+    const MAX_ATTEMPTS = 4;
+    const BACKOFF_MS = [2000, 4000, 6000]; // waits between retries
+
+    let lastErr: Error | null = null;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(`${API_BASE}/api/status`);
+        if (!res.ok) {
+          // 502/503 = cold start; retry. Other errors = real failure.
+          if ((res.status === 502 || res.status === 503) && attempt < MAX_ATTEMPTS - 1) {
+            await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt] ?? 6000));
+            continue;
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const json: ApiResponse = await res.json();
+        setData(json);
+        setLastUpdated(new Date());
+        lastFetchRef.current = Date.now();
+        setSecondsUntilRefresh(POLL_INTERVAL / 1000);
+        hasLoadedRef.current = true;
+        lastErr = null;
+        break; // success
+      } catch (err) {
+        lastErr = err instanceof Error ? err : new Error(String(err));
+        if (attempt < MAX_ATTEMPTS - 1) {
+          await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt] ?? 6000));
+        }
       }
+    }
+
+    if (lastErr) setError(lastErr.message);
+
+    if (isRefresh) {
+      setRefreshing(false);
+    } else {
+      setLoading(false);
     }
   }, []);
 
