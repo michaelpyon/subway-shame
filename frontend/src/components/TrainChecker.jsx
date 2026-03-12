@@ -20,36 +20,39 @@ const ALL_LINES = [
 const ALL_LINE_IDS = ALL_LINES.flat();
 
 const GOOD_RESPONSES = [
-  "Your train is running fine. Enjoy it while it lasts.",
-  "Somehow, it's not fucked. Mark your calendar.",
-  "All clear. This is the MTA's version of a miracle.",
-  "You're good — for now. Don't get comfortable.",
-  "Shockingly, your train is behaving today.",
-  "Nothing wrong. Screenshot this — nobody will believe you.",
+  "Running on time. Don't overthink it.",
+  "No delays reported. Check again in ten minutes if you need to be sure.",
+  "Service is normal. That's the full update.",
+  "Nothing wrong at this moment.",
+  "Looks clear. The platform may tell a different story.",
+  "No issues. This is unusual for a weekday.",
+  "The train is running as scheduled. We noted it.",
+  "Clean bill of health. For now.",
 ];
 
 const BAD_RESPONSES = [
-  "Oh yeah, it's fucked.",
-  "lol. lmao, even.",
-  "Buddy, your train is having a day.",
-  "RIP to your commute.",
-  "Short answer: yes. Long answer: absolutely yes.",
-  "The MTA has personally chosen violence against you today.",
-  "You might want to consider a bike.",
-  "Hope you weren't in a hurry.",
+  "There are delays.",
+  "The MTA reports a service disruption. They are working on it.",
+  "It's not running well.",
+  "Delays are in effect. Additional delays are possible.",
+  "Something happened. The alerts below have the specifics.",
+  "The train is running. Late.",
+  "Service is disrupted. The MTA is aware.",
+  "There are issues on this line today.",
 ];
 
 const DIRECTION_BAD_RESPONSES = [
-  "That direction specifically? Extra fucked.",
-  "Going that way? The MTA says no.",
-  "That direction is cooked. Maybe try the other way?",
-  "Your specific route is experiencing what we call 'a situation.'",
+  "That direction is affected.",
+  "Your direction has delays.",
+  "Issues are concentrated in your direction.",
+  "That way is part of this.",
 ];
 
 const DIRECTION_GOOD_OTHER_BAD = [
-  "Your direction is fine but the other way is a mess. So... good luck getting home later.",
-  "That direction is clear! Just don't plan on coming back the same way.",
-  "You're fine going that way. Coming back? That's a different story.",
+  "Your direction is fine. The return trip may not be.",
+  "Going that way, service is normal. The other direction has delays.",
+  "Clear in your direction. The opposite is not.",
+  "You'll get there. Getting back is the open question.",
 ];
 
 function pickRandom(arr) {

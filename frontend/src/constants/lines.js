@@ -20,14 +20,16 @@ export const LINE_NAMES = {
 };
 
 export const SHAME_HEADLINES = [
-  "Congratulations, You're Terrible",
-  "The Crown of Shame Goes To...",
-  "Most Likely to Ruin Your Commute",
-  "Today's Main Character (Derogatory)",
-  "The Audacity Award Winner",
-  "Not All Heroes Wear Capes. This One Doesn't Move.",
-  "And the Award for Outstanding Disappointment Goes To...",
-  "Chef's Kiss of Incompetence",
+  "Today's most-delayed line",
+  "The train that kept everyone waiting",
+  "Worst on-time performance, by the numbers",
+  "A difficult day for this one",
+  "This line has had better weeks",
+  "Service was, technically, provided",
+  "The MTA's most consistent disappointment, today",
+  "Currently in last place",
+  "A lot happened here today",
+  "This line filed a report against itself",
 ];
 
 export const ALL_GOOD_MESSAGES = [
