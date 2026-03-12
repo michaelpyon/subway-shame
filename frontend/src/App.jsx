@@ -22,6 +22,7 @@ export default function App() {
 
   const [historyData, setHistoryData] = useState(null);
   const [recordsData, setRecordsData] = useState(null);
+  const [checkerOpen, setCheckerOpen] = useState(false);
 
   // Fetch history once data is available
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function App() {
         loading={loading}
         refreshing={refreshing}
         error={error}
+        onOpenChecker={() => setCheckerOpen(true)}
       />
 
       {/* Soft error banner when we have stale data */}
@@ -88,18 +90,14 @@ export default function App() {
               {data.podium && data.podium.length > 1 && (
                 <Podium podium={data.podium} date={data.date} />
               )}
-              <TrainChecker lines={data.lines} />
             </>
           ) : (
-            <>
-              <div className="text-center py-12 px-4">
-                <div className="text-5xl mb-4">🎉</div>
-                <p className="text-xl text-gray-300 font-semibold max-w-md mx-auto">
-                  {allGoodMsg}
-                </p>
-              </div>
-              <TrainChecker lines={data.lines} />
-            </>
+            <div className="text-center py-12 px-4">
+              <div className="text-5xl mb-4">🎉</div>
+              <p className="text-xl text-gray-300 font-semibold max-w-md mx-auto">
+                {allGoodMsg}
+              </p>
+            </div>
           )}
           {data.timeseries && data.timeseries.length > 0 && (
             <ShameChart timeseries={data.timeseries} />
@@ -107,6 +105,11 @@ export default function App() {
           <ScoringExplainer />
           <LineGrid lines={data.lines} history={historyData} records={recordsData} />
         </>
+      )}
+
+      {/* TrainChecker modal */}
+      {data && checkerOpen && (
+        <TrainChecker lines={data.lines} isModal={true} onClose={() => setCheckerOpen(false)} />
       )}
 
       {/* Footer */}

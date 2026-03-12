@@ -66,6 +66,7 @@ export default function Trophy({ winner, lines = [] }) {
   const [shareState, setShareState] = useState("idle"); // idle | working | copied | shared | error
   const [activeTab, setActiveTab] = useState("today");
   const [hofEntries, setHofEntries] = useState([]);
+  const [expanded, setExpanded] = useState(false);
 
   const headline = useMemo(() => {
     const idx = Math.floor(Math.random() * SHAME_HEADLINES.length);
@@ -192,7 +193,7 @@ export default function Trophy({ winner, lines = [] }) {
       ? "✓ Shared!"
       : shareState === "error"
       ? "Try again"
-      : "📸 Share Today's Shame";
+      : "📸 Share";
 
   const topHof = getTopHof(hofEntries);
   const hasHof = hofEntries.length > 0;
@@ -207,7 +208,7 @@ export default function Trophy({ winner, lines = [] }) {
       {/* Hidden share card rendered off-screen for html2canvas */}
       <ShareCard winner={winner} lines={lines} date={shareDateShort} />
 
-      <div className="px-4 pt-8 pb-2 max-w-2xl mx-auto">
+      <div className="px-4 pt-6 pb-2 max-w-2xl mx-auto">
         {/* Tab bar */}
         <div className="flex gap-1 mb-3">
           <button
@@ -245,210 +246,223 @@ export default function Trophy({ winner, lines = [] }) {
         {/* ─── TODAY TAB ─── */}
         {activeTab === "today" && (
           <div
-            className="trophy-card relative rounded-2xl p-6 sm:p-8 text-center overflow-hidden"
+            className="trophy-card relative rounded-2xl overflow-hidden"
             style={{
               background: `linear-gradient(135deg, rgba(${hexToRgb(color)}, 0.15) 0%, rgba(17,24,39,1) 70%)`,
               border: `2px solid ${color}40`,
             }}
           >
-            {/* LIVE badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-gray-900/80 rounded-full px-2.5 py-1 border border-gray-700/60">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300">
-                Live
-              </span>
-            </div>
-
             {/* Glow effect */}
             <div
-              className="absolute inset-0 opacity-20 blur-3xl"
+              className="absolute inset-0 opacity-20 blur-3xl pointer-events-none"
               style={{
                 background: `radial-gradient(circle at 50% 0%, ${color}, transparent 60%)`,
               }}
             />
 
-            <div className="relative z-10">
-              {/* Trophy icon */}
-              <div className="trophy-float text-6xl sm:text-7xl mb-4">🏆</div>
+            {/* ── COMPACT ROW (always visible) ── */}
+            <div className="relative z-10 px-4 py-3 flex items-center gap-3">
+              {/* Line badge */}
+              <LineBadge lineId={winner.id} size="md" />
 
-              {/* Headline */}
-              <p className="text-sm sm:text-base text-gray-400 uppercase tracking-widest mb-3">
-                {headline}
-              </p>
-
-              {/* The line badge, large */}
-              <div className="flex justify-center mb-4">
-                <LineBadge lineId={winner.id} size="xl" />
-              </div>
-
-              {/* Daily score */}
-              <div className="mb-2">
-                <div className="flex items-baseline justify-center gap-1.5">
+              {/* Winner info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-white font-bold text-sm">{winner.id} Train</span>
                   <span
-                    className="text-5xl sm:text-6xl font-black tabular-nums"
+                    className="text-base font-black tabular-nums"
                     style={{ color: tier.color }}
                   >
-                    {winner.daily_score.toLocaleString()}
+                    {winner.daily_score.toLocaleString()} pts
                   </span>
-                  <span className="text-xl font-bold text-gray-500">pts</span>
+                  <span className="text-sm">{tier.emoji}</span>
+                  <span className="text-xs font-medium" style={{ color: tier.color }}>{tier.label}</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">accumulated shame today · resets at midnight</p>
+                {/* Tiny meta */}
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {/* LIVE dot */}
+                  <span className="flex items-center gap-1">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Live</span>
+                  </span>
+                  <span className="text-[10px] text-gray-600">accumulated today · resets midnight</span>
+                  {winner.score > 0 && (
+                    <span className="text-[10px] text-gray-600">+{winner.score} pts active</span>
+                  )}
+                </div>
               </div>
 
-              {/* Live score — clarified as "right now" snapshot */}
-              {winner.score > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-gray-900/60 rounded-full px-3 py-1 mb-3 border border-gray-800">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    +{winner.score} pts currently active
-                  </span>
-                </div>
-              )}
-
-              {/* Status */}
-              <div
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                style={{
-                  backgroundColor: `${tier.color}20`,
-                  color: tier.color,
-                }}
-              >
-                {tier.emoji} {winner.status}
+              {/* Share + toggle */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleShare}
+                  disabled={shareState === "working"}
+                  className="text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-60"
+                  style={{
+                    backgroundColor:
+                      shareState === "idle" || shareState === "working"
+                        ? `${color}18`
+                        : shareState === "error"
+                        ? "#EF444418"
+                        : "#16A34A18",
+                    border: `1px solid ${
+                      shareState === "idle" || shareState === "working"
+                        ? `${color}50`
+                        : shareState === "error"
+                        ? "#EF444450"
+                        : "#16A34A50"
+                    }`,
+                    color:
+                      shareState === "idle" || shareState === "working"
+                        ? color
+                        : shareState === "error"
+                        ? "#EF4444"
+                        : "#16A34A",
+                  }}
+                >
+                  {shareLabel}
+                </button>
+                <button
+                  onClick={() => setExpanded((v) => !v)}
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-800/50"
+                >
+                  {expanded ? "↑ Hide" : "↓ Details"}
+                </button>
               </div>
+            </div>
 
-              {/* Breakdown bar */}
-              {sortedCats.length > 0 && winner.daily_score > 0 && (
-                <div className="max-w-md mx-auto mb-5">
-                  <div className="h-4 rounded-full overflow-hidden flex bg-gray-800/50 mb-2">
-                    {sortedCats.map((cat) => {
-                      const pts = breakdown[cat];
-                      const pct = (pts / winner.daily_score) * 100;
-                      const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+            {/* ── EXPANDED DETAILS ── */}
+            {expanded && (
+              <div className="relative z-10 px-5 pb-5 pt-1 border-t border-white/5">
+                {/* Headline */}
+                <p className="text-xs text-gray-400 uppercase tracking-widest mb-4 text-center">
+                  {headline}
+                </p>
+
+                {/* Status pill */}
+                <div className="flex justify-center mb-4">
+                  <div
+                    className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold"
+                    style={{
+                      backgroundColor: `${tier.color}20`,
+                      color: tier.color,
+                    }}
+                  >
+                    {tier.emoji} {winner.status}
+                  </div>
+                </div>
+
+                {/* Breakdown bar */}
+                {sortedCats.length > 0 && winner.daily_score > 0 && (
+                  <div className="max-w-md mx-auto mb-5">
+                    <div className="h-4 rounded-full overflow-hidden flex bg-gray-800/50 mb-2">
+                      {sortedCats.map((cat) => {
+                        const pts = breakdown[cat];
+                        const pct = (pts / winner.daily_score) * 100;
+                        const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+                        return (
+                          <div
+                            key={cat}
+                            className="h-full"
+                            style={{
+                              width: `${Math.max(pct, 5)}%`,
+                              backgroundColor: cfg.color,
+                            }}
+                            title={`${cfg.label}: ${pts} pts`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
+                      {sortedCats.map((cat) => {
+                        const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+                        return (
+                          <span key={cat} className="text-xs flex items-center gap-1">
+                            <span
+                              className="inline-block w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: cfg.color }}
+                            />
+                            <span className="text-gray-400">{cfg.label}</span>
+                            <span className="text-gray-600">{breakdown[cat].toLocaleString()} pts</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Direction split */}
+                {(byDir.uptown?.score > 0 || byDir.downtown?.score > 0) && (
+                  <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-5">
+                    {["uptown", "downtown"].map((d, i) => {
+                      const dd = byDir[d] || { score: 0 };
                       return (
                         <div
-                          key={cat}
-                          className="h-full"
-                          style={{
-                            width: `${Math.max(pct, 5)}%`,
-                            backgroundColor: cfg.color,
-                          }}
-                          title={`${cfg.label}: ${pts} pts`}
-                        />
-                      );
-                    })}
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
-                    {sortedCats.map((cat) => {
-                      const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
-                      return (
-                        <span key={cat} className="text-xs flex items-center gap-1">
-                          <span
-                            className="inline-block w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: cfg.color }}
-                          />
-                          <span className="text-gray-400">{cfg.label}</span>
-                          <span className="text-gray-600">{breakdown[cat].toLocaleString()} pts</span>
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Direction split */}
-              {(byDir.uptown?.score > 0 || byDir.downtown?.score > 0) && (
-                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-5">
-                  {["uptown", "downtown"].map((d, i) => {
-                    const dd = byDir[d] || { score: 0 };
-                    return (
-                      <div
-                        key={d}
-                        className="bg-gray-950/50 rounded-lg p-3 text-center"
-                      >
-                        <span className="text-xs text-gray-500 block mb-1">
-                          {i === 0 ? "↑" : "↓"} {dirs[i]}
-                        </span>
-                        <span
-                          className={`text-2xl font-bold tabular-nums ${
-                            dd.score > 0 ? "text-white" : "text-gray-700"
-                          }`}
+                          key={d}
+                          className="bg-gray-950/50 rounded-lg p-3 text-center"
                         >
-                          {dd.score}
-                        </span>
-                        <span className="text-[10px] text-gray-600 block">pts</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Alerts */}
-              {alertsToShow.length > 0 && (
-                <div className="space-y-2 text-left max-w-lg mx-auto mb-5">
-                  {alertsToShow.map((alert, i) => {
-                    const a = typeof alert === "string" ? { text: alert } : alert;
-                    const cfg = a.category
-                      ? CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]
-                      : null;
-                    return (
-                      <div
-                        key={i}
-                        className="bg-gray-950/60 border border-gray-800 rounded-lg p-3 text-sm text-gray-300 leading-relaxed"
-                      >
-                        {cfg && (
-                          <span
-                            className="text-[10px] font-medium uppercase tracking-wider mr-2 px-1.5 py-0.5 rounded"
-                            style={{
-                              backgroundColor: `${cfg.color}20`,
-                              color: cfg.color,
-                            }}
-                          >
-                            {cfg.label}
+                          <span className="text-xs text-gray-500 block mb-1">
+                            {i === 0 ? "↑" : "↓"} {dirs[i]}
                           </span>
-                        )}
-                        <AlertText text={a.text || alert} />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                          <span
+                            className={`text-2xl font-bold tabular-nums ${
+                              dd.score > 0 ? "text-white" : "text-gray-700"
+                            }`}
+                          >
+                            {dd.score}
+                          </span>
+                          <span className="text-[10px] text-gray-600 block">pts</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-              {/* Share button */}
-              <button
-                onClick={handleShare}
-                disabled={shareState === "working"}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 active:scale-95 disabled:opacity-60"
-                style={{
-                  backgroundColor:
-                    shareState === "idle" || shareState === "working"
-                      ? `${color}18`
-                      : shareState === "error"
-                      ? "#EF444418"
-                      : "#16A34A18",
-                  border: `1px solid ${
-                    shareState === "idle" || shareState === "working"
-                      ? `${color}50`
-                      : shareState === "error"
-                      ? "#EF444450"
-                      : "#16A34A50"
-                  }`,
-                  color:
-                    shareState === "idle" || shareState === "working"
-                      ? color
-                      : shareState === "error"
-                      ? "#EF4444"
-                      : "#16A34A",
-                }}
-              >
-                {shareLabel}
-              </button>
-            </div>
+                {/* Alerts */}
+                {alertsToShow.length > 0 && (
+                  <div className="space-y-2 text-left max-w-lg mx-auto mb-4">
+                    {alertsToShow.map((alert, i) => {
+                      const a = typeof alert === "string" ? { text: alert } : alert;
+                      const cfg = a.category
+                        ? CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]
+                        : null;
+                      return (
+                        <div
+                          key={i}
+                          className="bg-gray-950/60 border border-gray-800 rounded-lg p-3 text-sm text-gray-300 leading-relaxed"
+                        >
+                          {cfg && (
+                            <span
+                              className="text-[10px] font-medium uppercase tracking-wider mr-2 px-1.5 py-0.5 rounded"
+                              style={{
+                                backgroundColor: `${cfg.color}20`,
+                                color: cfg.color,
+                              }}
+                            >
+                              {cfg.label}
+                            </span>
+                          )}
+                          <AlertText text={a.text || alert} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Hide details toggle */}
+                <div className="text-center">
+                  <button
+                    onClick={() => setExpanded(false)}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    ↑ Hide details
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

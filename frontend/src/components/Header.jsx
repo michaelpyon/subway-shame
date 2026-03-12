@@ -4,7 +4,7 @@ const MTA_COLORS = [
   "#6CBE45", "#996633", "#A7A9AC", "#808183",
 ];
 
-export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error }) {
+export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error, onOpenChecker }) {
   const timeAgo = lastUpdated ? formatTimeAgo(lastUpdated) : null;
   const countdown = formatCountdown(secondsUntilRefresh);
 
@@ -97,6 +97,18 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             </svg>
           </button>
         </div>
+
+        {/* "Is My Train Fucked?" pill button */}
+        {onOpenChecker && (
+          <div className="mt-3">
+            <button
+              onClick={onOpenChecker}
+              className="border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 text-xs font-medium px-4 py-1.5 rounded-full transition-colors"
+            >
+              🚇 Is My Train Fucked? →
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

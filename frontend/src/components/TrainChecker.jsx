@@ -70,7 +70,7 @@ function parseHash() {
   };
 }
 
-export default function TrainChecker({ lines }) {
+export default function TrainChecker({ lines, isModal = false, onClose }) {
   const [selectedLine, setSelectedLine] = useState(null);
   const [selectedDirection, setSelectedDirection] = useState(null);
   const [verdict, setVerdict] = useState(null);
@@ -185,143 +185,171 @@ export default function TrainChecker({ lines }) {
     });
   }, [lineData, selectedDirection]);
 
-  return (
-    <div className="px-4 py-6 max-w-2xl mx-auto">
-      <div className="bg-gray-900 rounded-2xl p-5 sm:p-6 border border-gray-800">
-        <h2 className="text-xl sm:text-2xl font-black text-center mb-1 text-white">
-          Is My Train Fucked?
-        </h2>
-        <p className="text-xs text-gray-600 text-center mb-5">
-          The only question that matters.
-        </p>
+  const innerContent = (
+    <div className="bg-gray-900 rounded-2xl p-5 sm:p-6 border border-gray-800 relative">
+      {/* Close button (only in modal mode) */}
+      {isModal && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors text-lg leading-none"
+          aria-label="Close"
+        >
+          ×
+        </button>
+      )}
 
-        {/* Line selector */}
+      <h2 className="text-xl sm:text-2xl font-black text-center mb-1 text-white pr-8">
+        Is My Train Fucked?
+      </h2>
+      <p className="text-xs text-gray-600 text-center mb-5">
+        The only question that matters.
+      </p>
+
+      {/* Line selector */}
+      <div className="mb-4">
+        <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Pick your line</p>
+        <div className="flex flex-wrap gap-1.5 justify-center">
+          {ALL_LINES.flat().map(lineId => (
+            <button
+              key={lineId}
+              onClick={() => handleLineSelect(lineId)}
+              aria-label={`${lineId} train`}
+              className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                selectedLine === lineId
+                  ? "scale-110 ring-2 ring-white/40"
+                  : selectedLine
+                    ? "opacity-40 hover:opacity-70"
+                    : "hover:scale-105"
+              }`}
+            >
+              <LineBadge lineId={lineId} size="sm" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Direction selector — appears after line is picked */}
+      {selectedLine && directions && (
         <div className="mb-4">
-          <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Pick your line</p>
-          <div className="flex flex-wrap gap-1.5 justify-center">
-            {ALL_LINES.flat().map(lineId => (
+          <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Which direction? <span className="text-gray-700">(optional)</span></p>
+          <div className="flex gap-2 justify-center">
+            {directions.map((dir, i) => (
               <button
-                key={lineId}
-                onClick={() => handleLineSelect(lineId)}
-                aria-label={`${lineId} train`}
-                className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  selectedLine === lineId
-                    ? "scale-110 ring-2 ring-white/40"
-                    : selectedLine
-                      ? "opacity-40 hover:opacity-70"
-                      : "hover:scale-105"
+                key={dir}
+                onClick={() => setSelectedDirection(selectedDirection === i ? null : i)}
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all border min-h-[44px] flex items-center ${
+                  selectedDirection === i
+                    ? "bg-white/10 border-white/30 text-white"
+                    : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300"
                 }`}
               >
-                <LineBadge lineId={lineId} size="sm" />
+                {i === 0 ? "↑" : "↓"} {dir}
               </button>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Direction selector — appears after line is picked */}
-        {selectedLine && directions && (
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Which direction? <span className="text-gray-700">(optional)</span></p>
-            <div className="flex gap-2 justify-center">
-              {directions.map((dir, i) => (
-                <button
-                  key={dir}
-                  onClick={() => setSelectedDirection(selectedDirection === i ? null : i)}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all border min-h-[44px] flex items-center ${
-                    selectedDirection === i
-                      ? "bg-white/10 border-white/30 text-white"
-                      : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300"
-                  }`}
-                >
-                  {i === 0 ? "↑" : "↓"} {dir}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Check button */}
-        {selectedLine && (
-          <div className="text-center mb-2">
-            <button
-              onClick={handleCheck}
-              className="px-8 py-3 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-colors active:scale-95"
-            >
-              Tell me the truth
-            </button>
-          </div>
-        )}
-
-        {/* Verdict */}
-        {showResult && verdict && (
-          <div
-            key={animKey}
-            className={`mt-5 rounded-xl p-5 text-center border ${
-              verdict.isBad
-                ? "bg-red-950/30 border-red-900/40 verdict-shake"
-                : "bg-green-950/30 border-green-900/40 verdict-pulse-green"
-            }`}
+      {/* Check button */}
+      {selectedLine && (
+        <div className="text-center mb-2">
+          <button
+            onClick={handleCheck}
+            className="px-8 py-3 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-colors active:scale-95"
           >
-            {/* Icon */}
-            <div className="text-4xl mb-3">
-              {verdict.isBad ? "💀" : "✅"}
-            </div>
+            Tell me the truth
+          </button>
+        </div>
+      )}
 
-            {/* Verdict text */}
-            <p className={`text-lg font-bold mb-2 ${
-              verdict.isBad ? "text-red-400" : "text-green-400"
-            }`}>
-              {verdict.message}
-            </p>
-
-            {/* Score */}
-            {verdict.score > 0 && (
-              <p className="text-sm text-gray-500 mb-3">
-                The{" "}
-                <span className="inline-flex items-center mx-0.5 align-middle">
-                  <LineBadge lineId={selectedLine} size="sm" />
-                </span>
-                {" "}has racked up <span className="font-bold text-white">{verdict.score}</span> shame points today.
-              </p>
-            )}
-
-            {/* Share button */}
-            <button
-              onClick={handleShare}
-              className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
-            >
-              Share this verdict
-            </button>
-
-            {/* Relevant alerts */}
-            {relevantAlerts.length > 0 && verdict.isBad && (
-              <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
-                <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1">Here's why:</p>
-                {relevantAlerts.map((alert, i) => {
-                  const a = typeof alert === "string" ? { text: alert } : alert;
-                  const cfg = a.category ? (CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]) : null;
-                  return (
-                    <div
-                      key={i}
-                      className="text-xs text-gray-400 bg-gray-950/60 rounded p-2 leading-relaxed"
-                    >
-                      {cfg && (
-                        <span
-                          className="text-[9px] font-medium uppercase tracking-wider mr-1.5 px-1 py-0.5 rounded"
-                          style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
-                        >
-                          {cfg.label}
-                        </span>
-                      )}
-                      <AlertText text={a.text || alert} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+      {/* Verdict */}
+      {showResult && verdict && (
+        <div
+          key={animKey}
+          className={`mt-5 rounded-xl p-5 text-center border ${
+            verdict.isBad
+              ? "bg-red-950/30 border-red-900/40 verdict-shake"
+              : "bg-green-950/30 border-green-900/40 verdict-pulse-green"
+          }`}
+        >
+          {/* Icon */}
+          <div className="text-4xl mb-3">
+            {verdict.isBad ? "💀" : "✅"}
           </div>
-        )}
+
+          {/* Verdict text */}
+          <p className={`text-lg font-bold mb-2 ${
+            verdict.isBad ? "text-red-400" : "text-green-400"
+          }`}>
+            {verdict.message}
+          </p>
+
+          {/* Score */}
+          {verdict.score > 0 && (
+            <p className="text-sm text-gray-500 mb-3">
+              The{" "}
+              <span className="inline-flex items-center mx-0.5 align-middle">
+                <LineBadge lineId={selectedLine} size="sm" />
+              </span>
+              {" "}has racked up <span className="font-bold text-white">{verdict.score}</span> shame points today.
+            </p>
+          )}
+
+          {/* Share button */}
+          <button
+            onClick={handleShare}
+            className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+          >
+            Share this verdict
+          </button>
+
+          {/* Relevant alerts */}
+          {relevantAlerts.length > 0 && verdict.isBad && (
+            <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
+              <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1">Here's why:</p>
+              {relevantAlerts.map((alert, i) => {
+                const a = typeof alert === "string" ? { text: alert } : alert;
+                const cfg = a.category ? (CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]) : null;
+                return (
+                  <div
+                    key={i}
+                    className="text-xs text-gray-400 bg-gray-950/60 rounded p-2 leading-relaxed"
+                  >
+                    {cfg && (
+                      <span
+                        className="text-[9px] font-medium uppercase tracking-wider mr-1.5 px-1 py-0.5 rounded"
+                        style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
+                      >
+                        {cfg.label}
+                      </span>
+                    )}
+                    <AlertText text={a.text || alert} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  if (isModal) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      >
+        <div className="rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
+          {innerContent}
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="px-4 py-6 max-w-2xl mx-auto">
+      {innerContent}
     </div>
   );
 }
