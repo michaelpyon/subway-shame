@@ -245,15 +245,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
         )}
       </div>
 
-      {/* Tap-to-expand hint — only when not expanded */}
-      {hasContent && !expanded && (
-        <div className="px-4 pb-2 flex items-center gap-1 text-[10px] text-gray-700">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-          <span>Tap to see breakdown &amp; alerts</span>
-        </div>
-      )}
+
 
       {expanded && hasContent && (
         <div className="px-4 pb-4 space-y-3">
