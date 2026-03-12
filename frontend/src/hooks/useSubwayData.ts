@@ -5,7 +5,7 @@ const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
 // Use Railway backend in production; fall back to local dev proxy on localhost
 const API_BASE =
   typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? "https://web-production-be47b.up.railway.app"
+    ? "https://subway-shame-production.up.railway.app"
     : "";
 
 /** Return type for the useSubwayData hook. */
