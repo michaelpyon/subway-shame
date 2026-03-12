@@ -59,9 +59,6 @@ export default function App() {
         <SkeletonLoader />
       )}
 
-      {/* Train checker — always show when data is loaded */}
-      {data && <TrainChecker lines={data.lines} />}
-
       {/* Main content */}
       {data && (
         <>
@@ -71,14 +68,18 @@ export default function App() {
               {data.podium && data.podium.length > 1 && (
                 <Podium podium={data.podium} date={data.date} />
               )}
+              <TrainChecker lines={data.lines} />
             </>
           ) : (
-            <div className="text-center py-12 px-4">
-              <div className="text-5xl mb-4">🎉</div>
-              <p className="text-xl text-gray-300 font-semibold max-w-md mx-auto">
-                {allGoodMsg}
-              </p>
-            </div>
+            <>
+              <div className="text-center py-12 px-4">
+                <div className="text-5xl mb-4">🎉</div>
+                <p className="text-xl text-gray-300 font-semibold max-w-md mx-auto">
+                  {allGoodMsg}
+                </p>
+              </div>
+              <TrainChecker lines={data.lines} />
+            </>
           )}
           {data.timeseries && data.timeseries.length > 0 && (
             <ShameChart timeseries={data.timeseries} />
