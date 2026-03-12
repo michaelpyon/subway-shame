@@ -39,6 +39,9 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
               </div>
             ))}
           </div>
+          <p className="text-[10px] text-gray-700 tracking-widest uppercase font-mono -mt-1">
+            14 St · 6 Av
+          </p>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Subway Shame
           </h1>
