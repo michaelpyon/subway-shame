@@ -8,6 +8,7 @@ import {
 } from "../constants/lines";
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
+import Sparkline from "./Sparkline";
 
 function BreakdownBar({ breakdown, total }) {
   if (!breakdown || total <= 0) return null;
@@ -126,7 +127,7 @@ function DirectionColumn({ label, arrow, data }) {
   );
 }
 
-export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
+export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkData = null, record = null }) {
   const [expanded, setExpanded] = useState(false);
   const color = LINE_COLORS[line.id] || "#808183";
   const dailyScore = line.daily_score || 0;
@@ -190,6 +191,10 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
           </span>
         </div>
         <div className="text-right flex items-center gap-1.5 shrink-0">
+          {/* Sparkline — shown when collapsed and we have history data */}
+          {!expanded && sparkData && sparkData.length >= 2 && (
+            <Sparkline data={sparkData} color={color} />
+          )}
           {dailyScore > 0 && (
             <>
               <span className="text-base">{tier.emoji}</span>
@@ -208,12 +213,24 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1 }) {
                     pts
                   </span>
                 </div>
-                <span
-                  className="text-[9px] font-semibold uppercase tracking-wide"
-                  style={{ color: `${tier.color}90` }}
-                >
-                  {tier.label}
-                </span>
+                <div className="flex items-center justify-end gap-1">
+                  <span
+                    className="text-[9px] font-semibold uppercase tracking-wide"
+                    style={{ color: `${tier.color}90` }}
+                  >
+                    {tier.label}
+                  </span>
+                  {/* Record badge */}
+                  {record && dailyScore >= record.worst_score && (
+                    <span
+                      className="text-[9px] font-bold px-1 py-0.5 rounded"
+                      style={{ backgroundColor: "#7f1d1d", color: "#fca5a5" }}
+                      title={`Worst score in the last ${record.days_back} day${record.days_back !== 1 ? "s" : ""}`}
+                    >
+                      🔥 worst in {record.days_back}d
+                    </span>
+                  )}
+                </div>
               </div>
             </>
           )}

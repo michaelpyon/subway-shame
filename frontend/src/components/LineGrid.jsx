@@ -1,7 +1,7 @@
 import SubwayLineCard from "./SubwayLineCard";
 import LineBadge from "./LineBadge";
 
-export default function LineGrid({ lines }) {
+export default function LineGrid({ lines, history = null, records = null }) {
   const sorted = [...lines].sort((a, b) => (b.daily_score || 0) - (a.daily_score || 0));
 
   const problemLines = sorted.filter(l => (l.daily_score || 0) > 0);
@@ -30,6 +30,8 @@ export default function LineGrid({ lines }) {
               line={line}
               rank={idx + 1}
               maxScore={problemLines[0]?.daily_score || 1}
+              sparkData={history?.[line.id] ?? null}
+              record={records?.[line.id] ?? null}
             />
           ))}
         </div>
