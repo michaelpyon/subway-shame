@@ -85,12 +85,12 @@ export default function App() {
       {data && (
         <>
           {data.winner ? (
-            <>
+            <div className="space-y-2">
               <Trophy winner={data.winner} lines={data.lines || []} />
               {data.podium && data.podium.length > 1 && (
                 <Podium podium={data.podium} date={data.date} />
               )}
-            </>
+            </div>
           ) : (
             <div className="text-center py-12 px-4">
               <div className="text-5xl mb-4">🎉</div>

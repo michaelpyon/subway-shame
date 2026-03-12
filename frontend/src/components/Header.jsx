@@ -20,7 +20,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
       <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
         {/* Brand */}
         <div className="flex flex-col items-center gap-2 mb-1">
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-wide">
             The Low Line
           </h1>
         </div>

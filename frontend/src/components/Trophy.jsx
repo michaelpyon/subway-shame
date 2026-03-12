@@ -215,14 +215,9 @@ export default function Trophy({ winner, lines = [] }) {
             onClick={() => setActiveTab("today")}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               activeTab === "today"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
+                ? "bg-white/10 border border-white/20 text-white"
+                : "text-gray-500 hover:text-gray-300 border border-transparent"
             }`}
-            style={
-              activeTab === "today"
-                ? { backgroundColor: `${color}25`, border: `1px solid ${color}50` }
-                : { backgroundColor: "transparent", border: "1px solid transparent" }
-            }
           >
             🏆 Today
           </button>
@@ -230,14 +225,9 @@ export default function Trophy({ winner, lines = [] }) {
             onClick={() => setActiveTab("hof")}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               activeTab === "hof"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
+                ? "bg-white/10 border border-white/20 text-white"
+                : "text-gray-500 hover:text-gray-300 border border-transparent"
             }`}
-            style={
-              activeTab === "hof"
-                ? { backgroundColor: "#F59E0B25", border: "1px solid #F59E0B50" }
-                : { backgroundColor: "transparent", border: "1px solid transparent" }
-            }
           >
             ⭐ Hall of Shame
           </button>
@@ -261,76 +251,83 @@ export default function Trophy({ winner, lines = [] }) {
             />
 
             {/* ── COMPACT ROW (always visible) ── */}
-            <div className="relative z-10 px-4 py-3 flex items-center gap-3">
+            <div className="relative z-10 p-4 flex items-start gap-3">
               {/* Line badge */}
-              <LineBadge lineId={winner.id} size="md" />
+              <div className="shrink-0 mt-0.5">
+                <LineBadge lineId={winner.id} size="md" />
+              </div>
 
-              {/* Winner info */}
+              {/* Winner info — two lines */}
               <div className="flex-1 min-w-0">
+                {/* Line 1: name + score + tier + actions */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-white font-bold text-sm">{winner.id} Train</span>
                   <span
-                    className="text-base font-black tabular-nums"
+                    className="text-sm font-bold tabular-nums"
                     style={{ color: tier.color }}
                   >
                     {winner.daily_score.toLocaleString()} pts
                   </span>
                   <span className="text-sm">{tier.emoji}</span>
                   <span className="text-xs font-medium" style={{ color: tier.color }}>{tier.label}</span>
+                  <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                    <button
+                      onClick={handleShare}
+                      disabled={shareState === "working"}
+                      className="text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-60"
+                      style={{
+                        backgroundColor:
+                          shareState === "idle" || shareState === "working"
+                            ? `${color}18`
+                            : shareState === "error"
+                            ? "#EF444418"
+                            : "#16A34A18",
+                        border: `1px solid ${
+                          shareState === "idle" || shareState === "working"
+                            ? `${color}50`
+                            : shareState === "error"
+                            ? "#EF444450"
+                            : "#16A34A50"
+                        }`,
+                        color:
+                          shareState === "idle" || shareState === "working"
+                            ? color
+                            : shareState === "error"
+                            ? "#EF4444"
+                            : "#16A34A",
+                      }}
+                    >
+                      {shareLabel}
+                    </button>
+                    <button
+                      onClick={() => setExpanded((v) => !v)}
+                      className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1 rounded-lg hover:bg-gray-800/50"
+                    >
+                      {expanded ? "↑ Hide" : "↓ Details"}
+                    </button>
+                  </div>
                 </div>
-                {/* Tiny meta */}
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  {/* LIVE dot */}
+
+                {/* Line 2: live meta */}
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="flex items-center gap-1">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Live</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">LIVE</span>
                   </span>
-                  <span className="text-[10px] text-gray-600">accumulated today · resets midnight</span>
+                  <span className="text-[10px] text-gray-500">·</span>
+                  <span className="text-[10px] text-gray-500">accumulated today</span>
+                  <span className="text-[10px] text-gray-500">·</span>
+                  <span className="text-[10px] text-gray-500">resets midnight</span>
                   {winner.score > 0 && (
-                    <span className="text-[10px] text-gray-600">+{winner.score} pts active</span>
+                    <>
+                      <span className="text-[10px] text-gray-500">·</span>
+                      <span className="text-[10px] text-gray-500">+{winner.score} pts active</span>
+                    </>
                   )}
                 </div>
-              </div>
-
-              {/* Share + toggle */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={handleShare}
-                  disabled={shareState === "working"}
-                  className="text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-60"
-                  style={{
-                    backgroundColor:
-                      shareState === "idle" || shareState === "working"
-                        ? `${color}18`
-                        : shareState === "error"
-                        ? "#EF444418"
-                        : "#16A34A18",
-                    border: `1px solid ${
-                      shareState === "idle" || shareState === "working"
-                        ? `${color}50`
-                        : shareState === "error"
-                        ? "#EF444450"
-                        : "#16A34A50"
-                    }`,
-                    color:
-                      shareState === "idle" || shareState === "working"
-                        ? color
-                        : shareState === "error"
-                        ? "#EF4444"
-                        : "#16A34A",
-                  }}
-                >
-                  {shareLabel}
-                </button>
-                <button
-                  onClick={() => setExpanded((v) => !v)}
-                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-800/50"
-                >
-                  {expanded ? "↑ Hide" : "↓ Details"}
-                </button>
               </div>
             </div>
 

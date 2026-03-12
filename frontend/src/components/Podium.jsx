@@ -5,7 +5,7 @@ const PLACE_CONFIG = [
   {
     label: "1st",
     emoji: "🥇",
-    height: "h-36",
+    height: "h-28",
     order: "order-2",
     bgGradient: "from-yellow-500/20 to-transparent",
     borderColor: "border-yellow-500/40",
@@ -15,7 +15,7 @@ const PLACE_CONFIG = [
   {
     label: "2nd",
     emoji: "🥈",
-    height: "h-24",
+    height: "h-20",
     order: "order-1",
     bgGradient: "from-gray-400/15 to-transparent",
     borderColor: "border-gray-400/30",
@@ -25,7 +25,7 @@ const PLACE_CONFIG = [
   {
     label: "3rd",
     emoji: "🥉",
-    height: "h-16",
+    height: "h-14",
     order: "order-3",
     bgGradient: "from-amber-700/15 to-transparent",
     borderColor: "border-amber-700/30",
@@ -109,12 +109,12 @@ function PlacePedestal({ config, lines }) {
           </span>
         )}
         <span
-          className="text-2xl sm:text-3xl font-black tabular-nums"
+          className="text-xl sm:text-2xl font-bold tabular-nums"
           style={{ color: tier.color }}
         >
           {score}
         </span>
-        <span className="text-[10px] text-gray-500">pts today</span>
+        <span className="text-[9px] text-gray-600">pts today</span>
       </div>
 
       {/* Line names below */}
@@ -147,7 +147,7 @@ export default function Podium({ podium, date }) {
   }
 
   return (
-    <div className="px-4 py-6 max-w-2xl mx-auto">
+    <div className="px-4 pt-4 pb-4 max-w-2xl mx-auto">
       {/* Date badge */}
       {date && (
         <p className="text-center text-xs text-gray-600 uppercase tracking-widest mb-2">
@@ -155,8 +155,8 @@ export default function Podium({ podium, date }) {
         </p>
       )}
 
-      <h2 className="text-center text-lg sm:text-xl font-bold text-gray-300 mb-6">
-        Podium of Shame
+      <h2 className="text-center text-lg sm:text-xl font-bold text-gray-300 mb-4">
+        Today's Podium
       </h2>
 
       {/* Podium blocks — display order: 2nd | 1st | 3rd */}
