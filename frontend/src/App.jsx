@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSubwayData } from "./hooks/useSubwayData";
 import { ALL_GOOD_MESSAGES } from "./constants/lines";
 import Header from "./components/Header";
@@ -19,6 +19,26 @@ export default function App() {
     () => ALL_GOOD_MESSAGES[Math.floor(Math.random() * ALL_GOOD_MESSAGES.length)],
     []
   );
+
+  const [historyData, setHistoryData] = useState(null);
+  const [recordsData, setRecordsData] = useState(null);
+
+  // Fetch history once data is available
+  useEffect(() => {
+    if (!data) return;
+    const apiBase = import.meta.env.VITE_API_URL || "";
+    fetch(`${apiBase}/api/history?hours=72`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (json) {
+          setHistoryData(json.history || null);
+          setRecordsData(json.records || null);
+        }
+      })
+      .catch(() => {
+        // History fetch failure is silent — sparklines just won't appear
+      });
+  }, [data]);
 
   // Full offline state — backend is down, no data yet
   if (error && !data) {
@@ -85,7 +105,7 @@ export default function App() {
             <ShameChart timeseries={data.timeseries} />
           )}
           <ScoringExplainer />
-          <LineGrid lines={data.lines} />
+          <LineGrid lines={data.lines} history={historyData} records={recordsData} />
         </>
       )}
 

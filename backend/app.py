@@ -2,13 +2,21 @@ import os
 import json
 import time
 import logging
+import threading
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests as http_requests
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from google.transit import gtfs_realtime_pb2
+
+try:
+    import psycopg2
+    import psycopg2.extras
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
 # Config
@@ -134,6 +142,98 @@ ROUTE_NORMALIZE = {
 }
 
 FETCH_TIMEOUT = 8
+
+# ---------------------------------------------------------------------------
+# Database (Postgres via psycopg2 — gracefully skipped if DATABASE_URL unset)
+# ---------------------------------------------------------------------------
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+_db_conn = None
+_db_lock = threading.Lock()
+
+
+def _get_db_conn():
+    """Return a live psycopg2 connection, reconnecting if needed."""
+    global _db_conn
+    if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
+        return None
+    with _db_lock:
+        try:
+            if _db_conn is None or _db_conn.closed:
+                _db_conn = psycopg2.connect(DATABASE_URL)
+                _db_conn.autocommit = True
+        except Exception as e:
+            log.warning("DB connect failed: %s", e)
+            _db_conn = None
+    return _db_conn
+
+
+def init_db():
+    """Create the scores_history table and index if they don't exist."""
+    conn = _get_db_conn()
+    if conn is None:
+        log.info("DATABASE_URL not set or psycopg2 unavailable — skipping DB init")
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS scores_history (
+                    id SERIAL PRIMARY KEY,
+                    captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    line_id TEXT NOT NULL,
+                    score INTEGER NOT NULL DEFAULT 0,
+                    status TEXT,
+                    trip_count INTEGER DEFAULT 0
+                );
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_scores_history_line_time
+                ON scores_history(line_id, captured_at DESC);
+            """)
+        log.info("DB init complete")
+    except Exception as e:
+        log.warning("DB init failed: %s", e)
+
+
+def _insert_history_rows(lines_snapshot: list[dict]):
+    """Insert one row per line into scores_history. Called in a background thread."""
+    conn = _get_db_conn()
+    if conn is None:
+        return
+    try:
+        rows = [
+            (line["id"], line["score"], line["status"], line.get("trip_count", 0))
+            for line in lines_snapshot
+        ]
+        with conn.cursor() as cur:
+            psycopg2.extras.execute_values(
+                cur,
+                """
+                INSERT INTO scores_history (line_id, score, status, trip_count)
+                VALUES %s
+                """,
+                rows,
+            )
+    except Exception as e:
+        log.warning("DB insert failed: %s", e)
+        # Reset connection so next call retries
+        global _db_conn
+        with _db_lock:
+            try:
+                if _db_conn:
+                    _db_conn.close()
+            except Exception:
+                pass
+            _db_conn = None
+
+
+def save_history_async(lines_snapshot: list[dict]):
+    """Fire-and-forget: persist snapshot to Postgres in a background thread."""
+    if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
+        return
+    t = threading.Thread(target=_insert_history_rows, args=(lines_snapshot,), daemon=True)
+    t.start()
 
 
 # ---------------------------------------------------------------------------
@@ -574,6 +674,15 @@ def build_status() -> dict:
 
     lines.sort(key=lambda l: (-l["daily_score"], -l["score"], l["id"]))
 
+    # Persist snapshot to Postgres asynchronously (never blocks the response)
+    try:
+        save_history_async([
+            {"id": l["id"], "score": l["score"], "status": l["status"], "trip_count": l.get("trip_count", 0)}
+            for l in lines
+        ])
+    except Exception:
+        pass  # history failure must never break the main API
+
     # Build podium: top 3 places, but include all ties
     scored = [l for l in lines if l["daily_score"] > 0]
     podium = []
@@ -626,6 +735,100 @@ def api_status():
     return jsonify(build_status())
 
 
+@app.route("/api/history")
+def api_history():
+    """Return last N hours of per-line score snapshots + record badges."""
+    try:
+        hours = int(request.args.get("hours", 72))
+    except (ValueError, TypeError):
+        hours = 72
+
+    empty_response = {"history": {}, "records": {}}
+
+    if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
+        return jsonify(empty_response)
+
+    conn = _get_db_conn()
+    if conn is None:
+        return jsonify(empty_response)
+
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Fetch all rows in the window
+            cur.execute("""
+                SELECT line_id,
+                       captured_at AT TIME ZONE 'UTC' AS t,
+                       score
+                FROM scores_history
+                WHERE captured_at >= %s
+                ORDER BY line_id, captured_at ASC
+            """, (cutoff,))
+            rows = cur.fetchall()
+
+            # Also fetch current live scores (most recent snapshot per line)
+            cur.execute("""
+                SELECT DISTINCT ON (line_id)
+                    line_id,
+                    score AS current_score
+                FROM scores_history
+                ORDER BY line_id, captured_at DESC
+            """)
+            current_rows = cur.fetchall()
+
+        # How many days of data do we have?
+        if rows:
+            oldest = min(r["t"] for r in rows)
+            newest = datetime.now(timezone.utc)
+            days_back = max(1, int((newest - oldest).total_seconds() / 86400) + 1)
+        else:
+            days_back = 0
+
+        # Group history by line_id
+        history: dict = {}
+        for row in rows:
+            lid = row["line_id"]
+            if lid not in history:
+                history[lid] = []
+            history[lid].append({
+                "t": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "score": row["score"],
+            })
+
+        # Build records: for each line with current_score > 0, check if it's a new high
+        current_scores = {r["line_id"]: r["current_score"] for r in current_rows}
+
+        # Compute max score in the window per line
+        max_in_window: dict = {}
+        for row in rows:
+            lid = row["line_id"]
+            if lid not in max_in_window or row["score"] > max_in_window[lid]["worst_score"]:
+                max_in_window[lid] = {
+                    "worst_score": row["score"],
+                    "worst_at": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                }
+
+        records: dict = {}
+        for lid, curr in current_scores.items():
+            if curr <= 0:
+                continue
+            window = max_in_window.get(lid, {})
+            worst = window.get("worst_score", 0)
+            if curr >= worst and days_back > 0:
+                records[lid] = {
+                    "worst_score": worst,
+                    "worst_at": window.get("worst_at", ""),
+                    "days_back": days_back,
+                }
+
+        return jsonify({"history": history, "records": records})
+
+    except Exception as e:
+        log.warning("History endpoint error: %s", e)
+        return jsonify(empty_response)
+
+
 @app.route("/api/health")
 def api_health():
     return jsonify({"ok": True})
@@ -641,6 +844,7 @@ def serve_frontend(path):
 
 
 _load_state()
+init_db()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
