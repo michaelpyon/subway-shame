@@ -20,24 +20,22 @@ export const LINE_NAMES = {
 };
 
 export const SHAME_HEADLINES = [
-  "Today's most-delayed line",
-  "The train that kept everyone waiting",
-  "Worst on-time performance, by the numbers",
+  "Today's worst line",
   "A difficult day for this one",
-  "This line has had better weeks",
-  "Service was, technically, provided",
-  "The MTA's most consistent disappointment, today",
-  "Currently in last place",
-  "A lot happened here today",
-  "This line filed a report against itself",
+  "Most delays today",
+  "This line had a hard day",
+  "Today's delay leader",
+  "More delays than the others",
+  "The day's most-delayed service",
+  "This line was the problem today",
 ];
 
 export const ALL_GOOD_MESSAGES = [
-  "A miracle has occurred. All lines are running.",
-  "No winner today. The MTA is somehow behaving.",
-  "Did someone fix the subway? This can't last.",
-  "Enjoy this moment. It won't happen again.",
-  "All clear. Screenshot this, nobody will believe you.",
+  "All lines running normally.",
+  "No delays to report.",
+  "Nothing to report today.",
+  "The trains are fine.",
+  "All clear.",
 ];
 
 /**
