@@ -114,6 +114,23 @@ export default function App() {
 
       {/* Footer */}
       <footer className="text-center text-xs text-gray-700 py-6 px-4">
+        {/* FML easter egg */}
+        <div className="flex items-center justify-center gap-1.5 mb-3" title="F*** My Life" aria-label="F M L train lines — 14 St / 6 Av">
+          {[
+            { id: "F", color: "#FF6319" },
+            { id: "M", color: "#FF6319" },
+            { id: "L", color: "#A7A9AC" },
+          ].map(({ id, color }) => (
+            <div
+              key={id}
+              className="w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] shrink-0"
+              style={{ backgroundColor: color, color: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+            >
+              {id}
+            </div>
+          ))}
+          <span className="text-[9px] text-gray-700 tracking-widest uppercase font-mono ml-1">14 St · 6 Av</span>
+        </div>
         <p>
           Data from{" "}
           <a

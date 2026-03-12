@@ -20,30 +20,8 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
       <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
         {/* Brand */}
         <div className="flex flex-col items-center gap-2 mb-1">
-          <div className="flex items-center gap-1.5" title="F*** My Life" aria-label="F M L train lines">
-            {[
-              { id: "F", color: "#FF6319" },
-              { id: "M", color: "#FF6319" },
-              { id: "L", color: "#A7A9AC" },
-            ].map(({ id, color }) => (
-              <div
-                key={id}
-                className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-lg sm:text-xl shrink-0 shadow-lg"
-                style={{
-                  backgroundColor: color,
-                  color: "#fff",
-                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
-              >
-                {id}
-              </div>
-            ))}
-          </div>
-          <p className="text-[10px] text-gray-700 tracking-widest uppercase font-mono -mt-1">
-            14 St · 6 Av
-          </p>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Subway Shame
+            The Low Line
           </h1>
         </div>
         <p className="text-gray-500 mt-1.5 text-sm sm:text-base">

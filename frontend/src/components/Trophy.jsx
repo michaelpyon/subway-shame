@@ -117,7 +117,7 @@ export default function Trophy({ winner, lines = [] }) {
 
   const handleShare = useCallback(async () => {
     setShareState("working");
-    const shareText = `🚇 Subway Shame — ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://michaelpyon.github.io/subway-shame/`;
+    const shareText = `🚇 The Low Line — ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://michaelpyon.github.io/subway-shame/`;
 
     // Try html2canvas first
     try {
