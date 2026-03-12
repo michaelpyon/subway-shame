@@ -10,7 +10,20 @@ export default function LineGrid({ lines, history = null, records = null }) {
   return (
     <div className="px-4 pb-8 max-w-2xl mx-auto">
       <div className="flex items-baseline justify-between mb-4 px-1">
-        <h2 className="text-lg font-semibold text-gray-400">All Lines</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-400">All Lines</h2>
+          <button
+            onClick={() => {
+              const el = document.getElementById("scoring-explainer");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="w-4 h-4 rounded-full border border-gray-700 text-gray-600 hover:text-gray-400 hover:border-gray-500 transition-colors flex items-center justify-center text-[10px] font-bold leading-none"
+            title="How are shame points calculated?"
+            aria-label="How are shame points calculated?"
+          >
+            ?
+          </button>
+        </div>
         <div className="flex items-center gap-3 text-xs">
           {problemLines.length > 0 && (
             <span className="text-red-500">{problemLines.length} with issues</span>

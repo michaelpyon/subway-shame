@@ -17,7 +17,7 @@ export default function ScoringExplainer() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="px-4 py-2 max-w-5xl mx-auto">
+    <div id="scoring-explainer" className="px-4 py-2 max-w-5xl mx-auto">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-400 transition-colors mx-auto"

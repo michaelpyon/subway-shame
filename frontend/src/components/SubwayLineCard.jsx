@@ -127,6 +127,18 @@ function DirectionColumn({ label, arrow, data }) {
   );
 }
 
+const CAT_PTS = {
+  "No Service": 50,
+  "Delays": 30,
+  "Slow Speeds": 20,
+  "Skip Stop": 15,
+  "Rerouted": 15,
+  "Runs Local": 10,
+  "Reduced Freq": 10,
+  "Platform Change": 2,
+  "Other": 5,
+};
+
 export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkData = null, record = null }) {
   const [expanded, setExpanded] = useState(false);
   const color = LINE_COLORS[line.id] || "#808183";
@@ -189,6 +201,23 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           <span className="text-sm" style={{ color: liveScore === 0 && dailyScore > 0 ? "#9CA3AF" : tier.color }}>
             {statusText}
           </span>
+          {/* Interruption badges — always visible when line has issues */}
+          {hasContent && line.breakdown && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {CATEGORY_ORDER.filter((cat) => (line.breakdown[cat] || 0) > 0).map((cat) => {
+                const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+                return (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
+                  >
+                    {cfg.icon} {cfg.label}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="text-right flex items-center gap-1.5 shrink-0">
           {/* Sparkline — shown when collapsed and we have history data */}
@@ -231,6 +260,26 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                     </span>
                   )}
                 </div>
+                {/* Top-2 category pts breakdown */}
+                {line.breakdown && (() => {
+                  const topCats = CATEGORY_ORDER
+                    .filter((cat) => (line.breakdown[cat] || 0) > 0)
+                    .sort((a, b) => (line.breakdown[b] || 0) - (line.breakdown[a] || 0))
+                    .slice(0, 2);
+                  return topCats.length > 0 ? (
+                    <div className="mt-0.5">
+                      {topCats.map((cat) => {
+                        const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+                        const totalPts = line.breakdown[cat];
+                        return (
+                          <div key={cat} className="text-[9px] text-gray-600 text-right">
+                            {cfg.label} +{totalPts}pts
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </>
           )}
