@@ -320,11 +320,11 @@ export default function Trophy({ winner, lines = [] }) {
                   <span className="text-[10px] text-gray-500">·</span>
                   <span className="text-[10px] text-gray-500">accumulated today</span>
                   <span className="text-[10px] text-gray-500">·</span>
-                  <span className="text-[10px] text-gray-500">resets midnight</span>
+                  <span className="text-[10px] text-gray-500">resets at midnight</span>
                   {winner.score > 0 && (
                     <>
                       <span className="text-[10px] text-gray-500">·</span>
-                      <span className="text-[10px] text-gray-500">+{winner.score} pts active</span>
+                      <span className="text-[10px] text-gray-500">+{winner.score} pts/hr right now</span>
                     </>
                   )}
                 </div>
