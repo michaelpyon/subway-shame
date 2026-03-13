@@ -114,7 +114,7 @@ function PlacePedestal({ config, lines }) {
         >
           {score}
         </span>
-        <span className="text-[9px] text-gray-600">pts today</span>
+        <span className="text-[9px] text-gray-400">pts today</span>
       </div>
 
       {/* Line names below */}
@@ -126,7 +126,7 @@ function PlacePedestal({ config, lines }) {
           {lines.length === 1 ? "Train" : "Trains"}
         </span>
         {isTie && (
-          <span className="text-[10px] text-gray-600 block">
+          <span className="text-[10px] text-gray-400 block">
             Tied for {config.label}
           </span>
         )}
@@ -150,7 +150,7 @@ export default function Podium({ podium, date }) {
     <div className="px-4 pt-4 pb-4 max-w-2xl mx-auto">
       {/* Date badge */}
       {date && (
-        <p className="text-center text-xs text-gray-600 uppercase tracking-widest mb-2">
+        <p className="text-center text-xs text-gray-400 uppercase tracking-widest mb-2">
           {date}
         </p>
       )}

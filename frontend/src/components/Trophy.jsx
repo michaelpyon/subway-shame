@@ -216,7 +216,7 @@ export default function Trophy({ winner, lines = [] }) {
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               activeTab === "today"
                 ? "bg-white/10 border border-white/20 text-white"
-                : "text-gray-500 hover:text-gray-300 border border-transparent"
+                : "text-gray-400 hover:text-gray-300 border border-transparent"
             }`}
           >
             🏆 Today
@@ -226,7 +226,7 @@ export default function Trophy({ winner, lines = [] }) {
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               activeTab === "hof"
                 ? "bg-white/10 border border-white/20 text-white"
-                : "text-gray-500 hover:text-gray-300 border border-transparent"
+                : "text-gray-400 hover:text-gray-300 border border-transparent"
             }`}
           >
             ⭐ Hall of Shame
@@ -301,7 +301,7 @@ export default function Trophy({ winner, lines = [] }) {
                     </button>
                     <button
                       onClick={() => setExpanded((v) => !v)}
-                      className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1 rounded-lg hover:bg-gray-800/50"
+                      className="text-xs text-gray-400 hover:text-gray-300 transition-colors px-2 py-1 rounded-lg hover:bg-gray-800/50"
                     >
                       {expanded ? "↑ Hide" : "↓ Details"}
                     </button>
@@ -315,16 +315,16 @@ export default function Trophy({ winner, lines = [] }) {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">LIVE</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">LIVE</span>
                   </span>
-                  <span className="text-[10px] text-gray-500">·</span>
-                  <span className="text-[10px] text-gray-500">accumulated today</span>
-                  <span className="text-[10px] text-gray-500">·</span>
-                  <span className="text-[10px] text-gray-500">resets at midnight</span>
+                  <span className="text-[10px] text-gray-400">·</span>
+                  <span className="text-[10px] text-gray-400">accumulated today</span>
+                  <span className="text-[10px] text-gray-400">·</span>
+                  <span className="text-[10px] text-gray-400">resets at midnight</span>
                   {winner.score > 0 && (
                     <>
-                      <span className="text-[10px] text-gray-500">·</span>
-                      <span className="text-[10px] text-gray-500">+{winner.score} pts/hr right now</span>
+                      <span className="text-[10px] text-gray-400">·</span>
+                      <span className="text-[10px] text-gray-400">+{winner.score} pts/hr right now</span>
                     </>
                   )}
                 </div>
@@ -401,7 +401,7 @@ export default function Trophy({ winner, lines = [] }) {
                           key={d}
                           className="bg-gray-950/50 rounded-lg p-3 text-center"
                         >
-                          <span className="text-xs text-gray-500 block mb-1">
+                          <span className="text-xs text-gray-400 block mb-1">
                             {i === 0 ? "↑" : "↓"} {dirs[i]}
                           </span>
                           <span
@@ -453,7 +453,7 @@ export default function Trophy({ winner, lines = [] }) {
                 <div className="text-center">
                   <button
                     onClick={() => setExpanded(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                    className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
                   >
                     ↑ Hide details
                   </button>
@@ -485,7 +485,7 @@ export default function Trophy({ winner, lines = [] }) {
               <h2 className="text-xl font-bold text-center text-white mb-1">
                 ⭐ Hall of Shame
               </h2>
-              <p className="text-xs text-gray-500 text-center mb-1">
+              <p className="text-xs text-gray-400 text-center mb-1">
                 Worst daily offender since you started visiting
               </p>
               {/* Browser-local note — always visible */}
@@ -544,7 +544,7 @@ export default function Trophy({ winner, lines = [] }) {
                             <p className="text-sm font-semibold text-white truncate">
                               {entry.lineId} Train
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-400">
                               {(() => {
                                 const d = new Date(entry.date + "T12:00:00");
                                 return d.toLocaleDateString("en-US", {
