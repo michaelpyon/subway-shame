@@ -116,11 +116,11 @@ function PlacePedestal({ config, lines }) {
         )}
         <span
           className="text-xl sm:text-2xl font-bold tabular-nums"
-          style={{ color: tier.color }}
+          style={{ color: tier.color, fontFamily: 'var(--font-display)' }}
         >
           {score}
         </span>
-        <span className="text-[9px] text-gray-400">pts today</span>
+        <span className="text-[9px] text-gray-400" style={{ fontFamily: 'var(--font-mono)' }}>pts today</span>
       </div>
 
       {/* Line names below */}
@@ -163,7 +163,10 @@ export default function Podium({ podium, date }) {
         </p>
       )}
 
-      <h2 className="text-center text-lg sm:text-xl font-bold text-gray-300 mb-4">
+      <h2
+        className="text-center text-lg sm:text-xl font-bold text-gray-300 mb-4"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         Today's Podium
       </h2>
 

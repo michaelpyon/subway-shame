@@ -40,7 +40,7 @@ export default function ScoringExplainer() {
 
       {open && (
         <div className="mt-3 bg-gray-900 rounded-lg p-4 sm:p-6 max-w-2xl mx-auto">
-          <h3 className="text-sm font-semibold text-gray-300 mb-1">
+          <h3 className="text-sm font-semibold text-gray-300 mb-1" style={{ fontFamily: 'var(--font-display)' }}>
             The Shame Point System
           </h3>
 
@@ -88,7 +88,7 @@ export default function ScoringExplainer() {
                 >
                   <span
                     className="w-14 text-right text-sm font-bold tabular-nums shrink-0"
-                    style={{ color: cfg.color }}
+                    style={{ color: cfg.color, fontFamily: 'var(--font-mono)' }}
                   >
                     +{pts} pts
                   </span>

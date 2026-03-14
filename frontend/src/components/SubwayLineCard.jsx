@@ -90,11 +90,12 @@ function DirectionColumn({ label, arrow, data }) {
             className={`text-sm font-bold tabular-nums ${
               data.score > 0 ? "text-white" : "text-gray-700"
             }`}
+            style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.04em' }}
           >
             {data.score}
           </span>
           {data.score > 0 && (
-            <span className="text-[9px] text-gray-600 ml-0.5">pts</span>
+            <span className="text-[9px] text-gray-600 ml-0.5" style={{ fontFamily: 'var(--font-mono)' }}>pts</span>
           )}
         </div>
       </div>
@@ -114,7 +115,7 @@ function DirectionColumn({ label, arrow, data }) {
                   />
                   <span className="text-gray-500">{cfg.label}</span>
                 </span>
-                <span className="text-gray-600">{data.breakdown[cat]} pts</span>
+                <span className="text-gray-600" style={{ fontFamily: 'var(--font-mono)' }}>{data.breakdown[cat]} pts</span>
               </div>
             );
           })}
@@ -231,13 +232,13 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                 <div className="flex items-baseline gap-0.5 justify-end">
                   <span
                     className="text-xl font-black tabular-nums leading-none"
-                    style={{ color: tier.color }}
+                    style={{ color: tier.color, fontFamily: 'var(--font-display)', letterSpacing: '-0.04em' }}
                   >
                     {dailyScore.toLocaleString()}
                   </span>
                   <span
                     className="text-[9px] font-medium"
-                    style={{ color: `${tier.color}80` }}
+                    style={{ color: `${tier.color}80`, fontFamily: 'var(--font-mono)' }}
                   >
                     pts
                   </span>
@@ -272,7 +273,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                         const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
                         const totalPts = line.breakdown[cat];
                         return (
-                          <div key={cat} className="text-[9px] text-gray-600 text-right">
+                          <div key={cat} className="text-[9px] text-gray-600 text-right" style={{ fontFamily: 'var(--font-mono)' }}>
                             {cfg.label} +{totalPts}pts
                           </div>
                         );
@@ -319,7 +320,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           {liveScore > 0 && (
             <div className="flex items-center justify-between text-xs text-gray-600 bg-gray-950/50 rounded-lg px-3 py-2">
               <span>🔴 Live (right now)</span>
-              <span className="font-bold text-gray-400">{liveScore.toLocaleString()} pts this snapshot</span>
+              <span className="font-bold text-gray-400" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{liveScore.toLocaleString()} pts this snapshot</span>
             </div>
           )}
 

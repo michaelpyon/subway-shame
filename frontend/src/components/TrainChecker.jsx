@@ -210,7 +210,10 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
         </button>
       )}
 
-      <h2 className="text-xl sm:text-2xl font-black text-center mb-1 text-white pr-8">
+      <h2
+        className="text-xl sm:text-2xl font-black text-center mb-1 text-white pr-8"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         Is My Train Fucked?
       </h2>
       <p className="text-xs text-gray-600 text-center mb-5">
@@ -303,7 +306,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
               <span className="inline-flex items-center mx-0.5 align-middle">
                 <LineBadge lineId={selectedLine} size="sm" />
               </span>
-              {" "}has racked up <span className="font-bold text-white">{verdict.score}</span> shame points today.
+              {" "}has racked up <span className="font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{verdict.score}</span> shame points today.
             </p>
           )}
 

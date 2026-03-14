@@ -22,7 +22,7 @@ export default function ShareCard({ winner, lines = [], date }) {
         width: "600px",
         height: "315px",
         backgroundColor: "#0a0a0f",
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        fontFamily: "'Instrument Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
         overflow: "hidden",
         boxSizing: "border-box",
         display: "flex",
@@ -124,11 +124,13 @@ export default function ShareCard({ winner, lines = [], date }) {
                   fontWeight: "900",
                   color: tier.color,
                   lineHeight: "1",
+                  fontFamily: "'Space Grotesk', 'Helvetica Neue', sans-serif",
+                  letterSpacing: "-0.04em",
                 }}
               >
                 {winner.daily_score.toLocaleString()}
               </div>
-              <div style={{ fontSize: "18px", fontWeight: "700", color: "#6b7280" }}>pts</div>
+              <div style={{ fontSize: "18px", fontWeight: "700", color: "#6b7280", fontFamily: "'JetBrains Mono', monospace" }}>pts</div>
             </div>
             <div style={{ fontSize: "13px", color: "#6b7280" }}>
               {tier.emoji}&nbsp;{tier.label.toUpperCase()}

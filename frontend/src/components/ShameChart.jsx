@@ -154,7 +154,7 @@ function CustomTooltip({ active, payload, label }) {
                   {entry.dataKey.length <= 1 ? `${entry.dataKey} Train` : entry.dataKey}
                 </span>
               </div>
-              <span className="text-white font-bold tabular-nums">
+              <span className="text-white font-bold tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
                 {entry.value.toLocaleString()} pts
               </span>
             </div>
@@ -228,7 +228,7 @@ export default function ShameChart({ timeseries }) {
 
   return (
     <div className="px-4 py-6 max-w-5xl mx-auto">
-      <h2 className="text-lg font-semibold text-gray-400 mb-1">Today's Shame Race</h2>
+      <h2 className="text-lg font-semibold text-gray-400 mb-1" style={{ fontFamily: 'var(--font-display)' }}>Today's Shame Race</h2>
       <p className="text-xs text-gray-600 mb-4">
         How shame points have accumulated since midnight — higher line = worse performance today.
         Points reset at midnight.
@@ -332,7 +332,7 @@ export default function ShameChart({ timeseries }) {
                 }
               >
                 <LineBadge lineId={lineId} size="sm" />
-                <span className="text-gray-400 tabular-nums font-medium">
+                <span className="text-gray-400 tabular-nums font-medium" style={{ fontFamily: 'var(--font-mono)' }}>
                   {lastVal}
                 </span>
               </button>

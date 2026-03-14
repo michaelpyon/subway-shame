@@ -20,7 +20,10 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
       <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
         {/* Brand */}
         <div className="flex flex-col items-center gap-2 mb-1">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-wide">
+          <h1
+            className="text-3xl sm:text-4xl font-bold text-white tracking-wide"
+            style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}
+          >
             The Low Line
           </h1>
         </div>
@@ -49,7 +52,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           {timeAgo && (
             <>
               <span className="text-gray-800">·</span>
-              <span>Next in {countdown}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>Next in {countdown}</span>
             </>
           )}
 
@@ -82,6 +85,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             <button
               onClick={onOpenChecker}
               className="border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 text-xs font-medium px-4 py-1.5 rounded-full transition-colors"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}
             >
               🚇 Is My Train Fucked? →
             </button>
