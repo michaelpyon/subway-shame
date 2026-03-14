@@ -84,14 +84,20 @@ function PlacePedestal({ config, lines }) {
 
   // Use the first line's color for the pedestal gradient, or blend for ties
   const primaryColor = LINE_COLORS[lines[0].id] || "#808183";
+  const MAX_BADGES = 4;
+  const extraCount = lines.length - MAX_BADGES;
+  const displayedLines = lines.length > MAX_BADGES ? lines.slice(0, MAX_BADGES) : lines;
 
   return (
     <div className={`${config.order} flex-1 max-w-[180px]`}>
       {/* Badges floating above pedestal */}
       <div className="flex justify-center gap-1 mb-2 flex-wrap">
-        {lines.map((line) => (
+        {displayedLines.map((line) => (
           <LineBadge key={line.id} lineId={line.id} size={config.badgeSize} />
         ))}
+        {extraCount > 0 && (
+          <span className="text-[10px] text-gray-400 self-center ml-0.5">+{extraCount}</span>
+        )}
       </div>
 
       {/* Pedestal */}
@@ -120,14 +126,16 @@ function PlacePedestal({ config, lines }) {
       {/* Line names below */}
       <div className="text-center mt-2">
         <span className="text-xs text-gray-500 block">
-          {lines
-            .map((l) => (l.id === "SI" ? "SIR" : `${l.id}`))
-            .join(" & ")}{" "}
+          {lines.length <= 4
+            ? lines
+                .map((l) => (l.id === "SI" ? "SIR" : `${l.id}`))
+                .join(" & ")
+            : `${lines.slice(0, 3).map((l) => (l.id === "SI" ? "SIR" : `${l.id}`)).join(", ")} +${lines.length - 3} more`}{" "}
           {lines.length === 1 ? "Train" : "Trains"}
         </span>
         {isTie && (
           <span className="text-[10px] text-gray-400 block">
-            Tied for {config.label}
+            {lines.length}-way tie for {config.label}
           </span>
         )}
       </div>
