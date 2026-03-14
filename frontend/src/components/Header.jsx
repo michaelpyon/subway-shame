@@ -28,7 +28,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           Which NYC subway line is ruining the most commutes right now?
         </p>
         <p className="text-gray-700 mt-1 text-xs">
-          Higher shame score = more delays, longer delays. Resets every midnight.
+          Every delay adds to the shame. Resets at midnight, forgives nothing.
         </p>
 
         {/* Status row */}
