@@ -187,6 +187,23 @@ export default function ShameChart({ timeseries }) {
     [chartData, activeLines]
   );
 
+  // Compute right margin dynamically: largest cluster of same-value lines
+  // drives how far badges spread. Each badge is 28px wide, radius 12px.
+  const rightMargin = useMemo(() => {
+    if (chartData.length === 0) return 55;
+    const lastPoint = chartData[chartData.length - 1];
+    const groups = {};
+    for (const lineId of activeLines) {
+      const val = lastPoint[lineId] || 0;
+      if (!groups[val]) groups[val] = 0;
+      groups[val]++;
+    }
+    const maxGroupSize = Math.max(...Object.values(groups));
+    // max offset = (maxGroupSize-1)/2 * 28 + badge radius 12 + 10px padding
+    const maxOffset = Math.ceil((maxGroupSize - 1) / 2) * 28 + 12 + 10;
+    return Math.max(55, maxOffset);
+  }, [chartData, activeLines]);
+
   if (timeseries.length < 2) {
     return (
       <div className="px-4 py-6 max-w-5xl mx-auto">
@@ -222,7 +239,7 @@ export default function ShameChart({ timeseries }) {
         <ResponsiveContainer width="100%" height={300} minHeight={240}>
           <AreaChart
             data={chartData}
-            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+            margin={{ top: 5, right: rightMargin, bottom: 5, left: 0 }}
           >
             {/* Gradient defs for each active line */}
             <defs>
