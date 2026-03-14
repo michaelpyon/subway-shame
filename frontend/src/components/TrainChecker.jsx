@@ -176,6 +176,15 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
     }
   }, []);
 
+  const handleShareX = useCallback(() => {
+    if (!verdict || !selectedLine) return;
+    const tier = getScoreTier(verdict.score);
+    const lineName = selectedLine === "SI" ? "SIR" : `${selectedLine}`;
+    const text = `${lineName} Train: ${verdict.score} pts — ${tier.label}. Check yours →`;
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://subway.michaelpyon.com")}`;
+    window.open(tweetUrl, "_blank", "noopener,noreferrer");
+  }, [verdict, selectedLine]);
+
   // Get relevant alerts for the selected direction
   const relevantAlerts = useMemo(() => {
     if (!lineData || !lineData.alerts) return [];
@@ -298,13 +307,24 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
             </p>
           )}
 
-          {/* Share button */}
-          <button
-            onClick={handleShare}
-            className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
-          >
-            Share this verdict
-          </button>
+          {/* Share buttons */}
+          <div className="mt-1 mb-3 flex items-center justify-center gap-2 flex-wrap">
+            <button
+              onClick={handleShare}
+              className="px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+            >
+              Copy link
+            </button>
+            <button
+              onClick={handleShareX}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X
+            </button>
+          </div>
 
           {/* Relevant alerts */}
           {relevantAlerts.length > 0 && verdict.isBad && (
