@@ -1,0 +1,17 @@
+{
+  "name": "The Low Line — NYC Subway Delay Tracker",
+  "short_name": "The Low Line",
+  "description": "Which NYC subway line is causing the most delays right now? Real-time MTA data, scored and ranked.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/og.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
