@@ -3,8 +3,10 @@ import json
 import time
 import logging
 import threading
+from contextlib import contextmanager
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from zoneinfo import ZoneInfo
 
 import requests as http_requests
 from flask import Flask, jsonify, request, send_from_directory
@@ -14,6 +16,7 @@ from google.transit import gtfs_realtime_pb2
 try:
     import psycopg2
     import psycopg2.extras
+    import psycopg2.pool
     PSYCOPG2_AVAILABLE = True
 except ImportError:
     PSYCOPG2_AVAILABLE = False
@@ -142,98 +145,197 @@ ROUTE_NORMALIZE = {
 }
 
 FETCH_TIMEOUT = 8
+ET = ZoneInfo("America/New_York")
 
 # ---------------------------------------------------------------------------
 # Database (Postgres via psycopg2 — gracefully skipped if DATABASE_URL unset)
 # ---------------------------------------------------------------------------
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+DB_POOL_MAX = int(os.environ.get("DB_POOL_MAX", "4"))
+STATUS_CACHE_KEY = "status_response"
+STATUS_REFRESH_LOCK_ID = 981247
 
-_db_conn = None
+_db_pool = None
 _db_lock = threading.Lock()
 
 
-def _get_db_conn():
-    """Return a live psycopg2 connection, reconnecting if needed."""
-    global _db_conn
+def _get_db_pool():
+    """Return a threaded connection pool for Postgres access."""
+    global _db_pool
     if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
         return None
     with _db_lock:
         try:
-            if _db_conn is None or _db_conn.closed:
-                _db_conn = psycopg2.connect(DATABASE_URL)
-                _db_conn.autocommit = True
+            if _db_pool is None:
+                _db_pool = psycopg2.pool.ThreadedConnectionPool(
+                    1,
+                    max(DB_POOL_MAX, 1),
+                    DATABASE_URL,
+                )
         except Exception as e:
             log.warning("DB connect failed: %s", e)
-            _db_conn = None
-    return _db_conn
+            _db_pool = None
+    return _db_pool
+
+
+@contextmanager
+def _db_connection():
+    """Yield a pooled connection and return it safely afterwards."""
+    pool = _get_db_pool()
+    if pool is None:
+        yield None
+        return
+
+    conn = None
+    try:
+        conn = pool.getconn()
+        conn.autocommit = True
+        yield conn
+    finally:
+        if conn is not None:
+            try:
+                pool.putconn(conn)
+            except Exception:
+                pass
 
 
 def init_db():
-    """Create the scores_history table and index if they don't exist."""
-    conn = _get_db_conn()
-    if conn is None:
-        log.info("DATABASE_URL not set or psycopg2 unavailable — skipping DB init")
-        return
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS scores_history (
-                    id SERIAL PRIMARY KEY,
-                    captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    line_id TEXT NOT NULL,
-                    score INTEGER NOT NULL DEFAULT 0,
-                    status TEXT,
-                    trip_count INTEGER DEFAULT 0
-                );
-            """)
-            cur.execute("""
-                CREATE INDEX IF NOT EXISTS idx_scores_history_line_time
-                ON scores_history(line_id, captured_at DESC);
-            """)
-        log.info("DB init complete")
-    except Exception as e:
-        log.warning("DB init failed: %s", e)
+    """Create the history and shared cache tables if they don't exist."""
+    with _db_connection() as conn:
+        if conn is None:
+            log.info("DATABASE_URL not set or psycopg2 unavailable — skipping DB init")
+            return
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS scores_history (
+                        id SERIAL PRIMARY KEY,
+                        captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        line_id TEXT NOT NULL,
+                        score INTEGER NOT NULL DEFAULT 0,
+                        status TEXT,
+                        trip_count INTEGER DEFAULT 0
+                    );
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_scores_history_line_time
+                    ON scores_history(line_id, captured_at DESC);
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS api_cache (
+                        cache_key TEXT PRIMARY KEY,
+                        payload JSONB NOT NULL,
+                        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS aggregate_runs (
+                        run_key TEXT PRIMARY KEY,
+                        snapshot_date DATE NOT NULL,
+                        timeseries_bucket TEXT NOT NULL,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS daily_line_state (
+                        snapshot_date DATE NOT NULL,
+                        line_id TEXT NOT NULL,
+                        daily_score INTEGER NOT NULL DEFAULT 0,
+                        breakdown JSONB NOT NULL DEFAULT '{}'::jsonb,
+                        by_direction JSONB NOT NULL DEFAULT
+                            '{"uptown":{"score":0,"breakdown":{}},"downtown":{"score":0,"breakdown":{}}}'::jsonb,
+                        peak_alerts JSONB NOT NULL DEFAULT '[]'::jsonb,
+                        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        PRIMARY KEY (snapshot_date, line_id)
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS timeseries_points (
+                        snapshot_date DATE NOT NULL,
+                        bucket TEXT NOT NULL,
+                        scores JSONB NOT NULL,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        PRIMARY KEY (snapshot_date, bucket)
+                    );
+                """)
+            log.info("DB init complete")
+        except Exception as e:
+            log.warning("DB init failed: %s", e)
 
 
-def _insert_history_rows(lines_snapshot: list[dict]):
-    """Insert one row per line into scores_history. Called in a background thread."""
-    conn = _get_db_conn()
-    if conn is None:
-        return
-    try:
-        rows = [
-            (line["id"], line["score"], line["status"], line.get("trip_count", 0))
-            for line in lines_snapshot
-        ]
-        with conn.cursor() as cur:
-            psycopg2.extras.execute_values(
-                cur,
-                """
-                INSERT INTO scores_history (line_id, score, status, trip_count)
-                VALUES %s
-                """,
-                rows,
-            )
-    except Exception as e:
-        log.warning("DB insert failed: %s", e)
-        # Reset connection so next call retries
-        global _db_conn
-        with _db_lock:
-            try:
-                if _db_conn:
-                    _db_conn.close()
-            except Exception:
-                pass
-            _db_conn = None
+def save_history(lines_snapshot: list[dict]):
+    """Persist one row per line into scores_history."""
+    with _db_connection() as conn:
+        if conn is None:
+            return
+        try:
+            rows = [
+                (line["id"], line["score"], line["status"], line.get("trip_count", 0))
+                for line in lines_snapshot
+            ]
+            with conn.cursor() as cur:
+                psycopg2.extras.execute_values(
+                    cur,
+                    """
+                    INSERT INTO scores_history (line_id, score, status, trip_count)
+                    VALUES %s
+                    """,
+                    rows,
+                )
+        except Exception as e:
+            log.warning("DB insert failed: %s", e)
 
 
-def save_history_async(lines_snapshot: list[dict]):
-    """Fire-and-forget: persist snapshot to Postgres in a background thread."""
-    if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
-        return
-    t = threading.Thread(target=_insert_history_rows, args=(lines_snapshot,), daemon=True)
-    t.start()
+def _load_cached_status_from_db(max_age_seconds: int) -> dict | None:
+    """Return a fresh shared API payload from Postgres when available."""
+    with _db_connection() as conn:
+        if conn is None:
+            return None
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT payload, updated_at
+                    FROM api_cache
+                    WHERE cache_key = %s
+                    """,
+                    (STATUS_CACHE_KEY,),
+                )
+                row = cur.fetchone()
+        except Exception as e:
+            log.warning("DB cache read failed: %s", e)
+            return None
+
+    if not row:
+        return None
+
+    payload, updated_at = row
+    age_seconds = (datetime.now(timezone.utc) - updated_at).total_seconds()
+    if age_seconds > max_age_seconds:
+        return None
+    return payload
+
+
+def _store_cached_status_in_db(payload: dict) -> None:
+    """Persist the latest API payload so workers can share it."""
+    with _db_connection() as conn:
+        if conn is None:
+            return
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO api_cache (cache_key, payload, updated_at)
+                    VALUES (%s, %s, NOW())
+                    ON CONFLICT (cache_key) DO UPDATE SET
+                        payload = EXCLUDED.payload,
+                        updated_at = EXCLUDED.updated_at
+                    """,
+                    (STATUS_CACHE_KEY, psycopg2.extras.Json(payload)),
+                )
+        except Exception as e:
+            log.warning("DB cache write failed: %s", e)
 
 
 # ---------------------------------------------------------------------------
@@ -285,7 +387,7 @@ def _load_state():
         with open(DATA_FILE) as f:
             state = json.load(f)
 
-        et_now = datetime.now(timezone(timedelta(hours=-5)))
+        et_now = datetime.now(ET)
         today = et_now.strftime("%Y-%m-%d")
 
         # Only restore if it's the same day — otherwise start fresh
@@ -340,7 +442,7 @@ def _accumulate_daily(alerts_data: dict[str, dict]) -> dict[str, dict]:
     global _daily_scores, _daily_breakdown, _daily_by_direction
     global _daily_date, _daily_peak_alerts
 
-    et_now = datetime.now(timezone(timedelta(hours=-5)))
+    et_now = datetime.now(ET)
     today = et_now.strftime("%Y-%m-%d")
 
     if today != _daily_date:
@@ -406,7 +508,7 @@ def _record_timeseries(alerts_data: dict[str, dict]):
     """Record a snapshot into 15-min buckets. Only records once per bucket."""
     global _timeseries, _ts_date, _ts_last_bucket
 
-    et_now = datetime.now(timezone(timedelta(hours=-5)))
+    et_now = datetime.now(ET)
     today = et_now.strftime("%Y-%m-%d")
 
     # Reset at midnight
@@ -634,29 +736,187 @@ def _status_label(alerts: list[dict]) -> str:
     return label_map.get(worst["category"], "Issues")
 
 
-def build_status() -> dict:
-    """Build the full API response."""
-    global _cache, _cache_time
+def _empty_live_line() -> dict:
+    return {
+        "score": 0,
+        "alerts": [],
+        "breakdown": {},
+        "by_direction": {
+            "uptown": {"score": 0, "breakdown": {}},
+            "downtown": {"score": 0, "breakdown": {}},
+        },
+    }
 
-    now = time.time()
-    if _cache and (now - _cache_time) < CACHE_TTL:
-        return _cache
 
-    alerts_data = fetch_alerts()
-    trip_counts = fetch_trip_counts()
-    daily_data = _accumulate_daily(alerts_data)
-    _record_timeseries(alerts_data)
-    _save_state()
+def _json_value(value, fallback):
+    if value is None:
+        return fallback
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return fallback
+    return value
 
+
+def _sample_bucket(et_now: datetime) -> str:
+    return et_now.strftime("%Y-%m-%dT%H:%M")
+
+
+def _timeseries_bucket(et_now: datetime) -> str:
+    minute = (et_now.minute // 15) * 15
+    return et_now.strftime("%H:") + f"{minute:02d}"
+
+
+def _merge_breakdowns(existing: dict, incoming: dict) -> dict:
+    merged = dict(existing or {})
+    for category, score in (incoming or {}).items():
+        merged[category] = int(round(merged.get(category, 0) + score))
+    return merged
+
+
+def _merge_daily_state(existing: dict, current: dict) -> dict:
+    merged = {
+        "daily_score": int(existing.get("daily_score", 0)),
+        "breakdown": dict(existing.get("breakdown", {})),
+        "by_direction": {
+            "uptown": {
+                "score": int(existing.get("by_direction", {}).get("uptown", {}).get("score", 0)),
+                "breakdown": dict(existing.get("by_direction", {}).get("uptown", {}).get("breakdown", {})),
+            },
+            "downtown": {
+                "score": int(existing.get("by_direction", {}).get("downtown", {}).get("score", 0)),
+                "breakdown": dict(existing.get("by_direction", {}).get("downtown", {}).get("breakdown", {})),
+            },
+        },
+        "peak_alerts": list(existing.get("peak_alerts", [])),
+    }
+
+    merged["daily_score"] += int(current.get("score", 0))
+    merged["breakdown"] = _merge_breakdowns(merged["breakdown"], current.get("breakdown", {}))
+
+    for direction in ("uptown", "downtown"):
+        current_direction = current.get("by_direction", {}).get(direction, {})
+        merged["by_direction"][direction]["score"] += int(current_direction.get("score", 0))
+        merged["by_direction"][direction]["breakdown"] = _merge_breakdowns(
+            merged["by_direction"][direction]["breakdown"],
+            current_direction.get("breakdown", {}),
+        )
+
+    if len(current.get("alerts", [])) > len(merged["peak_alerts"]):
+        merged["peak_alerts"] = current["alerts"][:]
+
+    return merged
+
+
+def _load_daily_state_from_db(cur, snapshot_date: str) -> dict[str, dict]:
+    cur.execute(
+        """
+        SELECT line_id, daily_score, breakdown, by_direction, peak_alerts
+        FROM daily_line_state
+        WHERE snapshot_date = %s
+        """,
+        (snapshot_date,),
+    )
+    rows = cur.fetchall()
+
+    daily_data = {line: _empty_line_daily() for line in ALL_LINES}
+    for row in rows:
+        daily_data[row["line_id"]] = {
+            "daily_score": int(row["daily_score"]),
+            "breakdown": _json_value(row["breakdown"], {}),
+            "by_direction": _json_value(row["by_direction"], _empty_line_daily()["by_direction"]),
+            "peak_alerts": _json_value(row["peak_alerts"], []),
+        }
+    return daily_data
+
+
+def _load_timeseries_from_db(cur, snapshot_date: str) -> list[dict]:
+    cur.execute(
+        """
+        SELECT bucket, scores
+        FROM timeseries_points
+        WHERE snapshot_date = %s
+        ORDER BY bucket ASC
+        """,
+        (snapshot_date,),
+    )
+    rows = cur.fetchall()
+    return [
+        {
+            "time": row["bucket"],
+            "scores": _json_value(row["scores"], {}),
+        }
+        for row in rows
+    ]
+
+
+def _persist_db_aggregates(cur, snapshot_date: str, run_key: str, bucket: str, alerts_data: dict[str, dict]) -> None:
+    cur.execute(
+        """
+        INSERT INTO aggregate_runs (run_key, snapshot_date, timeseries_bucket)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (run_key) DO NOTHING
+        RETURNING run_key
+        """,
+        (run_key, snapshot_date, bucket),
+    )
+    inserted = cur.fetchone()
+    if not inserted:
+        return
+
+    existing = _load_daily_state_from_db(cur, snapshot_date)
+    rows = []
+    for line_id in ALL_LINES:
+        current = alerts_data.get(line_id, _empty_live_line())
+        merged = _merge_daily_state(existing.get(line_id, _empty_line_daily()), current)
+        rows.append(
+            (
+                snapshot_date,
+                line_id,
+                merged["daily_score"],
+                psycopg2.extras.Json(merged["breakdown"]),
+                psycopg2.extras.Json(merged["by_direction"]),
+                psycopg2.extras.Json(merged["peak_alerts"]),
+            )
+        )
+
+    psycopg2.extras.execute_values(
+        cur,
+        """
+        INSERT INTO daily_line_state (
+            snapshot_date, line_id, daily_score, breakdown, by_direction, peak_alerts
+        )
+        VALUES %s
+        ON CONFLICT (snapshot_date, line_id) DO UPDATE SET
+            daily_score = EXCLUDED.daily_score,
+            breakdown = EXCLUDED.breakdown,
+            by_direction = EXCLUDED.by_direction,
+            peak_alerts = EXCLUDED.peak_alerts,
+            updated_at = NOW()
+        """,
+        rows,
+    )
+
+    scores = {
+        line_id: data["score"]
+        for line_id, data in alerts_data.items()
+        if data.get("score", 0) > 0
+    }
+    cur.execute(
+        """
+        INSERT INTO timeseries_points (snapshot_date, bucket, scores)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (snapshot_date, bucket) DO NOTHING
+        """,
+        (snapshot_date, bucket, psycopg2.extras.Json(scores)),
+    )
+
+
+def _build_lines_payload(alerts_data: dict[str, dict], trip_counts: dict[str, int], daily_data: dict[str, dict]) -> list[dict]:
     lines = []
     for line_id in ALL_LINES:
-        ad = alerts_data.get(line_id, {
-            "score": 0, "alerts": [], "breakdown": {},
-            "by_direction": {
-                "uptown": {"score": 0, "breakdown": {}},
-                "downtown": {"score": 0, "breakdown": {}},
-            },
-        })
+        ad = alerts_data.get(line_id, _empty_live_line())
         dd = daily_data.get(line_id, _empty_line_daily())
         lines.append({
             "id": line_id,
@@ -665,48 +925,109 @@ def build_status() -> dict:
             "status": _status_label(ad["alerts"]),
             "alerts": ad["alerts"],
             "peak_alerts": dd["peak_alerts"],
-            "breakdown": dd["breakdown"],          # daily accumulated
-            "live_breakdown": ad["breakdown"],       # current snapshot
-            "by_direction": dd["by_direction"],      # daily accumulated
-            "live_by_direction": ad["by_direction"],  # current snapshot
+            "breakdown": dd["breakdown"],
+            "live_breakdown": ad["breakdown"],
+            "by_direction": dd["by_direction"],
+            "live_by_direction": ad["by_direction"],
             "trip_count": trip_counts.get(line_id, 0),
         })
-
     lines.sort(key=lambda l: (-l["daily_score"], -l["score"], l["id"]))
+    return lines
 
-    # Persist snapshot to Postgres asynchronously (never blocks the response)
-    try:
-        save_history_async([
-            {"id": l["id"], "score": l["score"], "status": l["status"], "trip_count": l.get("trip_count", 0)}
-            for l in lines
-        ])
-    except Exception:
-        pass  # history failure must never break the main API
 
-    # Build podium: top 3 places, but include all ties
-    scored = [l for l in lines if l["daily_score"] > 0]
+def _build_result(lines: list[dict], timeseries: list[dict], et_now: datetime) -> dict:
+    scored = [line for line in lines if line["daily_score"] > 0]
     podium = []
     place = 0
     prev_score = None
-    for l in scored:
-        if l["daily_score"] != prev_score:
+    for line in scored:
+        if line["daily_score"] != prev_score:
             place = len(podium) + 1
-            prev_score = l["daily_score"]
+            prev_score = line["daily_score"]
         if place > 3:
             break
-        podium.append(l)
+        podium.append(line)
+
     winner = lines[0] if lines and lines[0]["daily_score"] > 0 else None
-
-    et_now = datetime.now(timezone(timedelta(hours=-5)))
-
-    result = {
+    return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "date": et_now.strftime("%A, %B %-d"),
         "winner": winner,
         "podium": podium,
         "lines": lines,
-        "timeseries": get_timeseries(),
+        "timeseries": timeseries,
     }
+
+
+def _build_status_local() -> dict:
+    alerts_data = fetch_alerts()
+    trip_counts = fetch_trip_counts()
+    daily_data = _accumulate_daily(alerts_data)
+    _record_timeseries(alerts_data)
+    _save_state()
+    lines = _build_lines_payload(alerts_data, trip_counts, daily_data)
+    try:
+        save_history([
+            {"id": line["id"], "score": line["score"], "status": line["status"], "trip_count": line.get("trip_count", 0)}
+            for line in lines
+        ])
+    except Exception:
+        pass
+    return _build_result(lines, get_timeseries(), datetime.now(ET))
+
+
+def _build_status_with_db() -> dict:
+    with _db_connection() as conn:
+        if conn is None:
+            return _build_status_local()
+
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT pg_advisory_lock(%s)", (STATUS_REFRESH_LOCK_ID,))
+            try:
+                shared_cache = _load_cached_status_from_db(CACHE_TTL)
+                if shared_cache:
+                    return shared_cache
+
+                et_now = datetime.now(ET)
+                snapshot_date = et_now.strftime("%Y-%m-%d")
+                run_key = _sample_bucket(et_now)
+                bucket = _timeseries_bucket(et_now)
+
+                alerts_data = fetch_alerts()
+                trip_counts = fetch_trip_counts()
+                _persist_db_aggregates(cur, snapshot_date, run_key, bucket, alerts_data)
+                daily_data = _load_daily_state_from_db(cur, snapshot_date)
+                timeseries = _load_timeseries_from_db(cur, snapshot_date)
+                lines = _build_lines_payload(alerts_data, trip_counts, daily_data)
+
+                try:
+                    save_history([
+                        {"id": line["id"], "score": line["score"], "status": line["status"], "trip_count": line.get("trip_count", 0)}
+                        for line in lines
+                    ])
+                except Exception:
+                    pass
+
+                result = _build_result(lines, timeseries, et_now)
+                _store_cached_status_in_db(result)
+                return result
+            finally:
+                cur.execute("SELECT pg_advisory_unlock(%s)", (STATUS_REFRESH_LOCK_ID,))
+
+
+def build_status() -> dict:
+    """Build the full API response."""
+    global _cache, _cache_time
+
+    now = time.time()
+    if _cache and (now - _cache_time) < CACHE_TTL:
+        return _cache
+
+    try:
+        result = _build_status_with_db() if PSYCOPG2_AVAILABLE and DATABASE_URL else _build_status_local()
+    except Exception as exc:
+        log.warning("Falling back to local status build: %s", exc)
+        result = _build_status_local()
 
     _cache = result
     _cache_time = time.time()
@@ -748,85 +1069,85 @@ def api_history():
     if not PSYCOPG2_AVAILABLE or not DATABASE_URL:
         return jsonify(empty_response)
 
-    conn = _get_db_conn()
-    if conn is None:
-        return jsonify(empty_response)
+    with _db_connection() as conn:
+        if conn is None:
+            return jsonify(empty_response)
 
-    try:
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        try:
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
 
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            # Fetch all rows in the window
-            cur.execute("""
-                SELECT line_id,
-                       captured_at AT TIME ZONE 'UTC' AS t,
-                       score
-                FROM scores_history
-                WHERE captured_at >= %s
-                ORDER BY line_id, captured_at ASC
-            """, (cutoff,))
-            rows = cur.fetchall()
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                # Fetch all rows in the window
+                cur.execute("""
+                    SELECT line_id,
+                           captured_at AT TIME ZONE 'UTC' AS t,
+                           score
+                    FROM scores_history
+                    WHERE captured_at >= %s
+                    ORDER BY line_id, captured_at ASC
+                """, (cutoff,))
+                rows = cur.fetchall()
 
-            # Also fetch current live scores (most recent snapshot per line)
-            cur.execute("""
-                SELECT DISTINCT ON (line_id)
-                    line_id,
-                    score AS current_score
-                FROM scores_history
-                ORDER BY line_id, captured_at DESC
-            """)
-            current_rows = cur.fetchall()
+                # Also fetch current live scores (most recent snapshot per line)
+                cur.execute("""
+                    SELECT DISTINCT ON (line_id)
+                        line_id,
+                        score AS current_score
+                    FROM scores_history
+                    ORDER BY line_id, captured_at DESC
+                """)
+                current_rows = cur.fetchall()
 
-        # How many days of data do we have?
-        if rows:
-            oldest = min(r["t"] for r in rows)
-            newest = datetime.now(timezone.utc)
-            days_back = max(1, int((newest - oldest).total_seconds() / 86400) + 1)
-        else:
-            days_back = 0
+            # How many days of data do we have?
+            if rows:
+                oldest = min(r["t"] for r in rows)
+                newest = datetime.now(timezone.utc)
+                days_back = max(1, int((newest - oldest).total_seconds() / 86400) + 1)
+            else:
+                days_back = 0
 
-        # Group history by line_id
-        history: dict = {}
-        for row in rows:
-            lid = row["line_id"]
-            if lid not in history:
-                history[lid] = []
-            history[lid].append({
-                "t": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "score": row["score"],
-            })
+            # Group history by line_id
+            history: dict = {}
+            for row in rows:
+                lid = row["line_id"]
+                if lid not in history:
+                    history[lid] = []
+                history[lid].append({
+                    "t": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "score": row["score"],
+                })
 
-        # Build records: for each line with current_score > 0, check if it's a new high
-        current_scores = {r["line_id"]: r["current_score"] for r in current_rows}
+            # Build records: for each line with current_score > 0, check if it's a new high
+            current_scores = {r["line_id"]: r["current_score"] for r in current_rows}
 
-        # Compute max score in the window per line
-        max_in_window: dict = {}
-        for row in rows:
-            lid = row["line_id"]
-            if lid not in max_in_window or row["score"] > max_in_window[lid]["worst_score"]:
-                max_in_window[lid] = {
-                    "worst_score": row["score"],
-                    "worst_at": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                }
+            # Compute max score in the window per line
+            max_in_window: dict = {}
+            for row in rows:
+                lid = row["line_id"]
+                if lid not in max_in_window or row["score"] > max_in_window[lid]["worst_score"]:
+                    max_in_window[lid] = {
+                        "worst_score": row["score"],
+                        "worst_at": row["t"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    }
 
-        records: dict = {}
-        for lid, curr in current_scores.items():
-            if curr <= 0:
-                continue
-            window = max_in_window.get(lid, {})
-            worst = window.get("worst_score", 0)
-            if curr >= worst and days_back > 0:
-                records[lid] = {
-                    "worst_score": worst,
-                    "worst_at": window.get("worst_at", ""),
-                    "days_back": days_back,
-                }
+            records: dict = {}
+            for lid, curr in current_scores.items():
+                if curr <= 0:
+                    continue
+                window = max_in_window.get(lid, {})
+                worst = window.get("worst_score", 0)
+                if curr >= worst and days_back > 0:
+                    records[lid] = {
+                        "worst_score": worst,
+                        "worst_at": window.get("worst_at", ""),
+                        "days_back": days_back,
+                    }
 
-        return jsonify({"history": history, "records": records})
+            return jsonify({"history": history, "records": records})
 
-    except Exception as e:
-        log.warning("History endpoint error: %s", e)
-        return jsonify(empty_response)
+        except Exception as e:
+            log.warning("History endpoint error: %s", e)
+            return jsonify(empty_response)
 
 
 @app.route("/api/health")
@@ -843,7 +1164,8 @@ def serve_frontend(path):
         return send_from_directory(app.static_folder, "index.html")
 
 
-_load_state()
+if not (PSYCOPG2_AVAILABLE and DATABASE_URL):
+    _load_state()
 init_db()
 
 if __name__ == "__main__":
