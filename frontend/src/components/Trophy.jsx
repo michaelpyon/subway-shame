@@ -12,7 +12,7 @@ import AlertText from "./AlertText";
 import ShareCard from "./ShareCard";
 
 const HOF_KEY = "subway-shame-hof";
-const HOF_MAX = 50; // keep last 50 entries, display top 5
+const HOF_MAX = 50;
 
 function loadHof() {
   try {
@@ -25,9 +25,8 @@ function loadHof() {
 
 function saveToHof(winner) {
   try {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const today = new Date().toISOString().slice(0, 10);
     const existing = loadHof();
-    // One entry per calendar day — update if today's score is higher
     const idx = existing.findIndex((e) => e.date === today);
     const label = formatHofLabel(today, winner.id, winner.daily_score);
     const entry = { date: today, lineId: winner.id, score: winner.daily_score, label };
@@ -50,7 +49,7 @@ function saveToHof(winner) {
 }
 
 function formatHofLabel(dateStr, lineId, score) {
-  const d = new Date(dateStr + "T12:00:00"); // noon local to avoid timezone edge
+  const d = new Date(dateStr + "T12:00:00");
   const month = d.toLocaleDateString("en-US", { month: "short" });
   const day = d.getDate();
   return `${month} ${day} — ${lineId} Train — ${score} pts`;
@@ -63,7 +62,7 @@ function getTopHof(entries, n = 5) {
 export default function Trophy({ winner, lines = [] }) {
   const color = LINE_COLORS[winner.id] || "#808183";
   const tier = getScoreTier(winner.daily_score);
-  const [shareState, setShareState] = useState("idle"); // idle | working | copied | shared | error
+  const [shareState, setShareState] = useState("idle");
   const [activeTab, setActiveTab] = useState("today");
   const [hofEntries, setHofEntries] = useState([]);
   const [expanded, setExpanded] = useState(false);
@@ -73,7 +72,6 @@ export default function Trophy({ winner, lines = [] }) {
     return SHAME_HEADLINES[idx];
   }, []);
 
-  // Save winner to Hall of Fame when component mounts with live data
   useEffect(() => {
     if (winner && winner.daily_score > 0) {
       const updated = saveToHof(winner);
@@ -83,7 +81,6 @@ export default function Trophy({ winner, lines = [] }) {
     }
   }, [winner]);
 
-  // Show the best available alerts: current ones first, fall back to peak
   const alertsToShow =
     winner.alerts && winner.alerts.length > 0
       ? winner.alerts
@@ -95,7 +92,6 @@ export default function Trophy({ winner, lines = [] }) {
   const dirs = LINE_DIRECTIONS[winner.id] || ["Uptown", "Downtown"];
   const byDir = winner.by_direction || {};
 
-  // Compute line counts for share text
   const worstCount = lines.filter((l) => (l.daily_score || 0) > 0).length;
   const goodCount = lines.length - worstCount;
 
@@ -117,31 +113,28 @@ export default function Trophy({ winner, lines = [] }) {
 
   const handleShare = useCallback(async () => {
     setShareState("working");
-    const shareText = `🚇 The Low Line — ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://michaelpyon.github.io/subway-shame/`;
+    const shareText = `🚇 The Low Line — ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://subway.michaelpyon.com`;
 
-    // Try html2canvas first
     try {
       const { default: html2canvas } = await import("html2canvas");
       const el = document.getElementById("shame-share-card");
       if (!el) throw new Error("Card element not found");
 
       const canvas = await html2canvas(el, {
-        backgroundColor: "#0a0a0f",
-        scale: 2, // retina
+        backgroundColor: "#0a0a0a",
+        scale: 2,
         useCORS: true,
         logging: false,
       });
 
-      // Convert to blob
       const blob = await new Promise((res) =>
         canvas.toBlob((b) => res(b), "image/png", 1.0)
       );
-      const file = new File([blob], "subway-shame.png", { type: "image/png" });
+      const file = new File([blob], "the-low-line.png", { type: "image/png" });
 
-      // Try Web Share API with file
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: "Subway Shame NYC",
+          title: "The Low Line",
           text: shareText,
           files: [file],
         });
@@ -150,11 +143,10 @@ export default function Trophy({ winner, lines = [] }) {
         return;
       }
 
-      // Fallback: download the PNG
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "subway-shame.png";
+      a.download = "the-low-line.png";
       a.click();
       URL.revokeObjectURL(url);
       setShareState("shared");
@@ -164,10 +156,9 @@ export default function Trophy({ winner, lines = [] }) {
       console.warn("html2canvas failed, falling back to text share:", imgErr);
     }
 
-    // Text-only fallback
     try {
       if (navigator.share) {
-        await navigator.share({ text: shareText, title: "Subway Shame NYC" });
+        await navigator.share({ text: shareText, title: "The Low Line" });
         setShareState("shared");
       } else {
         await navigator.clipboard.writeText(shareText);
@@ -186,14 +177,14 @@ export default function Trophy({ winner, lines = [] }) {
 
   const shareLabel =
     shareState === "working"
-      ? "⏳ Capturing..."
+      ? "Capturing..."
       : shareState === "copied"
       ? "✓ Copied!"
       : shareState === "shared"
       ? "✓ Shared!"
       : shareState === "error"
       ? "Try again"
-      : "📸 Share";
+      : "Share";
 
   const topHof = getTopHof(hofEntries);
   const hasHof = hofEntries.length > 0;
@@ -205,31 +196,42 @@ export default function Trophy({ winner, lines = [] }) {
 
   return (
     <>
-      {/* Hidden share card rendered off-screen for html2canvas */}
       <ShareCard winner={winner} lines={lines} date={shareDateShort} />
 
       <div className="px-4 pt-6 pb-2 max-w-2xl mx-auto">
-        {/* Tab bar */}
+        {/* Tab bar — Bebas Neue labels */}
         <div className="flex gap-1 mb-3">
           <button
             onClick={() => setActiveTab("today")}
-            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            className={`flex-1 py-2 rounded-xl text-sm transition-all duration-200 press-scale ${
               activeTab === "today"
-                ? "bg-white/10 border border-white/20 text-white"
-                : "text-gray-400 hover:text-gray-300 border border-transparent"
+                ? ""
+                : ""
             }`}
+            style={{
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '0.05em',
+              fontSize: '14px',
+              backgroundColor: activeTab === "today" ? 'rgba(232, 53, 58, 0.15)' : 'transparent',
+              color: activeTab === "today" ? '#E8353A' : 'rgba(245, 240, 232, 0.35)',
+              border: activeTab === "today" ? '1px solid rgba(232, 53, 58, 0.3)' : '1px solid transparent',
+            }}
           >
-            🏆 Today
+            TODAY
           </button>
           <button
             onClick={() => setActiveTab("hof")}
-            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              activeTab === "hof"
-                ? "bg-white/10 border border-white/20 text-white"
-                : "text-gray-400 hover:text-gray-300 border border-transparent"
-            }`}
+            className={`flex-1 py-2 rounded-xl text-sm transition-all duration-200 press-scale`}
+            style={{
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '0.05em',
+              fontSize: '14px',
+              backgroundColor: activeTab === "hof" ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+              color: activeTab === "hof" ? '#F59E0B' : 'rgba(245, 240, 232, 0.35)',
+              border: activeTab === "hof" ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid transparent',
+            }}
           >
-            ⭐ Hall of Shame
+            HALL OF SHAME
           </button>
         </div>
 
@@ -238,8 +240,8 @@ export default function Trophy({ winner, lines = [] }) {
           <div
             className="trophy-card relative rounded-2xl overflow-hidden"
             style={{
-              background: `linear-gradient(135deg, rgba(${hexToRgb(color)}, 0.15) 0%, rgba(17,24,39,1) 70%)`,
-              border: `2px solid ${color}40`,
+              backgroundColor: '#1A1A1A',
+              boxShadow: 'var(--shadow-card-shame)',
             }}
           >
             {/* Glow effect */}
@@ -250,18 +252,15 @@ export default function Trophy({ winner, lines = [] }) {
               }}
             />
 
-            {/* ── COMPACT ROW (always visible) ── */}
+            {/* ── COMPACT ROW ── */}
             <div className="relative z-10 p-4 flex items-start gap-3">
-              {/* Line badge */}
               <div className="shrink-0 mt-0.5">
                 <LineBadge lineId={winner.id} size="md" />
               </div>
 
-              {/* Winner info — two lines */}
               <div className="flex-1 min-w-0">
-                {/* Line 1: name + score + tier + actions */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-white font-bold text-sm">{winner.id} Train</span>
+                  <span className="font-bold text-sm" style={{ color: '#F5F0E8' }}>{winner.id} Train</span>
                   <span
                     className="text-sm font-bold tabular-nums"
                     style={{ color: tier.color }}
@@ -269,12 +268,15 @@ export default function Trophy({ winner, lines = [] }) {
                     {winner.daily_score.toLocaleString()} pts
                   </span>
                   <span className="text-sm">{tier.emoji}</span>
-                  <span className="text-xs font-medium" style={{ color: tier.color }}>{tier.label}</span>
+                  {/* Severity label as styled pill */}
+                  <span className={`severity-label ${tier.severityClass}`}>
+                    {tier.label.toUpperCase()}
+                  </span>
                   <div className="flex items-center gap-1.5 ml-auto shrink-0">
                     <button
                       onClick={handleShare}
                       disabled={shareState === "working"}
-                      className="text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-60"
+                      className="text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 press-scale disabled:opacity-60"
                       style={{
                         backgroundColor:
                           shareState === "idle" || shareState === "working"
@@ -301,30 +303,31 @@ export default function Trophy({ winner, lines = [] }) {
                     </button>
                     <button
                       onClick={() => setExpanded((v) => !v)}
-                      className="text-xs text-gray-400 hover:text-gray-300 transition-colors px-2 py-1 rounded-lg hover:bg-gray-800/50"
+                      className="text-xs transition-colors px-2 py-1 rounded-lg press-scale"
+                      style={{ color: 'rgba(245, 240, 232, 0.4)' }}
                     >
                       {expanded ? "↑ Hide" : "↓ Details"}
                     </button>
                   </div>
                 </div>
 
-                {/* Line 2: live meta */}
+                {/* Live meta */}
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="flex items-center gap-1">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">LIVE</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>LIVE</span>
                   </span>
-                  <span className="text-[10px] text-gray-400">·</span>
-                  <span className="text-[10px] text-gray-400">accumulated today</span>
-                  <span className="text-[10px] text-gray-400">·</span>
-                  <span className="text-[10px] text-gray-400">resets at midnight</span>
+                  <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>·</span>
+                  <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>accumulated today</span>
+                  <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>·</span>
+                  <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>resets at midnight</span>
                   {winner.score > 0 && (
                     <>
-                      <span className="text-[10px] text-gray-400">·</span>
-                      <span className="text-[10px] text-gray-400">+{winner.score} pts/hr right now</span>
+                      <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>·</span>
+                      <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>+{winner.score} pts/hr right now</span>
                     </>
                   )}
                 </div>
@@ -333,9 +336,8 @@ export default function Trophy({ winner, lines = [] }) {
 
             {/* ── EXPANDED DETAILS ── */}
             {expanded && (
-              <div className="relative z-10 px-5 pb-5 pt-1 border-t border-white/5">
-                {/* Headline */}
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-4 text-center">
+              <div className="relative z-10 px-5 pb-5 pt-1" style={{ borderTop: '1px solid rgba(245, 240, 232, 0.05)' }}>
+                <p className="text-xs uppercase tracking-widest mb-4 text-center" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
                   {headline}
                 </p>
 
@@ -355,7 +357,7 @@ export default function Trophy({ winner, lines = [] }) {
                 {/* Breakdown bar */}
                 {sortedCats.length > 0 && winner.daily_score > 0 && (
                   <div className="max-w-md mx-auto mb-5">
-                    <div className="h-4 rounded-full overflow-hidden flex bg-gray-800/50 mb-2">
+                    <div className="h-4 rounded-full overflow-hidden flex mb-2" style={{ backgroundColor: '#2A2A2A' }}>
                       {sortedCats.map((cat) => {
                         const pts = breakdown[cat];
                         const pct = (pts / winner.daily_score) * 100;
@@ -382,8 +384,8 @@ export default function Trophy({ winner, lines = [] }) {
                               className="inline-block w-2.5 h-2.5 rounded-full"
                               style={{ backgroundColor: cfg.color }}
                             />
-                            <span className="text-gray-400">{cfg.label}</span>
-                            <span className="text-gray-600">{breakdown[cat].toLocaleString()} pts</span>
+                            <span style={{ color: 'rgba(245, 240, 232, 0.4)' }}>{cfg.label}</span>
+                            <span style={{ color: 'rgba(245, 240, 232, 0.25)' }}>{breakdown[cat].toLocaleString()} pts</span>
                           </span>
                         );
                       })}
@@ -399,19 +401,19 @@ export default function Trophy({ winner, lines = [] }) {
                       return (
                         <div
                           key={d}
-                          className="bg-gray-950/50 rounded-lg p-3 text-center"
+                          className="rounded-lg p-3 text-center"
+                          style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)' }}
                         >
-                          <span className="text-xs text-gray-400 block mb-1">
+                          <span className="text-xs block mb-1" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
                             {i === 0 ? "↑" : "↓"} {dirs[i]}
                           </span>
                           <span
-                            className={`text-2xl font-bold tabular-nums ${
-                              dd.score > 0 ? "text-white" : "text-gray-700"
-                            }`}
+                            className="text-2xl font-bold tabular-nums"
+                            style={{ color: dd.score > 0 ? '#F5F0E8' : 'rgba(245, 240, 232, 0.15)' }}
                           >
                             {dd.score}
                           </span>
-                          <span className="text-[10px] text-gray-600 block">pts</span>
+                          <span className="text-[10px] block" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>pts</span>
                         </div>
                       );
                     })}
@@ -429,7 +431,8 @@ export default function Trophy({ winner, lines = [] }) {
                       return (
                         <div
                           key={i}
-                          className="bg-gray-950/60 border border-gray-800 rounded-lg p-3 text-sm text-gray-300 leading-relaxed"
+                          className="rounded-lg p-3 text-sm leading-relaxed"
+                          style={{ backgroundColor: 'rgba(10, 10, 10, 0.6)', border: '1px solid rgba(245, 240, 232, 0.06)', color: 'rgba(245, 240, 232, 0.5)' }}
                         >
                           {cfg && (
                             <span
@@ -449,11 +452,11 @@ export default function Trophy({ winner, lines = [] }) {
                   </div>
                 )}
 
-                {/* Hide details toggle */}
                 <div className="text-center">
                   <button
                     onClick={() => setExpanded(false)}
-                    className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                    className="text-xs transition-colors press-scale"
+                    style={{ color: 'rgba(245, 240, 232, 0.35)' }}
                   >
                     ↑ Hide details
                   </button>
@@ -468,41 +471,42 @@ export default function Trophy({ winner, lines = [] }) {
           <div
             className="relative rounded-2xl p-6 sm:p-8 overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(17,24,39,1) 70%)",
-              border: "2px solid rgba(245,158,11,0.2)",
+              backgroundColor: '#1A1A1A',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             {/* Glow */}
             <div
               className="absolute inset-0 opacity-10 blur-3xl"
               style={{
-                background:
-                  "radial-gradient(circle at 50% 0%, #F59E0B, transparent 60%)",
+                background: "radial-gradient(circle at 50% 0%, #F59E0B, transparent 60%)",
               }}
             />
 
             <div className="relative z-10">
-              <h2 className="text-xl font-bold text-center text-white mb-1">
-                ⭐ Hall of Shame
+              <h2
+                className="text-xl font-bold text-center mb-1"
+                style={{ fontFamily: 'var(--font-display)', color: '#F5F0E8', letterSpacing: '0.04em', fontSize: '24px' }}
+              >
+                HALL OF SHAME
               </h2>
-              <p className="text-xs text-gray-400 text-center mb-1">
+              <p className="text-xs text-center mb-1" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
                 Worst daily offender since you started visiting
               </p>
-              {/* Browser-local note — always visible */}
               <div className="flex items-center justify-center gap-1.5 mb-5">
-                <svg className="w-3 h-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" style={{ color: 'rgba(245, 240, 232, 0.15)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="text-[10px] text-gray-700">Saved in your browser only — private to you, not a global record</span>
+                <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.15)' }}>Saved in your browser only — private to you, not a global record</span>
               </div>
 
               {!hasHof ? (
                 <div className="text-center py-6">
                   <p className="text-4xl mb-3">📅</p>
-                  <p className="text-gray-400 text-sm font-medium mb-2">
+                  <p className="text-sm font-medium mb-2" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
                     Nothing recorded yet
                   </p>
-                  <p className="text-gray-600 text-xs max-w-xs mx-auto leading-relaxed">
+                  <p className="text-xs max-w-xs mx-auto leading-relaxed" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
                     Each day you visit, the worst line that day gets saved here automatically.
                     Come back tomorrow to start building your record.
                   </p>
@@ -520,15 +524,12 @@ export default function Trophy({ winner, lines = [] }) {
                           className="flex items-center gap-4 rounded-xl px-4 py-3"
                           style={{
                             backgroundColor: `${entryColor}10`,
-                            border: `1px solid ${entryColor}30`,
+                            boxShadow: 'var(--shadow-card)',
                           }}
                         >
-                          {/* Rank */}
-                          <span className="text-lg font-black text-gray-600 w-6 text-center shrink-0">
+                          <span className="text-lg font-black w-6 text-center shrink-0" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
                             {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                           </span>
-
-                          {/* Line badge (small) */}
                           <div
                             className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-base shrink-0"
                             style={{
@@ -538,13 +539,11 @@ export default function Trophy({ winner, lines = [] }) {
                           >
                             {entry.lineId}
                           </div>
-
-                          {/* Label */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">
+                            <p className="text-sm font-semibold truncate" style={{ color: '#F5F0E8' }}>
                               {entry.lineId} Train
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
                               {(() => {
                                 const d = new Date(entry.date + "T12:00:00");
                                 return d.toLocaleDateString("en-US", {
@@ -555,8 +554,6 @@ export default function Trophy({ winner, lines = [] }) {
                               })()}
                             </p>
                           </div>
-
-                          {/* Score */}
                           <div className="text-right shrink-0">
                             <div className="flex items-baseline gap-0.5 justify-end">
                               <span
@@ -565,9 +562,11 @@ export default function Trophy({ winner, lines = [] }) {
                               >
                                 {entry.score.toLocaleString()}
                               </span>
-                              <span className="text-[9px] text-gray-600">pts</span>
+                              <span className="text-[9px]" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>pts</span>
                             </div>
-                            <p className="text-[10px]" style={{ color: `${entryTier.color}90` }}>{entryTier.label}</p>
+                            <span className={`severity-label ${entryTier.severityClass}`}>
+                              {entryTier.label.toUpperCase()}
+                            </span>
                           </div>
                         </div>
                       );
@@ -575,7 +574,7 @@ export default function Trophy({ winner, lines = [] }) {
                   </div>
 
                   {hofEntries.length > 5 && (
-                    <p className="text-xs text-gray-600 text-center mt-3">
+                    <p className="text-xs text-center mt-3" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
                       Showing top 5 of {hofEntries.length} recorded days
                     </p>
                   )}
@@ -583,7 +582,8 @@ export default function Trophy({ winner, lines = [] }) {
                   <div className="text-center mt-5">
                     <button
                       onClick={handleResetHof}
-                      className="text-xs text-gray-600 hover:text-red-500 transition-colors underline"
+                      className="text-xs underline transition-colors press-scale"
+                      style={{ color: 'rgba(245, 240, 232, 0.25)' }}
                     >
                       Reset history
                     </button>

@@ -10,33 +10,41 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
 
   return (
     <header>
-      {/* Top MTA color bar */}
-      <div className="h-1 w-full flex">
+      {/* Top MTA color bar — thinner accent */}
+      <div className="h-0.5 w-full flex">
         {MTA_COLORS.map((color, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: color }} />
         ))}
       </div>
 
       <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
-        {/* Brand */}
-        <div className="flex flex-col items-center gap-2 mb-1">
-          <h1
-            className="text-3xl sm:text-4xl font-bold text-white tracking-wide"
-            style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}
-          >
-            The Low Line
-          </h1>
-        </div>
-        <p className="text-gray-500 mt-1.5 text-sm sm:text-base">
-          Which NYC subway line is ruining the most commutes right now?
-        </p>
-        <p className="text-gray-700 mt-1 text-xs">
-          Every delay adds to the shame. Resets at midnight, forgives nothing.
+        {/* Wordmark */}
+        <h1
+          className="tracking-wide"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(32px, 8vw, 48px)',
+            lineHeight: 1,
+            color: '#F5F0E8',
+            letterSpacing: '0.04em',
+          }}
+        >
+          THE LOW LINE
+        </h1>
+        <p
+          className="mt-1.5"
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontWeight: 400,
+            color: 'rgba(245, 240, 232, 0.5)',
+            fontSize: '13px',
+          }}
+        >
+          Is My Train Fucked?
         </p>
 
         {/* Status row */}
-        <div className="flex items-center justify-center gap-3 mt-3 text-xs text-gray-600">
-          {/* Live / stale indicator */}
+        <div className="flex items-center justify-center gap-3 mt-3 text-xs" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
           {timeAgo ? (
             <span className="flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : refreshing ? "bg-green-500 animate-pulse" : "bg-green-600"}`} />
@@ -44,14 +52,14 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             </span>
           ) : (
             <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-700" />
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#2A2A2A' }} />
               <span>Connecting…</span>
             </span>
           )}
 
           {timeAgo && (
             <>
-              <span className="text-gray-800">·</span>
+              <span style={{ color: 'rgba(245, 240, 232, 0.15)' }}>·</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>Next in {countdown}</span>
             </>
           )}
@@ -59,12 +67,13 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-1 rounded hover:bg-gray-800 transition-colors disabled:opacity-30"
+            className="p-1 rounded transition-colors disabled:opacity-30 press-scale"
+            style={{ color: 'rgba(245, 240, 232, 0.35)' }}
             title="Refresh now"
             aria-label="Refresh now"
           >
             <svg
-              className={`w-3.5 h-3.5 text-gray-500 ${loading ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -79,15 +88,28 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           </button>
         </div>
 
-        {/* "Is My Train Fucked?" pill button */}
+        {/* "Is My Train Fucked?" CTA — Signal Red, Bebas Neue, unmissable */}
         {onOpenChecker && (
-          <div className="mt-3">
+          <div className="mt-4">
             <button
               onClick={onOpenChecker}
-              className="border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 text-xs font-medium px-4 py-1.5 rounded-full transition-colors"
-              style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}
+              className="press-scale"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '16px',
+                letterSpacing: '0.05em',
+                backgroundColor: '#E8353A',
+                color: '#F5F0E8',
+                border: '2px solid #F5F0E8',
+                borderRadius: '6px',
+                padding: '10px 20px',
+                cursor: 'pointer',
+                transitionProperty: 'scale, background-color',
+                transitionDuration: '120ms',
+                transitionTimingFunction: 'ease-out',
+              }}
             >
-              🚇 Is My Train Fucked? →
+              IS MY TRAIN FUCKED?
             </button>
           </div>
         )}

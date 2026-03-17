@@ -176,15 +176,6 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
     }
   }, []);
 
-  const handleShareX = useCallback(() => {
-    if (!verdict || !selectedLine) return;
-    const tier = getScoreTier(verdict.score);
-    const lineName = selectedLine === "SI" ? "SIR" : `${selectedLine}`;
-    const text = `${lineName} Train: ${verdict.score} pts — ${tier.label}. Check yours →`;
-    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://subway.michaelpyon.com")}`;
-    window.open(tweetUrl, "_blank", "noopener,noreferrer");
-  }, [verdict, selectedLine]);
-
   // Get relevant alerts for the selected direction
   const relevantAlerts = useMemo(() => {
     if (!lineData || !lineData.alerts) return [];
@@ -198,12 +189,13 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
   }, [lineData, selectedDirection]);
 
   const innerContent = (
-    <div className="bg-gray-900 rounded-2xl p-5 sm:p-6 border border-gray-800 relative">
+    <div className="rounded-2xl p-5 sm:p-6 relative" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
       {/* Close button (only in modal mode) */}
       {isModal && (
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors text-lg leading-none"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-lg leading-none press-scale"
+          style={{ backgroundColor: '#2A2A2A', color: 'rgba(245, 240, 232, 0.4)' }}
           aria-label="Close"
         >
           ×
@@ -211,25 +203,25 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       )}
 
       <h2
-        className="text-xl sm:text-2xl font-black text-center mb-1 text-white pr-8"
-        style={{ fontFamily: 'var(--font-display)' }}
+        className="text-center mb-1 pr-8"
+        style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#F5F0E8', letterSpacing: '0.04em' }}
       >
-        Is My Train Fucked?
+        IS MY TRAIN FUCKED?
       </h2>
-      <p className="text-xs text-gray-600 text-center mb-5">
+      <p className="text-xs text-center mb-5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
         The only question that matters.
       </p>
 
       {/* Line selector */}
       <div className="mb-4">
-        <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Pick your line</p>
+        <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>Pick your line</p>
         <div className="flex flex-wrap gap-1.5 justify-center">
           {ALL_LINES.flat().map(lineId => (
             <button
               key={lineId}
               onClick={() => handleLineSelect(lineId)}
               aria-label={`${lineId} train`}
-              className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
+              className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
                 selectedLine === lineId
                   ? "scale-110 ring-2 ring-white/40"
                   : selectedLine
@@ -246,19 +238,22 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       {/* Direction selector — appears after line is picked */}
       {selectedLine && directions && (
         <div className="mb-4">
-          <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Which direction? <span className="text-gray-700">(optional)</span></p>
+          <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+            Which direction? <span style={{ color: 'rgba(245, 240, 232, 0.15)' }}>(optional)</span>
+          </p>
           <div className="flex gap-2 justify-center">
             {directions.map((dir, i) => (
               <button
                 key={dir}
                 onClick={() => setSelectedDirection(selectedDirection === i ? null : i)}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all border min-h-[44px] flex items-center ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] flex items-center press-scale`}
+                style={
                   selectedDirection === i
-                    ? "bg-white/10 border-white/30 text-white"
-                    : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300"
-                }`}
+                    ? { backgroundColor: 'rgba(245, 240, 232, 0.1)', border: '1px solid rgba(245, 240, 232, 0.3)', color: '#F5F0E8' }
+                    : { backgroundColor: '#2A2A2A', border: '1px solid rgba(245, 240, 232, 0.08)', color: 'rgba(245, 240, 232, 0.4)' }
+                }
               >
-                {i === 0 ? "↑" : "↓"} {dir}
+                {i === 0 ? "\u2191" : "\u2193"} {dir}
               </button>
             ))}
           </div>
@@ -270,9 +265,10 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
         <div className="text-center mb-2">
           <button
             onClick={handleCheck}
-            className="px-8 py-3 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-colors active:scale-95"
+            className="px-8 py-3 font-bold rounded-full text-sm transition-colors press-scale"
+            style={{ backgroundColor: '#E8353A', color: '#F5F0E8', fontFamily: 'var(--font-display)', fontSize: '16px', letterSpacing: '0.04em' }}
           >
-            Tell me the truth
+            TELL ME THE TRUTH
           </button>
         </div>
       )}
@@ -281,65 +277,57 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       {showResult && verdict && (
         <div
           key={animKey}
-          className={`mt-5 rounded-xl p-5 text-center border ${
-            verdict.isBad
-              ? "bg-red-950/30 border-red-900/40 verdict-shake"
-              : "bg-green-950/30 border-green-900/40 verdict-pulse-green"
+          className={`mt-5 rounded-xl p-5 text-center ${
+            verdict.isBad ? "verdict-shake" : "verdict-pulse-green"
           }`}
+          style={
+            verdict.isBad
+              ? { backgroundColor: 'rgba(232, 53, 58, 0.08)', border: '1px solid rgba(232, 53, 58, 0.2)' }
+              : { backgroundColor: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }
+          }
         >
           {/* Icon */}
           <div className="text-4xl mb-3">
-            {verdict.isBad ? "💀" : "✅"}
+            {verdict.isBad ? "\uD83D\uDC80" : "\u2705"}
           </div>
 
           {/* Verdict text */}
-          <p className={`text-lg font-bold mb-2 ${
-            verdict.isBad ? "text-red-400" : "text-green-400"
-          }`}>
+          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? '#E8353A' : '#22C55E' }}>
             {verdict.message}
           </p>
 
           {/* Score */}
           {verdict.score > 0 && (
-            <p className="text-sm text-gray-500 mb-3">
+            <p className="text-sm mb-3" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
               The{" "}
               <span className="inline-flex items-center mx-0.5 align-middle">
                 <LineBadge lineId={selectedLine} size="sm" />
               </span>
-              {" "}has racked up <span className="font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{verdict.score}</span> shame points today.
+              {" "}has racked up <span className="font-bold" style={{ color: '#F5F0E8', fontFamily: 'var(--font-display)' }}>{verdict.score}</span> shame points today.
             </p>
           )}
 
-          {/* Share buttons */}
-          <div className="mt-1 mb-3 flex items-center justify-center gap-2 flex-wrap">
-            <button
-              onClick={handleShare}
-              className="px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
-            >
-              Copy link
-            </button>
-            <button
-              onClick={handleShareX}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
-            >
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              Share on X
-            </button>
-          </div>
+          {/* Share button */}
+          <button
+            onClick={handleShare}
+            className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium transition-colors press-scale"
+            style={{ backgroundColor: 'rgba(245, 240, 232, 0.1)', color: 'rgba(245, 240, 232, 0.5)' }}
+          >
+            Share this verdict
+          </button>
 
           {/* Relevant alerts */}
           {relevantAlerts.length > 0 && verdict.isBad && (
             <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
-              <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1">Here's why:</p>
+              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>Here's why:</p>
               {relevantAlerts.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = a.category ? (CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]) : null;
                 return (
                   <div
                     key={i}
-                    className="text-xs text-gray-400 bg-gray-950/60 rounded p-2 leading-relaxed"
+                    className="text-xs rounded p-2 leading-relaxed"
+                    style={{ backgroundColor: 'rgba(10, 10, 10, 0.6)', color: 'rgba(245, 240, 232, 0.4)' }}
                   >
                     {cfg && (
                       <span
@@ -363,7 +351,8 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
   if (isModal) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
       >
         <div className="rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">

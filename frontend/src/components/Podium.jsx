@@ -4,33 +4,27 @@ import LineBadge from "./LineBadge";
 const PLACE_CONFIG = [
   {
     label: "1st",
-    emoji: "🥇",
+    emoji: "\uD83E\uDD47",
     height: "h-28",
     order: "order-2",
-    bgGradient: "from-yellow-500/20 to-transparent",
-    borderColor: "border-yellow-500/40",
-    textClass: "text-yellow-400",
     badgeSize: "lg",
+    accentColor: "#EAB308",
   },
   {
     label: "2nd",
-    emoji: "🥈",
+    emoji: "\uD83E\uDD48",
     height: "h-20",
     order: "order-1",
-    bgGradient: "from-gray-400/15 to-transparent",
-    borderColor: "border-gray-400/30",
-    textClass: "text-gray-400",
     badgeSize: "md",
+    accentColor: "#9CA3AF",
   },
   {
     label: "3rd",
-    emoji: "🥉",
+    emoji: "\uD83E\uDD49",
     height: "h-14",
     order: "order-3",
-    bgGradient: "from-amber-700/15 to-transparent",
-    borderColor: "border-amber-700/30",
-    textClass: "text-amber-600",
     badgeSize: "md",
+    accentColor: "#B45309",
   },
 ];
 
@@ -67,10 +61,16 @@ function PlacePedestal({ config, lines }) {
     return (
       <div className={`${config.order} flex-1 max-w-[180px]`}>
         <div
-          className={`${config.height} rounded-t-xl border-t border-x ${config.borderColor} bg-gradient-to-b ${config.bgGradient} flex flex-col items-center justify-end pb-3 opacity-30`}
+          className={`${config.height} rounded-t-xl flex flex-col items-center justify-end pb-3 opacity-30`}
+          style={{
+            borderTop: `1px solid ${config.accentColor}30`,
+            borderLeft: `1px solid ${config.accentColor}30`,
+            borderRight: `1px solid ${config.accentColor}30`,
+            background: `linear-gradient(to bottom, ${config.accentColor}15, transparent)`,
+          }}
         >
           <span className="text-2xl">{config.emoji}</span>
-          <span className={`text-xs ${config.textClass} mt-1`}>
+          <span className="text-xs mt-1" style={{ color: config.accentColor }}>
             {config.label}
           </span>
         </div>
@@ -84,58 +84,52 @@ function PlacePedestal({ config, lines }) {
 
   // Use the first line's color for the pedestal gradient, or blend for ties
   const primaryColor = LINE_COLORS[lines[0].id] || "#808183";
-  const MAX_BADGES = 4;
-  const extraCount = lines.length - MAX_BADGES;
-  const displayedLines = lines.length > MAX_BADGES ? lines.slice(0, MAX_BADGES) : lines;
 
   return (
     <div className={`${config.order} flex-1 max-w-[180px]`}>
       {/* Badges floating above pedestal */}
       <div className="flex justify-center gap-1 mb-2 flex-wrap">
-        {displayedLines.map((line) => (
+        {lines.map((line) => (
           <LineBadge key={line.id} lineId={line.id} size={config.badgeSize} />
         ))}
-        {extraCount > 0 && (
-          <span className="text-[10px] text-gray-400 self-center ml-0.5">+{extraCount}</span>
-        )}
       </div>
 
       {/* Pedestal */}
       <div
-        className={`${config.height} rounded-t-xl border-t border-x ${config.borderColor} bg-gradient-to-b ${config.bgGradient} flex flex-col items-center justify-center relative overflow-hidden`}
+        className={`${config.height} rounded-t-xl flex flex-col items-center justify-center relative overflow-hidden`}
         style={{
-          borderColor: `${primaryColor}50`,
+          borderTop: `1px solid ${primaryColor}50`,
+          borderLeft: `1px solid ${primaryColor}50`,
+          borderRight: `1px solid ${primaryColor}50`,
           background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
         }}
       >
         <span className="text-2xl mb-1">{config.emoji}</span>
         {isTie && (
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
             TIE
           </span>
         )}
         <span
           className="text-xl sm:text-2xl font-bold tabular-nums"
-          style={{ color: tier.color, fontFamily: 'var(--font-display)' }}
+          style={{ color: tier.color, fontFamily: 'var(--font-display)', letterSpacing: '-0.04em' }}
         >
           {score}
         </span>
-        <span className="text-[9px] text-gray-400" style={{ fontFamily: 'var(--font-mono)' }}>pts today</span>
+        <span className="text-[9px]" style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>pts today</span>
       </div>
 
       {/* Line names below */}
       <div className="text-center mt-2">
-        <span className="text-xs text-gray-500 block">
-          {lines.length <= 4
-            ? lines
-                .map((l) => (l.id === "SI" ? "SIR" : `${l.id}`))
-                .join(" & ")
-            : `${lines.slice(0, 3).map((l) => (l.id === "SI" ? "SIR" : `${l.id}`)).join(", ")} +${lines.length - 3} more`}{" "}
+        <span className="text-xs block" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+          {lines
+            .map((l) => (l.id === "SI" ? "SIR" : `${l.id}`))
+            .join(" & ")}{" "}
           {lines.length === 1 ? "Train" : "Trains"}
         </span>
         {isTie && (
-          <span className="text-[10px] text-gray-400 block">
-            {lines.length}-way tie for {config.label}
+          <span className="text-[10px] block" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+            Tied for {config.label}
           </span>
         )}
       </div>
@@ -158,16 +152,16 @@ export default function Podium({ podium, date }) {
     <div className="px-4 pt-4 pb-4 max-w-2xl mx-auto">
       {/* Date badge */}
       {date && (
-        <p className="text-center text-xs text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-center text-xs uppercase tracking-widest mb-2" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
           {date}
         </p>
       )}
 
       <h2
-        className="text-center text-lg sm:text-xl font-bold text-gray-300 mb-4"
-        style={{ fontFamily: 'var(--font-display)' }}
+        className="text-center mb-4"
+        style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em' }}
       >
-        Today's Podium
+        TODAY'S PODIUM
       </h2>
 
       {/* Podium blocks — display order: 2nd | 1st | 3rd */}
@@ -188,7 +182,7 @@ export default function Podium({ podium, date }) {
       </div>
 
       {/* Bottom bar */}
-      <div className="h-2 rounded-full bg-gray-800 max-w-xs mx-auto" />
+      <div className="h-2 rounded-full max-w-xs mx-auto" style={{ backgroundColor: '#2A2A2A' }} />
     </div>
   );
 }

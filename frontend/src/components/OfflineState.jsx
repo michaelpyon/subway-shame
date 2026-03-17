@@ -2,7 +2,7 @@ import LineBadge from "./LineBadge";
 import { getScoreTier } from "../constants/lines";
 
 // Preview lines — scores calibrated to the current tier thresholds so colors look right
-// Dumpster Fire ≥5000 | Rough Day ≥1500 | Running Late ≥300 | Minor Issues ≥1 | Good Service = 0
+// Dumpster Fire >=5000 | Rough Day >=1500 | Running Late >=300 | Minor Issues >=1 | Good Service = 0
 const PREVIEW_LINES = [
   { id: "A",  dailyScore: 5800, status: "No Service" },
   { id: "F",  dailyScore: 2100, status: "Delays" },
@@ -19,7 +19,7 @@ const MTA_LINE_COLORS = [
 ];
 
 // Static bar widths for the preview breakdown bar (just visual chrome)
-const PREVIEW_BAR_COLORS = ["#EF4444", "#F97316", "#EAB308"];
+const PREVIEW_BAR_COLORS = ["#E8353A", "#F97316", "#EAB308"];
 const PREVIEW_BAR_WIDTHS = [
   [55, 30, 15],
   [45, 40, 15],
@@ -31,9 +31,9 @@ const PREVIEW_BAR_WIDTHS = [
 
 export default function OfflineState({ onRetry, loading }) {
   return (
-    <div className="min-h-screen bg-gray-950 text-white antialiased">
+    <div className="min-h-screen antialiased" style={{ backgroundColor: '#0A0A0A', color: '#F5F0E8' }}>
       {/* Top MTA color bar */}
-      <div className="h-1 w-full flex">
+      <div className="h-0.5 w-full flex">
         {MTA_LINE_COLORS.map((color, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: color }} />
         ))}
@@ -41,17 +41,29 @@ export default function OfflineState({ onRetry, loading }) {
 
       {/* Header */}
       <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <span className="text-2xl" aria-hidden="true">🚇</span>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Subway Shame
-          </h1>
-        </div>
-        <p className="text-gray-500 mt-1.5 text-sm sm:text-base">
-          Which NYC subway line is ruining the most commutes right now?
+        <h1
+          className="tracking-wide"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(32px, 8vw, 48px)',
+            lineHeight: 1,
+            color: '#F5F0E8',
+            letterSpacing: '0.04em',
+          }}
+        >
+          THE LOW LINE
+        </h1>
+        <p
+          className="mt-1.5"
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontWeight: 400,
+            color: 'rgba(245, 240, 232, 0.5)',
+            fontSize: '13px',
+          }}
+        >
+          Is My Train Fucked?
         </p>
-
-
       </div>
 
       {/* Status note */}
@@ -59,17 +71,18 @@ export default function OfflineState({ onRetry, loading }) {
         <div className="text-center py-3">
           <div className="flex items-center justify-center gap-1.5 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-            <span className="text-gray-500 text-xs">Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
+            <span className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
           </div>
           <button
             onClick={onRetry}
             disabled={loading}
-            className="px-3 py-1 text-xs text-gray-500 border border-gray-800 rounded-full hover:border-gray-600 hover:text-gray-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-xs rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed press-scale"
+            style={{ color: 'rgba(245, 240, 232, 0.3)', border: '1px solid rgba(245, 240, 232, 0.1)' }}
           >
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-2.5 h-2.5 border border-gray-500 border-t-gray-300 rounded-full animate-spin" />
-                Checking…
+                <span className="inline-block w-2.5 h-2.5 rounded-full animate-spin" style={{ border: '1px solid rgba(245, 240, 232, 0.3)', borderTopColor: 'rgba(245, 240, 232, 0.6)' }} />
+                Checking...
               </span>
             ) : (
               "Try again"
@@ -80,18 +93,21 @@ export default function OfflineState({ onRetry, loading }) {
 
       {/* Is My Train Fucked — preview */}
       <div className="max-w-2xl mx-auto px-4 py-5">
-        <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 relative overflow-hidden">
+        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
           {/* Overlay */}
-          <div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center rounded-2xl z-10 backdrop-blur-[1px]">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 shadow-lg">
-              <span className="text-gray-300 text-sm font-medium">Available when live data connects</span>
+          <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-10 backdrop-blur-[1px]" style={{ backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
+            <div className="rounded-lg px-4 py-2.5" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
+              <span className="text-sm font-medium" style={{ color: 'rgba(245, 240, 232, 0.5)' }}>Available when live data connects</span>
             </div>
           </div>
 
-          <h2 className="text-xl font-black text-center mb-1 text-white">
-            Is My Train Fucked?
+          <h2
+            className="text-center mb-1"
+            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#F5F0E8', letterSpacing: '0.04em' }}
+          >
+            IS MY TRAIN FUCKED?
           </h2>
-          <p className="text-xs text-gray-600 text-center mb-4">
+          <p className="text-xs text-center mb-4" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
             The only question that matters.
           </p>
           {/* All line badges */}
@@ -103,16 +119,20 @@ export default function OfflineState({ onRetry, loading }) {
         </div>
       </div>
 
-      {/* Live Rankings Preview — with real MTA colors + skeletons */}
-      <div className="max-w-5xl mx-auto px-4 pb-8">
+      {/* Live Rankings Preview */}
+      <div className="max-w-2xl mx-auto px-4 pb-8">
         <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-400">Live Rankings</h2>
-          <span className="text-xs text-gray-600 px-2 py-0.5 rounded-full border border-gray-800">
+          <h2
+            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em' }}
+          >
+            LIVE RANKINGS
+          </h2>
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'rgba(245, 240, 232, 0.25)', border: '1px solid rgba(245, 240, 232, 0.1)' }}>
             Preview
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PREVIEW_LINES.map(({ id, dailyScore, status }, idx) => {
             const scoreTier = getScoreTier(dailyScore);
             const barWidths = PREVIEW_BAR_WIDTHS[idx];
@@ -121,15 +141,15 @@ export default function OfflineState({ onRetry, loading }) {
             return (
               <div
                 key={id}
-                className="bg-gray-900 rounded-lg overflow-hidden"
-                style={{ borderLeft: `4px solid ${scoreTier.color}` }}
+                className="rounded-lg overflow-hidden"
+                style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}
               >
                 <div className="p-4">
                   {/* Top row: badge + name + score */}
                   <div className="flex items-center gap-3">
                     <LineBadge lineId={id} size="md" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-white text-sm">
+                      <div className="font-semibold text-sm" style={{ color: '#F5F0E8' }}>
                         {id} Train
                       </div>
                       <div
@@ -160,8 +180,8 @@ export default function OfflineState({ onRetry, loading }) {
                         </>
                       ) : (
                         <div className="text-right">
-                          <span className="text-green-500 text-lg">✓</span>
-                          <span className="text-[9px] font-semibold uppercase tracking-wide text-green-700 block">On time</span>
+                          <span className="text-lg" style={{ color: '#22C55E' }}>&#10003;</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-wide block" style={{ color: '#166534' }}>On time</span>
                         </div>
                       )}
                     </div>
@@ -170,7 +190,7 @@ export default function OfflineState({ onRetry, loading }) {
                   {/* Breakdown bar skeleton */}
                   {hasScore && barWidths && (
                     <div className="mt-3">
-                      <div className="h-2 rounded-full overflow-hidden flex bg-gray-800">
+                      <div className="h-2 rounded-full overflow-hidden flex" style={{ backgroundColor: '#2A2A2A' }}>
                         {barWidths.map((w, i) => w > 0 && (
                           <div
                             key={i}
@@ -191,20 +211,21 @@ export default function OfflineState({ onRetry, loading }) {
           })}
         </div>
 
-        <p className="text-center text-xs text-gray-700 mt-4">
+        <p className="text-center text-xs mt-4" style={{ color: 'rgba(245, 240, 232, 0.15)' }}>
           Sample data — live scores will load once the backend connects
         </p>
       </div>
 
       {/* Footer */}
-      <footer className="text-center text-xs text-gray-700 py-6 px-4 border-t border-gray-900">
+      <footer className="text-center text-xs py-6 px-4" style={{ color: 'rgba(245, 240, 232, 0.15)', borderTop: '1px solid rgba(245, 240, 232, 0.06)' }}>
         <p>
           Data from{" "}
           <a
             href="https://api.mta.info/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-600"
+            className="underline"
+            style={{ color: 'rgba(245, 240, 232, 0.25)' }}
           >
             MTA GTFS-RT feeds
           </a>

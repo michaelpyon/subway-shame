@@ -1,4 +1,4 @@
-// ShareCard.jsx — Hidden 600×315 card rendered off-screen for html2canvas capture
+// ShareCard.jsx — Hidden 600x315 card rendered off-screen for html2canvas capture
 // Uses only inline styles so html2canvas can reliably capture it.
 import { LINE_COLORS, getScoreTier } from "../constants/lines";
 
@@ -21,8 +21,8 @@ export default function ShareCard({ winner, lines = [], date }) {
         top: "0",
         width: "600px",
         height: "315px",
-        backgroundColor: "#0a0a0f",
-        fontFamily: "'Instrument Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+        backgroundColor: "#0A0A0A",
+        fontFamily: "'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
         overflow: "hidden",
         boxSizing: "border-box",
         display: "flex",
@@ -63,17 +63,18 @@ export default function ShareCard({ winner, lines = [], date }) {
           boxSizing: "border-box",
         }}
       >
-        {/* App title */}
+        {/* App title — Bebas Neue */}
         <div
           style={{
-            fontSize: "11px",
-            letterSpacing: "5px",
-            color: "#6b7280",
+            fontSize: "18px",
+            letterSpacing: "6px",
+            color: "#F5F0E8",
             textTransform: "uppercase",
             marginBottom: "16px",
+            fontFamily: "'Bebas Neue', 'Helvetica Neue', sans-serif",
           }}
         >
-          🚇 &nbsp; SUBWAY SHAME NYC
+          THE LOW LINE
         </div>
 
         {/* Row: badge + scores side by side */}
@@ -124,16 +125,23 @@ export default function ShareCard({ winner, lines = [], date }) {
                   fontWeight: "900",
                   color: tier.color,
                   lineHeight: "1",
-                  fontFamily: "'Space Grotesk', 'Helvetica Neue', sans-serif",
-                  letterSpacing: "-0.04em",
+                  fontFamily: "'Bebas Neue', 'Space Grotesk', sans-serif",
+                  letterSpacing: "-0.02em",
                 }}
               >
                 {winner.daily_score.toLocaleString()}
               </div>
               <div style={{ fontSize: "18px", fontWeight: "700", color: "#6b7280", fontFamily: "'JetBrains Mono', monospace" }}>pts</div>
             </div>
-            <div style={{ fontSize: "13px", color: "#6b7280" }}>
-              {tier.emoji}&nbsp;{tier.label.toUpperCase()}
+            <div
+              style={{
+                fontSize: "14px",
+                color: tier.color,
+                fontFamily: "'Bebas Neue', sans-serif",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {tier.label.toUpperCase()}
             </div>
           </div>
         </div>
@@ -149,7 +157,7 @@ export default function ShareCard({ winner, lines = [], date }) {
             style={{
               height: "8px",
               borderRadius: "4px",
-              backgroundColor: "#1f2937",
+              backgroundColor: "#1A1A1A",
               overflow: "hidden",
               marginBottom: "6px",
             }}
@@ -158,13 +166,13 @@ export default function ShareCard({ winner, lines = [], date }) {
               style={{
                 width: `${delayedPct}%`,
                 height: "100%",
-                backgroundColor: "#EF4444",
+                backgroundColor: "#E8353A",
                 borderRadius: "4px",
               }}
             />
           </div>
           <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-            <span style={{ color: "#EF4444", fontWeight: "700" }}>
+            <span style={{ color: "#E8353A", fontWeight: "700" }}>
               {delayedCount} lines delayed
             </span>
             &nbsp;·&nbsp;
@@ -186,7 +194,7 @@ export default function ShareCard({ winner, lines = [], date }) {
           letterSpacing: "1px",
         }}
       >
-        michaelpyon.github.io/subway-shame
+        subway.michaelpyon.com
       </div>
     </div>
   );

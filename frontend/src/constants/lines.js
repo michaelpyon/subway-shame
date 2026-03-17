@@ -53,11 +53,11 @@ export const ALL_GOOD_MESSAGES = [
  *   5000+     → Dumpster Fire (multi-hour catastrophe)
  */
 export const SCORE_TIERS = [
-  { min: 5000, label: "Dumpster Fire 🔥", color: "#EF4444", emoji: "🔥" },
-  { min: 1500, label: "Full Meltdown",    color: "#F97316", emoji: "😤" },
-  { min: 300,  label: "Pain Train",       color: "#EAB308", emoji: "😒" },
-  { min: 1,    label: "Limping Along",    color: "#9CA3AF", emoji: "😐" },
-  { min: 0,    label: "Good Service",     color: "#22C55E", emoji: "✓" },
+  { min: 5000, label: "Dumpster Fire 🔥", color: "#EF4444", emoji: "🔥", severityClass: "severity-dumpster" },
+  { min: 1500, label: "Full Meltdown",    color: "#F97316", emoji: "😤", severityClass: "severity-meltdown" },
+  { min: 300,  label: "Pain Train",       color: "#EAB308", emoji: "😒", severityClass: "severity-pain-train" },
+  { min: 1,    label: "Limping Along",    color: "#9CA3AF", emoji: "😐", severityClass: "severity-limping" },
+  { min: 0,    label: "Good Service",     color: "#22C55E", emoji: "✓", severityClass: "" },
 ];
 
 export function getScoreTier(score) {

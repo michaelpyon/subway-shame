@@ -11,7 +11,6 @@ import {
 import { LINE_COLORS } from "../constants/lines";
 import LineBadge from "./LineBadge";
 
-// Only show lines that have data (score > 0 at any point)
 function getActiveLines(timeseries) {
   const seen = new Set();
   for (const point of timeseries) {
@@ -22,7 +21,6 @@ function getActiveLines(timeseries) {
   return [...seen];
 }
 
-// Transform API timeseries into Recharts-friendly data
 function buildChartData(timeseries, activeLines) {
   const cumulative = {};
   for (const lineId of activeLines) {
@@ -45,8 +43,6 @@ function getLineColor(lineId) {
   return isYellow ? "#D4A50A" : LINE_COLORS[lineId] || "#808183";
 }
 
-// Custom dot that renders an MTA-style badge at the last data point.
-// Accepts an `offsetMap` that maps lineId → pixel offset to separate overlapping badges.
 function EndpointBadge({ cx, cy, index, dataLength, lineId, color, offsetMap }) {
   if (index !== dataLength - 1) return null;
   if (cx == null || cy == null) return null;
@@ -56,21 +52,16 @@ function EndpointBadge({ cx, cy, index, dataLength, lineId, color, offsetMap }) 
   const bgColor = LINE_COLORS[lineId] || "#808183";
   const r = 12;
 
-  // Apply offset to separate overlapping badges
   const offset = offsetMap?.[lineId] || 0;
   const adjustedCx = cx + offset;
 
   return (
     <g>
-      {/* Connector line from actual data point to offset badge */}
       {offset !== 0 && (
         <line x1={cx} y1={cy} x2={adjustedCx} y2={cy} stroke={bgColor} strokeWidth={1.5} strokeDasharray="3 2" opacity={0.5} />
       )}
-      {/* Outer glow */}
       <circle cx={adjustedCx} cy={cy} r={r + 3} fill={bgColor} opacity={0.25} />
-      {/* Badge circle */}
-      <circle cx={adjustedCx} cy={cy} r={r} fill={bgColor} stroke="#030712" strokeWidth={2} />
-      {/* Letter/number */}
+      <circle cx={adjustedCx} cy={cy} r={r} fill={bgColor} stroke="#0A0A0A" strokeWidth={2} />
       <text
         x={adjustedCx}
         y={cy}
@@ -87,15 +78,10 @@ function EndpointBadge({ cx, cy, index, dataLength, lineId, color, offsetMap }) 
   );
 }
 
-/**
- * Build a map of lineId → horizontal pixel offset for lines whose last data point
- * is at the same value. This prevents badge overlap on the chart.
- */
 function buildOffsetMap(chartData, activeLines) {
   if (chartData.length === 0) return {};
   const lastPoint = chartData[chartData.length - 1];
 
-  // Group lines by their final value
   const groups = {};
   for (const lineId of activeLines) {
     const val = lastPoint[lineId] || 0;
@@ -104,12 +90,11 @@ function buildOffsetMap(chartData, activeLines) {
   }
 
   const offsetMap = {};
-  const badgeDiameter = 28; // spacing between overlapping badges
+  const badgeDiameter = 28;
 
   for (const val in groups) {
     const members = groups[val];
     if (members.length <= 1) continue;
-    // Spread badges horizontally around the data point
     const totalWidth = (members.length - 1) * badgeDiameter;
     members.forEach((lineId, i) => {
       offsetMap[lineId] = -totalWidth / 2 + i * badgeDiameter;
@@ -129,8 +114,8 @@ function CustomTooltip({ active, payload, label }) {
   if (sorted.length === 0) return null;
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl text-sm max-w-[220px]">
-      <p className="text-gray-400 text-xs mb-2 font-mono">{label}</p>
+    <div className="rounded-lg p-3 shadow-xl text-sm max-w-[220px]" style={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(245, 240, 232, 0.12)' }}>
+      <p className="text-xs mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(245, 240, 232, 0.4)' }}>{label}</p>
       <div className="space-y-1.5">
         {sorted.slice(0, 10).map((entry) => {
           const bgColor = LINE_COLORS[entry.dataKey] || "#808183";
@@ -150,11 +135,11 @@ function CustomTooltip({ active, payload, label }) {
                 >
                   {entry.dataKey}
                 </span>
-                <span className="text-gray-400 text-xs">
+                <span className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
                   {entry.dataKey.length <= 1 ? `${entry.dataKey} Train` : entry.dataKey}
                 </span>
               </div>
-              <span className="text-white font-bold tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
+              <span className="font-bold tabular-nums" style={{ color: '#F5F0E8', fontFamily: 'var(--font-mono)' }}>
                 {entry.value.toLocaleString()} pts
               </span>
             </div>
@@ -187,8 +172,6 @@ export default function ShameChart({ timeseries }) {
     [chartData, activeLines]
   );
 
-  // Compute right margin dynamically: largest cluster of same-value lines
-  // drives how far badges spread. Each badge is 28px wide, radius 12px.
   const rightMargin = useMemo(() => {
     if (chartData.length === 0) return 55;
     const lastPoint = chartData[chartData.length - 1];
@@ -199,22 +182,24 @@ export default function ShameChart({ timeseries }) {
       groups[val]++;
     }
     const maxGroupSize = Math.max(...Object.values(groups));
-    // max offset = (maxGroupSize-1)/2 * 28 + badge radius 12 + 10px padding
     const maxOffset = Math.ceil((maxGroupSize - 1) / 2) * 28 + 12 + 10;
     return Math.max(55, maxOffset);
   }, [chartData, activeLines]);
 
   if (timeseries.length < 2) {
     return (
-      <div className="px-4 py-6 max-w-5xl mx-auto">
-        <h2 className="text-lg font-semibold text-gray-400 mb-3">
-          Today's Shame Race
+      <div className="px-4 py-6 max-w-2xl mx-auto">
+        <h2
+          className="text-lg font-semibold mb-3"
+          style={{ fontFamily: 'var(--font-display)', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em', fontSize: '22px' }}
+        >
+          TODAY'S SHAME RACE
         </h2>
-        <div className="bg-gray-900 rounded-lg p-8 text-center">
-          <p className="text-gray-600 text-sm">
+        <div className="rounded-xl p-8 text-center" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-sm" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
             Chart builds throughout the day as data is collected.
           </p>
-          <p className="text-gray-700 text-xs mt-2">
+          <p className="text-xs mt-2" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>
             {timeseries.length === 1
               ? "1 reading captured — check back in ~15 min for the trend line."
               : "No readings yet. The chart will appear once data starts coming in."}
@@ -227,21 +212,25 @@ export default function ShameChart({ timeseries }) {
   const dataLength = chartData.length;
 
   return (
-    <div className="px-4 py-6 max-w-5xl mx-auto">
-      <h2 className="text-lg font-semibold text-gray-400 mb-1" style={{ fontFamily: 'var(--font-display)' }}>Today's Shame Race</h2>
-      <p className="text-xs text-gray-600 mb-4">
+    <div className="px-4 py-6 max-w-2xl mx-auto">
+      <h2
+        className="text-lg font-semibold mb-1"
+        style={{ fontFamily: 'var(--font-display)', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em', fontSize: '22px' }}
+      >
+        TODAY'S SHAME RACE
+      </h2>
+      <p className="text-xs mb-4" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
         How shame points have accumulated since midnight — higher line = worse performance today.
         Points reset at midnight.
       </p>
 
-      <div className="bg-gray-900 rounded-lg p-4 sm:p-6 overflow-x-auto">
+      <div className="rounded-xl p-4 sm:p-6 overflow-x-auto" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
         <div className="min-w-[320px]">
         <ResponsiveContainer width="100%" height={300} minHeight={240}>
           <AreaChart
             data={chartData}
             margin={{ top: 5, right: rightMargin, bottom: 5, left: 0 }}
           >
-            {/* Gradient defs for each active line */}
             <defs>
               {sortedLines.map((lineId) => {
                 const color = getLineColor(lineId);
@@ -253,16 +242,16 @@ export default function ShameChart({ timeseries }) {
                 );
               })}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(245, 240, 232, 0.06)" />
             <XAxis
               dataKey="time"
-              stroke="#4b5563"
-              tick={{ fill: "#6b7280", fontSize: 10 }}
+              stroke="rgba(245, 240, 232, 0.15)"
+              tick={{ fill: "rgba(245, 240, 232, 0.3)", fontSize: 10 }}
               tickLine={false}
             />
             <YAxis
-              stroke="#4b5563"
-              tick={{ fill: "#6b7280", fontSize: 10 }}
+              stroke="rgba(245, 240, 232, 0.15)"
+              tick={{ fill: "rgba(245, 240, 232, 0.3)", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
               width={45}
@@ -272,7 +261,7 @@ export default function ShameChart({ timeseries }) {
                 angle: -90,
                 position: "insideLeft",
                 offset: 12,
-                style: { fill: "#374151", fontSize: 9, textAnchor: "middle" },
+                style: { fill: "rgba(245, 240, 232, 0.15)", fontSize: 9, textAnchor: "middle" },
               }}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -300,7 +289,7 @@ export default function ShameChart({ timeseries }) {
                       offsetMap={offsetMap}
                     />
                   )}
-                  activeDot={{ r: 5, fill: color, stroke: "#030712", strokeWidth: 2 }}
+                  activeDot={{ r: 5, fill: color, stroke: "#0A0A0A", strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               );
@@ -319,12 +308,12 @@ export default function ShameChart({ timeseries }) {
             return (
               <button
                 key={lineId}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs transition-opacity ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs transition-opacity press-scale ${
                   hoveredLine && hoveredLine !== lineId
                     ? "opacity-30"
                     : "opacity-100"
                 }`}
-                style={{ backgroundColor: "#111827" }}
+                style={{ backgroundColor: '#2A2A2A' }}
                 onMouseEnter={() => setHoveredLine(lineId)}
                 onMouseLeave={() => setHoveredLine(null)}
                 onClick={() =>
@@ -332,7 +321,7 @@ export default function ShameChart({ timeseries }) {
                 }
               >
                 <LineBadge lineId={lineId} size="sm" />
-                <span className="text-gray-400 tabular-nums font-medium" style={{ fontFamily: 'var(--font-mono)' }}>
+                <span className="tabular-nums font-medium" style={{ color: 'rgba(245, 240, 232, 0.4)', fontFamily: 'var(--font-mono)' }}>
                   {lastVal}
                 </span>
               </button>

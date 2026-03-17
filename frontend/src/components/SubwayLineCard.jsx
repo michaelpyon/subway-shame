@@ -19,7 +19,7 @@ function BreakdownBar({ breakdown, total }) {
   return (
     <div className="space-y-1.5">
       {/* Stacked bar */}
-      <div className="h-3 rounded-full overflow-hidden flex bg-gray-800">
+      <div className="h-3 rounded-full overflow-hidden flex" style={{ backgroundColor: '#2A2A2A' }}>
         {sorted.map((cat) => {
           const pts = breakdown[cat];
           const pct = (pts / total) * 100;
@@ -49,8 +49,8 @@ function BreakdownBar({ breakdown, total }) {
                 className="inline-block w-2 h-2 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              <span className="text-gray-400">{cfg.label}</span>
-              <span className="text-gray-500">{pts} pts</span>
+              <span style={{ color: 'rgba(245, 240, 232, 0.45)' }}>{cfg.label}</span>
+              <span style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>{pts} pts</span>
             </span>
           );
         })}
@@ -80,22 +80,24 @@ function DirectionColumn({ label, arrow, data }) {
   );
 
   return (
-    <div className="bg-gray-950 rounded-lg p-2.5">
+    <div className="rounded-lg p-2.5" style={{ backgroundColor: '#0A0A0A' }}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] text-gray-500">
+        <span className="text-[11px]" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
           {arrow} {label}
         </span>
         <div className="text-right">
           <span
-            className={`text-sm font-bold tabular-nums ${
-              data.score > 0 ? "text-white" : "text-gray-700"
-            }`}
-            style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.04em' }}
+            className="text-sm font-bold tabular-nums"
+            style={{
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '-0.04em',
+              color: data.score > 0 ? '#F5F0E8' : 'rgba(245, 240, 232, 0.2)',
+            }}
           >
             {data.score}
           </span>
           {data.score > 0 && (
-            <span className="text-[9px] text-gray-600 ml-0.5" style={{ fontFamily: 'var(--font-mono)' }}>pts</span>
+            <span className="text-[9px] ml-0.5" style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>pts</span>
           )}
         </div>
       </div>
@@ -113,32 +115,20 @@ function DirectionColumn({ label, arrow, data }) {
                     className="inline-block w-1.5 h-1.5 rounded-full"
                     style={{ backgroundColor: cfg.color }}
                   />
-                  <span className="text-gray-500">{cfg.label}</span>
+                  <span style={{ color: 'rgba(245, 240, 232, 0.3)' }}>{cfg.label}</span>
                 </span>
-                <span className="text-gray-600" style={{ fontFamily: 'var(--font-mono)' }}>{data.breakdown[cat]} pts</span>
+                <span style={{ color: 'rgba(245, 240, 232, 0.25)', fontFamily: 'var(--font-mono)' }}>{data.breakdown[cat]} pts</span>
               </div>
             );
           })}
         </div>
       )}
       {sorted.length === 0 && (
-        <span className="text-[10px] text-gray-700">No issues</span>
+        <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.15)' }}>No issues</span>
       )}
     </div>
   );
 }
-
-const CAT_PTS = {
-  "No Service": 50,
-  "Delays": 30,
-  "Slow Speeds": 20,
-  "Skip Stop": 15,
-  "Rerouted": 15,
-  "Runs Local": 10,
-  "Reduced Freq": 10,
-  "Platform Change": 2,
-  "Other": 5,
-};
 
 export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkData = null, record = null }) {
   const [expanded, setExpanded] = useState(false);
@@ -149,21 +139,24 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
   const hasContent = dailyScore > 0;
   const scorePercent = maxScore > 0 ? (dailyScore / maxScore) * 100 : 0;
 
-  // Status text: if there are active issues, show the current status.
-  // If issues happened earlier today but the line is currently OK, say so explicitly.
   const statusText =
     dailyScore === 0
       ? "Good Service"
       : liveScore > 0
-      ? line.status                     // currently active — show current status
-      : "Issues earlier today";         // had issues, now resolved
+      ? line.status
+      : "Issues earlier today";
 
   return (
     <div
-      className={`bg-gray-900 rounded-lg overflow-hidden transition-colors relative ${
-        hasContent ? "cursor-pointer hover:bg-gray-800/80" : ""
+      className={`rounded-xl overflow-hidden transition-shadow relative ${
+        hasContent ? "cursor-pointer" : ""
       }`}
-      style={{ borderLeft: `4px solid ${color}` }}
+      style={{
+        backgroundColor: '#1A1A1A',
+        boxShadow: 'var(--shadow-card)',
+      }}
+      onMouseEnter={(e) => hasContent && (e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)')}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'var(--shadow-card)')}
       onClick={() => hasContent && setExpanded(!expanded)}
       role={hasContent ? "button" : undefined}
       aria-expanded={hasContent ? expanded : undefined}
@@ -179,7 +172,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         />
       )}
       <div className="p-4 flex items-center gap-3">
-        {/* Rank column — left side, only visible for top 3 */}
+        {/* Rank column */}
         <div className="w-6 shrink-0 text-center">
           {rank !== null && rank <= 3 && dailyScore > 0 && (
             <span
@@ -195,14 +188,14 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         <LineBadge lineId={line.id} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-white">
+            <span className="font-semibold" style={{ color: '#F5F0E8' }}>
               {line.id === "SI" ? "SIR" : `${line.id} Train`}
             </span>
           </div>
           <span className="text-sm" style={{ color: liveScore === 0 && dailyScore > 0 ? "#9CA3AF" : tier.color }}>
             {statusText}
           </span>
-          {/* Interruption badges — always visible when line has issues */}
+          {/* Interruption badges */}
           {hasContent && line.breakdown && (
             <div className="flex flex-wrap gap-1 mt-1">
               {CATEGORY_ORDER.filter((cat) => (line.breakdown[cat] || 0) > 0).map((cat) => {
@@ -221,7 +214,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           )}
         </div>
         <div className="text-right flex items-center gap-1.5 shrink-0">
-          {/* Sparkline — shown when collapsed and we have history data */}
+          {/* Sparkline */}
           {!expanded && sparkData && sparkData.length >= 2 && (
             <Sparkline data={sparkData} color={color} />
           )}
@@ -244,11 +237,9 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-1">
-                  <span
-                    className="text-[9px] font-semibold uppercase tracking-wide"
-                    style={{ color: `${tier.color}90` }}
-                  >
-                    {tier.label}
+                  {/* Severity label as styled pill */}
+                  <span className={`severity-label ${tier.severityClass}`}>
+                    {tier.label.toUpperCase()}
                   </span>
                   {/* Record badge */}
                   {record && dailyScore >= record.worst_score && (
@@ -257,7 +248,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                       style={{ backgroundColor: "#7f1d1d", color: "#fca5a5" }}
                       title={`Worst score in the last ${record.days_back} day${record.days_back !== 1 ? "s" : ""}`}
                     >
-                      🔥 worst in {record.days_back}d
+                      worst in {record.days_back}d
                     </span>
                   )}
                 </div>
@@ -273,7 +264,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                         const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
                         const totalPts = line.breakdown[cat];
                         return (
-                          <div key={cat} className="text-[9px] text-gray-600 text-right" style={{ fontFamily: 'var(--font-mono)' }}>
+                          <div key={cat} className="text-[9px] text-right" style={{ color: 'rgba(245, 240, 232, 0.25)', fontFamily: 'var(--font-mono)' }}>
                             {cfg.label} +{totalPts}pts
                           </div>
                         );
@@ -295,9 +286,10 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         </div>
         {hasContent && (
           <svg
-            className={`w-4 h-4 text-gray-500 transition-transform shrink-0 ${
+            className={`w-4 h-4 transition-transform shrink-0 ${
               expanded ? "rotate-180" : ""
             }`}
+            style={{ color: 'rgba(245, 240, 232, 0.3)' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -312,28 +304,26 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         )}
       </div>
 
-
-
       {expanded && hasContent && (
         <div className="px-4 pb-4 space-y-3">
           {/* Live vs daily context */}
           {liveScore > 0 && (
-            <div className="flex items-center justify-between text-xs text-gray-600 bg-gray-950/50 rounded-lg px-3 py-2">
+            <div className="flex items-center justify-between text-xs rounded-lg px-3 py-2" style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)', color: 'rgba(245, 240, 232, 0.35)' }}>
               <span>🔴 Live (right now)</span>
-              <span className="font-bold text-gray-400" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{liveScore.toLocaleString()} pts this snapshot</span>
+              <span className="font-bold" style={{ color: 'rgba(245, 240, 232, 0.5)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{liveScore.toLocaleString()} pts this snapshot</span>
             </div>
           )}
 
           {/* Score breakdown bar */}
           <div>
-            <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1.5">Today's breakdown</p>
+            <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Today's breakdown</p>
             <BreakdownBar breakdown={line.breakdown} total={dailyScore} />
           </div>
 
           {/* Direction split */}
           {line.by_direction && (
             <div>
-              <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1.5">By direction</p>
+              <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>By direction</p>
               <DirectionSplit byDirection={line.by_direction} lineId={line.id} />
             </div>
           )}
@@ -341,14 +331,15 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           {/* Alert texts */}
           {line.alerts && line.alerts.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-gray-600 uppercase tracking-wider">Current alerts</p>
+              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Current alerts</p>
               {line.alerts.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"];
                 return (
                   <div
                     key={i}
-                    className="text-sm text-gray-400 bg-gray-950 rounded p-2.5 leading-relaxed"
+                    className="text-sm rounded-lg p-2.5 leading-relaxed"
+                    style={{ backgroundColor: '#0A0A0A', color: 'rgba(245, 240, 232, 0.5)' }}
                   >
                     {a.category && (
                       <span
@@ -362,28 +353,29 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                       </span>
                     )}
                     {a.direction && a.direction !== "both" && (
-                      <span className="text-[10px] text-gray-600 mr-2">
+                      <span className="text-[10px] mr-2" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
                         {a.direction === "uptown" ? "↑" : "↓"} {a.direction}
                       </span>
                     )}
-                    <span className="text-gray-400"><AlertText text={a.text} /></span>
+                    <span style={{ color: 'rgba(245, 240, 232, 0.5)' }}><AlertText text={a.text} /></span>
                   </div>
                 );
               })}
             </div>
           )}
 
-          {/* Peak alerts — show if no current alerts */}
+          {/* Peak alerts */}
           {(!line.alerts || line.alerts.length === 0) && line.peak_alerts && line.peak_alerts.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-gray-600 uppercase tracking-wider">Earlier today (resolved)</p>
+              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Earlier today (resolved)</p>
               {line.peak_alerts.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"];
                 return (
                   <div
                     key={i}
-                    className="text-sm text-gray-500 bg-gray-950/50 rounded p-2.5 leading-relaxed border border-gray-800/50"
+                    className="text-sm rounded-lg p-2.5 leading-relaxed"
+                    style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)', border: '1px solid rgba(245, 240, 232, 0.06)', color: 'rgba(245, 240, 232, 0.35)' }}
                   >
                     {a.category && (
                       <span
@@ -396,7 +388,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                         {cfg.label}
                       </span>
                     )}
-                    <span className="text-gray-500"><AlertText text={a.text} /></span>
+                    <span style={{ color: 'rgba(245, 240, 232, 0.35)' }}><AlertText text={a.text} /></span>
                   </div>
                 );
               })}

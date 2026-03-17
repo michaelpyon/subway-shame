@@ -24,4 +24,8 @@ COPY --from=frontend-build /app/frontend/dist ./static/
 ENV PORT=8080
 EXPOSE 8080
 
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+# RUN_INGEST=1 starts the ingest worker as a background thread within gunicorn.
+# For dedicated worker deploys, run `python ingest.py` separately instead.
+ENV RUN_INGEST=1
+
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120

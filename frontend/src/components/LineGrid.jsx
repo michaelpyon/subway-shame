@@ -11,13 +11,22 @@ export default function LineGrid({ lines, history = null, records = null }) {
     <div className="px-4 pb-8 max-w-2xl mx-auto">
       <div className="flex items-baseline justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-400">All Lines</h2>
+          <h2
+            className="text-lg font-semibold"
+            style={{ fontFamily: 'var(--font-display)', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em', fontSize: '22px' }}
+          >
+            ALL LINES
+          </h2>
           <button
             onClick={() => {
               const el = document.getElementById("scoring-explainer");
               if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="w-4 h-4 rounded-full border border-gray-700 text-gray-600 hover:text-gray-400 hover:border-gray-500 transition-colors flex items-center justify-center text-[10px] font-bold leading-none"
+            className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold leading-none transition-colors press-scale"
+            style={{
+              border: '1px solid rgba(245, 240, 232, 0.15)',
+              color: 'rgba(245, 240, 232, 0.3)',
+            }}
             title="How are shame points calculated?"
             aria-label="How are shame points calculated?"
           >
@@ -26,7 +35,7 @@ export default function LineGrid({ lines, history = null, records = null }) {
         </div>
         <div className="flex items-center gap-3 text-xs">
           {problemLines.length > 0 && (
-            <span className="text-red-500">{problemLines.length} with issues</span>
+            <span style={{ color: '#E8353A' }}>{problemLines.length} with issues</span>
           )}
           {goodLines.length > 0 && (
             <span className="text-green-600">{goodLines.length} on time</span>
@@ -52,7 +61,13 @@ export default function LineGrid({ lines, history = null, records = null }) {
 
       {/* Good service lines — compact badge row */}
       {goodLines.length > 0 && (
-        <div className="bg-gray-900/50 rounded-xl px-4 py-3 border border-gray-800/50">
+        <div
+          className="rounded-xl px-4 py-3"
+          style={{
+            backgroundColor: 'rgba(26, 26, 26, 0.5)',
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
           <div className="flex items-center gap-2 mb-2.5">
             <span className="text-green-500 text-xs font-semibold uppercase tracking-wider">Running normally</span>
           </div>
@@ -66,7 +81,7 @@ export default function LineGrid({ lines, history = null, records = null }) {
 
       {/* All clear */}
       {problemLines.length === 0 && (
-        <div className="text-center py-6 text-gray-600 text-sm">
+        <div className="text-center py-6 text-sm" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
           All lines running normally.
         </div>
       )}

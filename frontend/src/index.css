@@ -1,24 +1,117 @@
 @import "tailwindcss";
 
+/* ── Brand Palette ── */
 :root {
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Instrument Sans', 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Colors */
+  --color-tunnel: #0A0A0A;
+  --color-platform: #F5F0E8;
+  --color-ballast: #1A1A1A;
+  --color-concrete: #2A2A2A;
+  --color-signal-red: #E8353A;
+
+  /* Typography */
+  --font-display: 'Bebas Neue', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Shadows (shadow-as-border system) */
+  --shadow-card:
+    0px 0px 0px 1px rgba(245, 240, 232, 0.10),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover:
+    0px 0px 0px 1px rgba(245, 240, 232, 0.18),
+    0px 2px 8px 0px rgba(0, 0, 0, 0.5);
+  --shadow-card-shame:
+    0px 0px 0px 1px rgba(232, 53, 58, 0.35),
+    0px 0px 20px -4px rgba(232, 53, 58, 0.2),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   font-family: var(--font-body);
+  background-color: var(--color-tunnel);
+  color: var(--color-platform);
 }
 
-/* Skeleton shimmer */
+/* ── Font utility classes ── */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Severity Labels (the money lines) ── */
+.severity-label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-wrap: balance;
+}
+
+.severity-limping {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9CA3AF;
+}
+
+.severity-pain-train {
+  background: rgba(234, 179, 8, 0.15);
+  color: #EAB308;
+}
+
+.severity-meltdown {
+  background: rgba(255, 99, 25, 0.15);
+  color: #FF6319;
+}
+
+.severity-dumpster {
+  background: rgba(232, 53, 58, 0.30);
+  color: #E8353A;
+  border: 1px solid rgba(232, 53, 58, 0.5);
+}
+
+/* ── Entrance Animation (staggered) ── */
+.stagger-section {
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(4px);
+  animation: fadeInUp 350ms ease-out forwards;
+}
+
+.stagger-section:nth-child(1) { animation-delay: 0ms; }
+.stagger-section:nth-child(2) { animation-delay: 80ms; }
+.stagger-section:nth-child(3) { animation-delay: 160ms; }
+.stagger-section:nth-child(4) { animation-delay: 240ms; }
+.stagger-section:nth-child(5) { animation-delay: 320ms; }
+.stagger-section:nth-child(6) { animation-delay: 400ms; }
+.stagger-section:nth-child(7) { animation-delay: 480ms; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* ── Skeleton shimmer ── */
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* Verdict animations */
+/* ── Verdict animations ── */
 @keyframes verdict-shake {
   0%, 100% { transform: translateX(0); }
   15% { transform: translateX(-5px); }
@@ -38,4 +131,20 @@ body {
 }
 .verdict-pulse-green {
   animation: verdict-pulse-green 0.7s ease-out;
+}
+
+/* ── Global interactive states ── */
+.press-scale {
+  transition-property: scale;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+.press-scale:active {
+  scale: 0.96;
+}
+
+/* Focus-visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-platform);
+  outline-offset: 2px;
 }
