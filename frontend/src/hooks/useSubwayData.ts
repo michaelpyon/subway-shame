@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import type { ApiResponse } from "../types/api";
 
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
-// Use Railway backend in production; fall back to local dev proxy on localhost
-const API_BASE =
-  typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? "https://subway-shame-production.up.railway.app"
-    : "";
+// Default to same-origin API calls so the frontend can move between deploy
+// targets without hardcoding one backend host.
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 /** Return type for the useSubwayData hook. */
 export interface UseSubwayDataReturn {
@@ -51,8 +49,8 @@ export function useSubwayData(): UseSubwayDataReturn {
     }
     setError(null);
 
-    // Retry up to 4 times with exponential backoff — handles Railway cold starts
-    // which can take 5–15s and return 502/503 before the dyno is warm.
+    // Retry up to 4 times with exponential backoff to smooth over brief API
+    // refresh windows or deploy restarts.
     const MAX_ATTEMPTS = 4;
     const BACKOFF_MS = [2000, 4000, 6000]; // waits between retries
 
