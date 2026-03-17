@@ -88,10 +88,15 @@ function PlacePedestal({ config, lines }) {
   return (
     <div className={`${config.order} flex-1 max-w-[180px]`}>
       {/* Badges floating above pedestal */}
-      <div className="flex justify-center gap-1 mb-2 flex-wrap">
+      <div className="flex justify-center gap-1 mb-1 flex-wrap">
         {lines.map((line) => (
           <LineBadge key={line.id} lineId={line.id} size={config.badgeSize} />
         ))}
+      </div>
+
+      {/* Medal — outside pedestal so overflow-hidden can't clip it */}
+      <div className="flex justify-center mb-1">
+        <span className="text-2xl">{config.emoji}</span>
       </div>
 
       {/* Pedestal */}
@@ -104,7 +109,6 @@ function PlacePedestal({ config, lines }) {
           background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
         }}
       >
-        <span className="text-2xl mb-1">{config.emoji}</span>
         {isTie && (
           <span className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
             TIE
