@@ -1,6 +1,7 @@
 import { LINE_COLORS } from "../constants/lines";
 
 const SIZES = {
+  xs: "w-5 h-5 text-[10px]",
   sm: "w-8 h-8 text-lg",
   md: "w-10 h-10 text-xl",
   lg: "w-16 h-16 text-3xl",

@@ -8,6 +8,7 @@ import ShameChart from "./components/ShameChart";
 import LineGrid from "./components/LineGrid";
 import ScoringExplainer from "./components/ScoringExplainer";
 import TrainChecker from "./components/TrainChecker";
+import AlertMarquee from "./components/AlertMarquee";
 import OfflineState from "./components/OfflineState";
 import SkeletonLoader from "./components/SkeletonLoader";
 import "./App.css";
@@ -67,6 +68,11 @@ export default function App() {
           onOpenChecker={() => setCheckerOpen(true)}
         />
       </div>
+
+      {/* Alert marquee — system-wide disruption banner */}
+      {data && data.lines && (
+        <AlertMarquee lines={data.lines} />
+      )}
 
       {/* Soft error banner when we have stale data */}
       {error && data && (

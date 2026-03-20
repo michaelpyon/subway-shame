@@ -154,6 +154,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
       style={{
         backgroundColor: '#1A1A1A',
         boxShadow: 'var(--shadow-card)',
+        borderLeft: `3px solid ${hasContent ? color : 'rgba(245, 240, 232, 0.06)'}`,
       }}
       onMouseEnter={(e) => hasContent && (e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'var(--shadow-card)')}

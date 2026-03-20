@@ -14,17 +14,17 @@
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Shadows (shadow-as-border system) */
+  /* Shadows (ink-bleed system — hard offset, industrial) */
   --shadow-card:
-    0px 0px 0px 1px rgba(245, 240, 232, 0.10),
-    0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+    0px 0px 0px 1px rgba(245, 240, 232, 0.06),
+    3px 3px 0px 0px rgba(0, 0, 0, 0.5);
   --shadow-card-hover:
-    0px 0px 0px 1px rgba(245, 240, 232, 0.18),
-    0px 2px 8px 0px rgba(0, 0, 0, 0.5);
+    0px 0px 0px 1px rgba(245, 240, 232, 0.12),
+    4px 4px 0px 0px rgba(0, 0, 0, 0.6);
   --shadow-card-shame:
-    0px 0px 0px 1px rgba(232, 53, 58, 0.35),
-    0px 0px 20px -4px rgba(232, 53, 58, 0.2),
-    0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+    0px 0px 0px 1px rgba(232, 53, 58, 0.30),
+    4px 4px 0px 0px rgba(232, 53, 58, 0.15),
+    0px 0px 20px -4px rgba(232, 53, 58, 0.15);
 }
 
 html {
@@ -50,35 +50,36 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Severity Labels (the money lines) ── */
+/* ── Severity Labels (stamped badges — left-border accent) ── */
 .severity-label {
   font-family: var(--font-display);
   font-size: 13px;
   letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  border-left: 2px solid currentColor;
   text-wrap: balance;
 }
 
 .severity-limping {
-  background: rgba(156, 163, 175, 0.15);
+  background: rgba(156, 163, 175, 0.18);
   color: #9CA3AF;
 }
 
 .severity-pain-train {
-  background: rgba(234, 179, 8, 0.15);
+  background: rgba(234, 179, 8, 0.22);
   color: #EAB308;
 }
 
 .severity-meltdown {
-  background: rgba(255, 99, 25, 0.15);
+  background: rgba(255, 99, 25, 0.28);
   color: #FF6319;
 }
 
 .severity-dumpster {
-  background: rgba(232, 53, 58, 0.30);
-  color: #E8353A;
-  border: 1px solid rgba(232, 53, 58, 0.5);
+  background: rgba(232, 53, 58, 0.45);
+  color: #F5F0E8;
+  border-left: 3px solid #E8353A;
 }
 
 /* ── Entrance Animation (staggered) ── */
@@ -103,6 +104,29 @@ body {
     transform: translateY(0);
     filter: blur(0);
   }
+}
+
+/* ── Alert marquee ── */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.alert-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.alert-marquee-track {
+  display: inline-flex;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.alert-marquee-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
 }
 
 /* ── Skeleton shimmer ── */
