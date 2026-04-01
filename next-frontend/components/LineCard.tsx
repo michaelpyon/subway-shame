@@ -124,7 +124,7 @@ export default function LineCard({ line, rank }: LineCardProps) {
           ) : (
             <>
               <WowDelta score={line.daily_score} />
-              <span className="text-sm font-black tabular-nums">
+              <span className={`text-sm font-black tabular-nums ${line.daily_score >= 100 ? "text-[#dc2626]" : ""}`}>
                 {line.daily_score.toLocaleString()}
               </span>
             </>

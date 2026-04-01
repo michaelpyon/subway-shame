@@ -68,9 +68,11 @@ export default function ShameScore({
     };
   }, [score, duration, delay, prefersReduced]);
 
+  const isHighShame = score >= 100;
+
   return (
     <motion.span
-      className={`tabular-nums tracking-tight ${sizeClasses[size]} ${className}`}
+      className={`tabular-nums tracking-tight ${sizeClasses[size]} ${isHighShame ? "shame-glow text-[#dc2626]" : ""} ${className}`}
       initial={prefersReduced ? {} : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay, duration: 0.3 }}

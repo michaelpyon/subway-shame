@@ -60,7 +60,7 @@ export default function RootLayout({
       <body
         className="min-h-full antialiased"
         style={{
-          backgroundColor: "#0A0A0A",
+          backgroundColor: "#000000",
           color: "#F5F0E8",
         }}
       >

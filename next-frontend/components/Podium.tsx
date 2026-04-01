@@ -108,7 +108,7 @@ export default function Podium({ top3 }: PodiumProps) {
 
             {/* Podium bar */}
             <motion.div
-              className={`${config.barHeight} w-20 sm:w-24 rounded-t-lg relative overflow-hidden`}
+              className={`${config.barHeight} w-20 sm:w-24 rounded-t-lg relative overflow-hidden ${config.position === 1 ? "gold-glow" : ""}`}
               style={{
                 background: `linear-gradient(to top, rgba(255,255,255,0.03), rgba(255,255,255,0.08))`,
                 boxShadow: `0 0 30px ${config.glowColor}`,

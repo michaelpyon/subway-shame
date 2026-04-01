@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #000000;
   --foreground: #f5f0e8;
+  --shame-red: #dc2626;
+  --gold-glow: #ffd700;
 }
 
 @theme inline {
@@ -100,6 +102,40 @@ body {
   100% {
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.04);
   }
+}
+
+/* ----------------------------------------------------------------
+   Gold glow for #1 podium position
+   ---------------------------------------------------------------- */
+
+@keyframes gold-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), 0 0 40px rgba(255, 215, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.35), 0 0 60px rgba(255, 215, 0, 0.15);
+  }
+}
+
+.gold-glow {
+  animation: gold-pulse 2s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------------------
+   Shame red glow for high-scoring lines
+   ---------------------------------------------------------------- */
+
+@keyframes shame-pulse {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(220, 38, 38, 0.6);
+  }
+}
+
+.shame-glow {
+  animation: shame-pulse 1.5s ease-in-out infinite;
 }
 
 /* ----------------------------------------------------------------
