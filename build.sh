@@ -6,7 +6,7 @@ pip install -r backend/requirements.txt
 
 echo "==> Installing frontend dependencies..."
 cd frontend
-npm install
+npm ci
 echo "==> Building frontend..."
 npx vite build
 cd ..

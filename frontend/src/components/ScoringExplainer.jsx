@@ -19,8 +19,11 @@ export default function ScoringExplainer() {
   return (
     <div id="scoring-explainer" className="px-4 py-2 max-w-2xl mx-auto">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 text-xs transition-colors mx-auto press-scale"
+        aria-controls="scoring-explainer-panel"
+        aria-expanded={open}
         style={{ color: 'rgba(245, 240, 232, 0.3)' }}
       >
         <span>How are shame points calculated?</span>
@@ -40,7 +43,11 @@ export default function ScoringExplainer() {
       </button>
 
       {open && (
-        <div className="mt-3 rounded-xl p-4 sm:p-6 max-w-2xl mx-auto" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
+        <div
+          id="scoring-explainer-panel"
+          className="mt-3 rounded-xl p-4 sm:p-6 max-w-2xl mx-auto"
+          style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}
+        >
           <h3
             className="text-sm font-semibold mb-1"
             style={{ fontFamily: 'var(--font-display)', color: '#F5F0E8', letterSpacing: '0.04em', fontSize: '18px' }}

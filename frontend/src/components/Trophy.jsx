@@ -202,15 +202,17 @@ export default function Trophy({ winner, lines = [] }) {
         {/* Tab bar — Bebas Neue labels */}
         <div className="flex gap-1 mb-3">
           <button
+            type="button"
             onClick={() => setActiveTab("today")}
-            className={`flex-1 py-2 rounded-xl text-sm transition-all duration-200 press-scale ${
+            className={`flex-1 py-2 text-sm transition-all duration-200 press-scale ${
               activeTab === "today"
                 ? ""
                 : ""
             }`}
             style={{
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.05em',
+              fontFamily: 'var(--font-headline)',
+              fontStyle: 'italic',
+              letterSpacing: '-0.02em',
               fontSize: '14px',
               backgroundColor: activeTab === "today" ? 'rgba(232, 53, 58, 0.15)' : 'transparent',
               color: activeTab === "today" ? '#E8353A' : 'rgba(245, 240, 232, 0.35)',
@@ -220,11 +222,13 @@ export default function Trophy({ winner, lines = [] }) {
             TODAY
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("hof")}
-            className={`flex-1 py-2 rounded-xl text-sm transition-all duration-200 press-scale`}
+            className={`flex-1 py-2 text-sm transition-all duration-200 press-scale`}
             style={{
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.05em',
+              fontFamily: 'var(--font-headline)',
+              fontStyle: 'italic',
+              letterSpacing: '-0.02em',
               fontSize: '14px',
               backgroundColor: activeTab === "hof" ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
               color: activeTab === "hof" ? '#F59E0B' : 'rgba(245, 240, 232, 0.35)',
@@ -238,10 +242,11 @@ export default function Trophy({ winner, lines = [] }) {
         {/* ─── TODAY TAB ─── */}
         {activeTab === "today" && (
           <div
-            className="trophy-card relative rounded-2xl overflow-hidden"
+            className="trophy-card relative overflow-hidden structural-card"
             style={{
               backgroundColor: '#1A1A1A',
               boxShadow: 'var(--shadow-card-shame)',
+              borderColor: '#E8353A',
             }}
           >
             {/* Glow effect */}
@@ -274,6 +279,7 @@ export default function Trophy({ winner, lines = [] }) {
                   </span>
                   <div className="flex items-center gap-1.5 ml-auto shrink-0">
                     <button
+                      type="button"
                       onClick={handleShare}
                       disabled={shareState === "working"}
                       className="text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 press-scale disabled:opacity-60"
@@ -302,8 +308,11 @@ export default function Trophy({ winner, lines = [] }) {
                       {shareLabel}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setExpanded((v) => !v)}
                       className="text-xs transition-colors px-2 py-1 rounded-lg press-scale"
+                      aria-controls="trophy-details-panel"
+                      aria-expanded={expanded}
                       style={{ color: 'rgba(245, 240, 232, 0.4)' }}
                     >
                       {expanded ? "↑ Hide" : "↓ Details"}
@@ -315,7 +324,7 @@ export default function Trophy({ winner, lines = [] }) {
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="flex items-center gap-1">
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
                     </span>
                     <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>LIVE</span>
@@ -336,7 +345,11 @@ export default function Trophy({ winner, lines = [] }) {
 
             {/* ── EXPANDED DETAILS ── */}
             {expanded && (
-              <div className="relative z-10 px-5 pb-5 pt-1" style={{ borderTop: '1px solid rgba(245, 240, 232, 0.05)' }}>
+              <div
+                id="trophy-details-panel"
+                className="relative z-10 px-5 pb-5 pt-1"
+                style={{ borderTop: '1px solid rgba(245, 240, 232, 0.05)' }}
+              >
                 <p className="text-xs uppercase tracking-widest mb-4 text-center" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
                   {headline}
                 </p>
@@ -454,6 +467,7 @@ export default function Trophy({ winner, lines = [] }) {
 
                 <div className="text-center">
                   <button
+                    type="button"
                     onClick={() => setExpanded(false)}
                     className="text-xs transition-colors press-scale"
                     style={{ color: 'rgba(245, 240, 232, 0.35)' }}
@@ -469,10 +483,11 @@ export default function Trophy({ winner, lines = [] }) {
         {/* ─── HALL OF FAME TAB ─── */}
         {activeTab === "hof" && (
           <div
-            className="relative rounded-2xl p-6 sm:p-8 overflow-hidden"
+            className="relative p-6 sm:p-8 overflow-hidden structural-card"
             style={{
               backgroundColor: '#1A1A1A',
               boxShadow: 'var(--shadow-card)',
+              borderColor: 'rgba(245, 240, 232, 0.12)',
             }}
           >
             {/* Glow */}
@@ -521,7 +536,7 @@ export default function Trophy({ winner, lines = [] }) {
                       return (
                         <div
                           key={entry.date}
-                          className="flex items-center gap-4 rounded-xl px-4 py-3"
+                          className="flex items-center gap-4 px-4 py-3"
                           style={{
                             backgroundColor: `${entryColor}10`,
                             boxShadow: 'var(--shadow-card)',
@@ -581,6 +596,7 @@ export default function Trophy({ winner, lines = [] }) {
 
                   <div className="text-center mt-5">
                     <button
+                      type="button"
                       onClick={handleResetHof}
                       className="text-xs underline transition-colors press-scale"
                       style={{ color: 'rgba(245, 240, 232, 0.25)' }}
@@ -596,11 +612,4 @@ export default function Trophy({ winner, lines = [] }) {
       </div>
     </>
   );
-}
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `${r},${g},${b}`;
 }

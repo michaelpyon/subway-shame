@@ -10,44 +10,55 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
 
   return (
     <header>
-      {/* Top MTA color bar — thinner accent */}
-      <div className="h-0.5 w-full flex">
+      {/* MTA color stripe — thicker accent */}
+      <div className="h-1 w-full flex">
         {MTA_COLORS.map((color, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: color }} />
         ))}
       </div>
 
-      <div className="px-4 pt-7 pb-4 text-center max-w-2xl mx-auto">
-        {/* Wordmark */}
+      <div className="px-4 pt-6 pb-4 max-w-2xl mx-auto">
+        {/* Wordmark — Epilogue italic with red underline */}
         <h1
-          className="tracking-wide"
+          className="inline-block"
           style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(32px, 8vw, 48px)',
+            fontFamily: 'var(--font-headline)',
+            fontWeight: 900,
+            fontStyle: 'italic',
+            fontSize: 'clamp(32px, 9vw, 44px)',
             lineHeight: 1,
             color: '#F5F0E8',
-            letterSpacing: '0.04em',
+            letterSpacing: '-0.03em',
+            textTransform: 'uppercase',
+            borderBottom: '4px solid #E8353A',
+            paddingBottom: '4px',
           }}
         >
           THE LOW LINE
         </h1>
-        <p
-          className="mt-1.5"
-          style={{
-            fontFamily: 'var(--font-body)',
-            fontWeight: 400,
-            color: 'rgba(245, 240, 232, 0.5)',
-            fontSize: '13px',
-          }}
-        >
-          Is My Train Fucked?
-        </p>
+
+        {/* Subtitle — mono, Signal Red */}
+        <div className="flex items-center gap-2 mt-2">
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              color: '#E8353A',
+              fontSize: '10px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Is My Train Fucked?
+          </p>
+          <div className="w-2 h-2 rounded-full motion-reduce:animate-none" style={{ backgroundColor: '#E8353A', animation: 'verdict-pulse-green 2s ease-out infinite' }} />
+        </div>
 
         {/* Status row */}
-        <div className="flex items-center justify-center gap-3 mt-3 text-xs" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
+        <div className="flex flex-wrap items-center gap-3 mt-3 text-xs" aria-live="polite" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
           {timeAgo ? (
             <span className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : refreshing ? "bg-green-500 animate-pulse" : "bg-green-600"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : refreshing ? "bg-green-500 animate-pulse motion-reduce:animate-none" : "bg-green-600"}`} />
               <span>Updated {timeAgo}</span>
             </span>
           ) : (
@@ -65,6 +76,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           )}
 
           <button
+            type="button"
             onClick={onRefresh}
             disabled={loading}
             className="p-1 rounded transition-colors disabled:opacity-30 press-scale"
@@ -73,7 +85,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             aria-label="Refresh now"
           >
             <svg
-              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin motion-reduce:animate-none" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -88,25 +100,24 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           </button>
         </div>
 
-        {/* "Is My Train Fucked?" CTA — Signal Red, Bebas Neue, unmissable */}
+        {/* CTA button — tighter */}
         {onOpenChecker && (
           <div className="mt-4">
             <button
+              type="button"
               onClick={onOpenChecker}
               className="press-scale"
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '16px',
+                fontSize: '15px',
                 letterSpacing: '0.05em',
                 backgroundColor: '#E8353A',
                 color: '#F5F0E8',
                 border: '2px solid #F5F0E8',
-                borderRadius: '6px',
-                padding: '10px 20px',
+                borderRadius: '0px',
+                padding: '8px 18px',
                 cursor: 'pointer',
-                transitionProperty: 'scale, background-color',
-                transitionDuration: '120ms',
-                transitionTimingFunction: 'ease-out',
+                boxShadow: '3px 3px 0px 0px rgba(0,0,0,0.5)',
               }}
             >
               IS MY TRAIN FUCKED?

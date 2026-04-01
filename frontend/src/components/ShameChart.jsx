@@ -43,7 +43,7 @@ function getLineColor(lineId) {
   return isYellow ? "#D4A50A" : LINE_COLORS[lineId] || "#808183";
 }
 
-function EndpointBadge({ cx, cy, index, dataLength, lineId, color, offsetMap }) {
+function EndpointBadge({ cx, cy, index, dataLength, lineId, offsetMap }) {
   if (index !== dataLength - 1) return null;
   if (cx == null || cy == null) return null;
 
@@ -285,7 +285,6 @@ export default function ShameChart({ timeseries }) {
                       {...props}
                       dataLength={dataLength}
                       lineId={lineId}
-                      color={color}
                       offsetMap={offsetMap}
                     />
                   )}
@@ -307,12 +306,15 @@ export default function ShameChart({ timeseries }) {
                 : 0;
             return (
               <button
+                type="button"
                 key={lineId}
                 className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs transition-opacity press-scale ${
                   hoveredLine && hoveredLine !== lineId
                     ? "opacity-30"
                     : "opacity-100"
                 }`}
+                aria-label={`${hoveredLine === lineId ? "Show all lines" : `Highlight ${lineId} train`} in the chart`}
+                aria-pressed={hoveredLine === lineId}
                 style={{ backgroundColor: '#2A2A2A' }}
                 onMouseEnter={() => setHoveredLine(lineId)}
                 onMouseLeave={() => setHoveredLine(null)}

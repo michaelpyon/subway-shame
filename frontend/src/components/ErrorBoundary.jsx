@@ -17,7 +17,7 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4">
+        <div className="min-h-dvh bg-gray-950 text-white flex flex-col items-center justify-center px-4">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🚇</div>
@@ -45,6 +45,7 @@ export default class ErrorBoundary extends Component {
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-colors"
+              type="button"
             >
               Refresh
             </button>

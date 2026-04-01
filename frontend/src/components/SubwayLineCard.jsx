@@ -146,6 +146,10 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
       ? line.status
       : "Issues earlier today";
 
+  const handleToggle = () => {
+    if (hasContent) setExpanded(!expanded);
+  };
+
   return (
     <div
       className={`rounded-xl overflow-hidden transition-shadow relative ${
@@ -158,9 +162,17 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
       }}
       onMouseEnter={(e) => hasContent && (e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'var(--shadow-card)')}
-      onClick={() => hasContent && setExpanded(!expanded)}
+      onClick={handleToggle}
+      onKeyDown={(e) => {
+        if (!hasContent) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
       role={hasContent ? "button" : undefined}
       aria-expanded={hasContent ? expanded : undefined}
+      tabIndex={hasContent ? 0 : undefined}
     >
       {/* Relative score background bar */}
       {dailyScore > 0 && (

@@ -31,7 +31,7 @@ const PREVIEW_BAR_WIDTHS = [
 
 export default function OfflineState({ onRetry, loading }) {
   return (
-    <div className="min-h-screen antialiased" style={{ backgroundColor: '#0A0A0A', color: '#F5F0E8' }}>
+    <div className="min-h-dvh antialiased" style={{ backgroundColor: '#0A0A0A', color: '#F5F0E8' }}>
       {/* Top MTA color bar */}
       <div className="h-0.5 w-full flex">
         {MTA_LINE_COLORS.map((color, i) => (
@@ -70,10 +70,11 @@ export default function OfflineState({ onRetry, loading }) {
       <div className="max-w-md mx-auto px-4 mt-2">
         <div className="text-center py-3">
           <div className="flex items-center justify-center gap-1.5 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse motion-reduce:animate-none" />
             <span className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
           </div>
           <button
+            type="button"
             onClick={onRetry}
             disabled={loading}
             className="px-3 py-1 text-xs rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed press-scale"
@@ -81,7 +82,7 @@ export default function OfflineState({ onRetry, loading }) {
           >
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-2.5 h-2.5 rounded-full animate-spin" style={{ border: '1px solid rgba(245, 240, 232, 0.3)', borderTopColor: 'rgba(245, 240, 232, 0.6)' }} />
+                <span className="inline-block w-2.5 h-2.5 rounded-full animate-spin motion-reduce:animate-none" style={{ border: '1px solid rgba(245, 240, 232, 0.3)', borderTopColor: 'rgba(245, 240, 232, 0.6)' }} />
                 Checking...
               </span>
             ) : (

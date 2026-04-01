@@ -10,6 +10,7 @@
   --color-signal-red: #E8353A;
 
   /* Typography */
+  --font-headline: 'Epilogue', system-ui, sans-serif;
   --font-display: 'Bebas Neue', system-ui, sans-serif;
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -45,9 +46,39 @@ body {
   font-family: var(--font-display);
 }
 
+.font-headline {
+  font-family: var(--font-headline);
+}
+
 .font-mono-data {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Structural card (Level 3 brutalist borders) ── */
+.structural-card {
+  border-top: 4px solid rgba(245, 240, 232, 0.12);
+  border-left: 4px solid rgba(245, 240, 232, 0.12);
+}
+
+/* ── Halftone texture overlay ── */
+.halftone {
+  background-image: radial-gradient(rgba(245, 240, 232, 0.04) 1px, transparent 0);
+  background-size: 4px 4px;
+}
+
+/* ── Severity section headers ── */
+.severity-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  font-family: var(--font-headline);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
 }
 
 /* ── Severity Labels (stamped badges — left-border accent) ── */
@@ -171,4 +202,30 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-platform);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-section,
+  .verdict-shake,
+  .verdict-pulse-green {
+    animation: none !important;
+    filter: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .alert-marquee {
+    white-space: normal;
+  }
+
+  .alert-marquee-track {
+    animation: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .press-scale {
+    transition: none;
+  }
 }

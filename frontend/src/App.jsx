@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState } from "react";
 import { useSubwayData } from "./hooks/useSubwayData";
-import { ALL_GOOD_MESSAGES } from "./constants/lines";
 import Header from "./components/Header";
 import Trophy from "./components/Trophy";
-import Podium from "./components/Podium";
+import SystemHealth from "./components/SystemHealth";
+import LeaderboardTicker from "./components/LeaderboardTicker";
 import ShameChart from "./components/ShameChart";
 import LineGrid from "./components/LineGrid";
 import ScoringExplainer from "./components/ScoringExplainer";
@@ -16,29 +16,7 @@ import "./App.css";
 export default function App() {
   const { data, loading, error, lastUpdated, refreshing, secondsUntilRefresh, refresh } = useSubwayData();
 
-  const allGoodMsg = useMemo(
-    () => ALL_GOOD_MESSAGES[Math.floor(Math.random() * ALL_GOOD_MESSAGES.length)],
-    []
-  );
-
-  const [historyData, setHistoryData] = useState(null);
-  const [recordsData, setRecordsData] = useState(null);
   const [checkerOpen, setCheckerOpen] = useState(false);
-
-  // Fetch history once data is available
-  useEffect(() => {
-    if (!data) return;
-    const apiBase = import.meta.env.VITE_API_URL || "";
-    fetch(`${apiBase}/api/history?hours=72`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((json) => {
-        if (json) {
-          setHistoryData(json.history || null);
-          setRecordsData(json.records || null);
-        }
-      })
-      .catch(() => {});
-  }, [data]);
 
   // Full offline state
   if (error && !data) {
@@ -47,7 +25,7 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen antialiased"
+      className="min-h-dvh antialiased"
       style={{
         backgroundColor: '#0A0A0A',
         color: '#F5F0E8',
@@ -69,17 +47,17 @@ export default function App() {
         />
       </div>
 
-      {/* Alert marquee — system-wide disruption banner */}
+      {/* Alert marquee */}
       {data && data.lines && (
         <AlertMarquee lines={data.lines} />
       )}
 
-      {/* Soft error banner when we have stale data */}
+      {/* Soft error banner */}
       {error && data && (
         <div className="max-w-2xl mx-auto px-4 mb-2">
-          <div className="rounded-lg px-4 py-2 flex items-center justify-between gap-3" style={{ backgroundColor: 'rgba(113, 63, 18, 0.25)', border: '1px solid rgba(113, 63, 18, 0.35)' }}>
+          <div className="px-4 py-2 flex items-center justify-between gap-3" style={{ backgroundColor: 'rgba(113, 63, 18, 0.25)', border: '1px solid rgba(113, 63, 18, 0.35)' }}>
             <p className="text-yellow-600 text-xs">
-              Showing last known data — live feed unavailable. Backend may be waking up; auto-retries every 5 min.
+              Showing last known data. Auto-retries every 5 min.
             </p>
             <button
               onClick={refresh}
@@ -92,7 +70,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Loading state (first load only) */}
+      {/* Loading state */}
       {loading && !data && (
         <SkeletonLoader />
       )}
@@ -100,33 +78,40 @@ export default function App() {
       {/* Main content */}
       {data && (
         <>
-          {data.winner ? (
+          {/* System health summary */}
+          <div className="stagger-section">
+            <SystemHealth lines={data.lines || []} />
+          </div>
+
+          {/* Leaderboard ticker (replaces podium) */}
+          {data.winner && (
             <div className="stagger-section">
-              <div className="space-y-2">
-                <Trophy winner={data.winner} lines={data.lines || []} />
-                {data.podium && data.podium.length > 1 && (
-                  <Podium podium={data.podium} date={data.date} />
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="stagger-section text-center py-12 px-4">
-              <div className="text-5xl mb-4">🎉</div>
-              <p className="text-xl font-semibold max-w-md mx-auto" style={{ color: '#F5F0E8' }}>
-                {allGoodMsg}
-              </p>
+              <LeaderboardTicker podium={data.podium || []} />
             </div>
           )}
+
+          {/* Trophy / winner card */}
+          {data.winner && (
+            <div className="stagger-section">
+              <Trophy winner={data.winner} lines={data.lines || []} />
+            </div>
+          )}
+
+          {/* Shame chart */}
           {data.timeseries && data.timeseries.length > 0 && (
             <div className="stagger-section">
               <ShameChart timeseries={data.timeseries} />
             </div>
           )}
+
+          {/* Scoring explainer */}
           <div className="stagger-section">
             <ScoringExplainer />
           </div>
+
+          {/* Line grid — severity grouped */}
           <div className="stagger-section">
-            <LineGrid lines={data.lines} history={historyData} records={recordsData} />
+            <LineGrid lines={data.lines} />
           </div>
         </>
       )}
@@ -137,51 +122,67 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="stagger-section text-center text-xs py-6 px-4" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
-        {/* FML easter egg */}
-        <div className="flex items-center justify-center gap-1.5 mb-3" title="F*** My Life" aria-label="F M L train lines — 14 St / 6 Av">
-          {[
-            { id: "F", color: "#FF6319" },
-            { id: "M", color: "#FF6319" },
-            { id: "L", color: "#A7A9AC" },
-          ].map(({ id, color }) => (
-            <div
-              key={id}
-              className="w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] shrink-0"
-              style={{ backgroundColor: color, color: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-            >
-              {id}
-            </div>
-          ))}
-          <span className="text-[9px] tracking-widest uppercase ml-1" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(245, 240, 232, 0.2)' }}>14 St · 6 Av</span>
+      <footer className="stagger-section max-w-2xl mx-auto px-4 py-8">
+        {/* Terminal footer */}
+        <div
+          className="text-center py-4 mb-4"
+          style={{ border: '2px dashed rgba(245, 240, 232, 0.1)' }}
+        >
+          <p
+            className="text-xs leading-relaxed mb-2"
+            style={{
+              fontFamily: 'var(--font-headline)',
+              fontWeight: 800,
+              fontStyle: 'italic',
+              color: 'rgba(245, 240, 232, 0.2)',
+              textTransform: 'uppercase',
+            }}
+          >
+            All service is theoretical.<br />
+            Do not rely on schedules.
+          </p>
+          <p
+            className="text-[10px] uppercase tracking-widest"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              color: 'rgba(245, 240, 232, 0.12)',
+            }}
+          >
+            DATA: MTA GTFS-RT · REFRESH: 300s · COVERAGE: 24 LINES
+          </p>
         </div>
-        <p>
-          Data from{" "}
-          <a
-            href="https://api.mta.info/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline transition-colors"
-            style={{ color: 'rgba(245, 240, 232, 0.35)' }}
-          >
-            MTA GTFS-RT feeds
-          </a>
-        </p>
-        <p className="mt-1">
-          For entertainment purposes. The MTA has enough problems.
-        </p>
-        <p className="mt-2">
-          Built by{" "}
-          <a
-            href="https://pyon.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline transition-colors"
-            style={{ color: 'rgba(245, 240, 232, 0.35)' }}
-          >
-            Michael Pyon
-          </a>
-        </p>
+
+        {/* FML easter egg */}
+        <div className="text-center" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>
+          <div className="flex items-center justify-center gap-1.5 mb-3" title="F*** My Life" aria-label="F M L train lines">
+            {[
+              { id: "F", color: "#FF6319" },
+              { id: "M", color: "#FF6319" },
+              { id: "L", color: "#A7A9AC" },
+            ].map(({ id, color }) => (
+              <div
+                key={id}
+                className="w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] shrink-0"
+                style={{ backgroundColor: color, color: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+              >
+                {id}
+              </div>
+            ))}
+            <span className="text-[9px] tracking-widest uppercase ml-1" style={{ fontFamily: 'var(--font-mono)' }}>14 St · 6 Av</span>
+          </div>
+          <p className="text-xs">
+            Built by{" "}
+            <a
+              href="https://pyon.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'rgba(245, 240, 232, 0.3)' }}
+            >
+              Michael Pyon
+            </a>
+          </p>
+        </div>
       </footer>
     </div>
   );
