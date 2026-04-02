@@ -2,17 +2,57 @@
 
 /* ── Brand Palette ── */
 :root {
-  /* Colors */
-  --color-tunnel: #0A0A0A;
+  /* Core Colors */
+  --color-tunnel: #000000;
   --color-platform: #F5F0E8;
   --color-ballast: #1A1A1A;
   --color-concrete: #2A2A2A;
   --color-signal-red: #E8353A;
 
+  /* Stitch: Gold accent system */
+  --color-gold: #ffd700;
+  --color-gold-dim: #e9c400;
+  --color-cream: #fff6df;
+
+  /* Stitch: Surface scale */
+  --color-surface: #131313;
+  --color-surface-container: #1f1f1f;
+  --color-surface-container-high: #2a2a2a;
+  --color-surface-container-highest: #353535;
+  --color-surface-container-low: #1b1b1b;
+  --color-surface-bright: #393939;
+  --color-on-surface: #e2e2e2;
+  --color-on-surface-variant: #d0c6ab;
+
+  /* Stitch: Semantic colors */
+  --color-primary: #fff6df;
+  --color-primary-container: #ffd700;
+  --color-primary-fixed-dim: #e9c400;
+  --color-secondary: #ffb4aa;
+  --color-secondary-container: #bb030f;
+  --color-tertiary: #f6f5ff;
+  --color-tertiary-container: #d0d8ff;
+  --color-outline: #999077;
+  --color-outline-variant: #4d4732;
+
+  /* Stitch: MTA line colors */
+  --mta-123: #EE352E;
+  --mta-456: #00933C;
+  --mta-7: #B933AD;
+  --mta-ace: #0039A6;
+  --mta-bdfm: #FF6319;
+  --mta-nqrw: #FCCC0A;
+  --mta-g: #6CBE45;
+  --mta-jz: #996633;
+  --mta-l: #A7A9AC;
+  --mta-s: #808183;
+  --mta-sir: #003DA5;
+
   /* Typography */
   --font-headline: 'Epilogue', system-ui, sans-serif;
   --font-display: 'Bebas Neue', system-ui, sans-serif;
   --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-label: 'Lexend', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Shadows (ink-bleed system — hard offset, industrial) */
@@ -26,6 +66,8 @@
     0px 0px 0px 1px rgba(232, 53, 58, 0.30),
     4px 4px 0px 0px rgba(232, 53, 58, 0.15),
     0px 0px 20px -4px rgba(232, 53, 58, 0.15);
+  --shadow-gold-glow:
+    0 0 10px rgba(255, 215, 0, 0.6);
 }
 
 html {
@@ -53,6 +95,37 @@ body {
 .font-mono-data {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+.font-label {
+  font-family: var(--font-label);
+}
+
+/* ── Stitch: Receipt edge (torn paper bottom) ── */
+.receipt-edge {
+  clip-path: polygon(
+    0% 0%, 100% 0%, 100% calc(100% - 6px),
+    97% 100%, 94% calc(100% - 6px), 91% 100%,
+    88% calc(100% - 6px), 85% 100%, 82% calc(100% - 6px),
+    79% 100%, 76% calc(100% - 6px), 73% 100%,
+    70% calc(100% - 6px), 67% 100%, 64% calc(100% - 6px),
+    61% 100%, 58% calc(100% - 6px), 55% 100%,
+    52% calc(100% - 6px), 49% 100%, 46% calc(100% - 6px),
+    43% 100%, 40% calc(100% - 6px), 37% 100%,
+    34% calc(100% - 6px), 31% 100%, 28% calc(100% - 6px),
+    25% 100%, 22% calc(100% - 6px), 19% 100%,
+    16% calc(100% - 6px), 13% 100%, 10% calc(100% - 6px),
+    7% 100%, 4% calc(100% - 6px), 1% 100%, 0% calc(100% - 6px)
+  );
+}
+
+/* ── Stitch: Gold glow header ── */
+.gold-glow {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+.gold-border-header {
+  border-bottom: 2px solid rgba(255, 215, 0, 0.2);
 }
 
 /* ── Structural card (Level 3 brutalist borders) ── */
