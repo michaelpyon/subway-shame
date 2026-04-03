@@ -14,7 +14,7 @@ export default function AlertMarquee({ lines }) {
       <span style={{ fontFamily: "var(--font-display)", letterSpacing: "0.06em" }}>
         ⚠ {label}
       </span>
-      <span style={{ color: "rgba(245, 240, 232, 0.5)" }}>·</span>
+      <span style={{ color: "var(--color-on-surface-variant)" }}>·</span>
       <span className="inline-flex items-center gap-1">
         {disrupted.map((l) => (
           <LineBadge key={l.id} lineId={l.id} size="xs" />
@@ -32,8 +32,8 @@ export default function AlertMarquee({ lines }) {
         aria-hidden="true"
         className="alert-marquee"
         style={{
-          backgroundColor: "#E8353A",
-          color: "#F5F0E8",
+          backgroundColor: "var(--color-signal-red)",
+          color: "var(--color-cream)",
           fontSize: "13px",
           fontWeight: 700,
           padding: "6px 0",

@@ -27,8 +27,8 @@ export default function App() {
     <div
       className="min-h-dvh antialiased"
       style={{
-        backgroundColor: '#0A0A0A',
-        color: '#F5F0E8',
+        backgroundColor: 'var(--color-tunnel)',
+        color: 'var(--color-cream)',
         backgroundImage: [
           'radial-gradient(circle at 20% 80%, rgba(232, 53, 58, 0.04) 0%, transparent 50%)',
           'radial-gradient(circle at 80% 20%, rgba(0, 57, 166, 0.04) 0%, transparent 50%)',
@@ -55,14 +55,15 @@ export default function App() {
       {/* Soft error banner */}
       {error && data && (
         <div className="max-w-2xl mx-auto px-4 mb-2">
-          <div className="px-4 py-2 flex items-center justify-between gap-3" style={{ backgroundColor: 'rgba(113, 63, 18, 0.25)', border: '1px solid rgba(113, 63, 18, 0.35)' }}>
-            <p className="text-yellow-600 text-xs">
+          <div className="px-4 py-2 flex items-center justify-between gap-3" style={{ backgroundColor: 'rgba(233, 196, 0, 0.12)', border: '1px solid rgba(233, 196, 0, 0.25)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-gold-dim)' }}>
               Showing last known data. Auto-retries every 5 min.
             </p>
             <button
               onClick={refresh}
               disabled={loading}
-              className="text-yellow-600 text-xs underline hover:text-yellow-500 disabled:opacity-40 shrink-0 press-scale"
+              className="text-xs underline disabled:opacity-40 shrink-0 press-scale"
+              style={{ color: 'var(--color-gold-dim)' }}
             >
               Retry
             </button>
@@ -126,15 +127,13 @@ export default function App() {
         {/* Terminal footer */}
         <div
           className="text-center py-4 mb-4"
-          style={{ border: '2px dashed rgba(245, 240, 232, 0.1)' }}
+          style={{ border: '2px dashed var(--color-outline-variant)' }}
         >
           <p
-            className="text-xs leading-relaxed mb-2"
+            className="text-xs leading-relaxed mb-2 font-label"
             style={{
-              fontFamily: 'var(--font-headline)',
               fontWeight: 800,
-              fontStyle: 'italic',
-              color: 'rgba(245, 240, 232, 0.2)',
+              color: 'var(--color-outline)',
               textTransform: 'uppercase',
             }}
           >
@@ -145,7 +144,7 @@ export default function App() {
             className="text-[10px] uppercase tracking-widest"
             style={{
               fontFamily: 'var(--font-mono)',
-              color: 'rgba(245, 240, 232, 0.12)',
+              color: 'var(--color-outline-variant)',
             }}
           >
             DATA: MTA GTFS-RT · REFRESH: 300s · COVERAGE: 24 LINES
@@ -153,12 +152,12 @@ export default function App() {
         </div>
 
         {/* FML easter egg */}
-        <div className="text-center" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>
+        <div className="text-center" style={{ color: 'var(--color-outline)' }}>
           <div className="flex items-center justify-center gap-1.5 mb-3" title="F*** My Life" aria-label="F M L train lines">
             {[
-              { id: "F", color: "#FF6319" },
-              { id: "M", color: "#FF6319" },
-              { id: "L", color: "#A7A9AC" },
+              { id: "F", color: "var(--mta-bdfm)" },
+              { id: "M", color: "var(--mta-bdfm)" },
+              { id: "L", color: "var(--mta-l)" },
             ].map(({ id, color }) => (
               <div
                 key={id}
@@ -177,7 +176,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
-              style={{ color: 'rgba(245, 240, 232, 0.3)' }}
+              style={{ color: 'var(--color-on-surface-variant)' }}
             >
               Michael Pyon
             </a>

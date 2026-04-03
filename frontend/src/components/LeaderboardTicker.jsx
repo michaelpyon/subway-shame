@@ -12,7 +12,7 @@ export default function LeaderboardTicker({ podium }) {
       <div
         className="overflow-x-auto"
         style={{
-          border: '2px solid rgba(245, 240, 232, 0.15)',
+          border: '2px solid var(--color-outline-variant)',
           boxShadow: 'var(--shadow-card)',
         }}
       >
@@ -26,17 +26,17 @@ export default function LeaderboardTicker({ podium }) {
             return (
               <div key={line.id} className="flex items-center gap-4">
                 {i > 0 && (
-                  <div className="w-px h-4" style={{ backgroundColor: 'rgba(245, 240, 232, 0.12)' }} />
+                  <div className="w-px h-4" style={{ backgroundColor: 'var(--color-outline-variant)' }} />
                 )}
                 <div
                   className="flex items-center gap-2"
-                  style={{ color: i === 0 ? tier.color : 'rgba(245, 240, 232, 0.5)' }}
+                  style={{ color: i === 0 ? tier.color : 'var(--color-on-surface-variant)' }}
                 >
                   <span
-                    className="px-1 text-[10px]"
+                    className="px-1 text-[10px] font-label"
                     style={{
-                      backgroundColor: i === 0 ? tier.color : 'rgba(245, 240, 232, 0.15)',
-                      color: i === 0 ? '#0A0A0A' : 'rgba(245, 240, 232, 0.5)',
+                      backgroundColor: i === 0 ? tier.color : 'var(--color-outline-variant)',
+                      color: i === 0 ? 'var(--color-tunnel)' : 'var(--color-on-surface-variant)',
                     }}
                   >
                     #{i + 1}

@@ -110,7 +110,7 @@ function PlacePedestal({ config, lines }) {
         }}
       >
         {isTie && (
-          <span className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
+          <span className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'var(--color-outline)' }}>
             TIE
           </span>
         )}
@@ -120,19 +120,19 @@ function PlacePedestal({ config, lines }) {
         >
           {score}
         </span>
-        <span className="text-[9px]" style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>pts today</span>
+        <span className="text-[9px]" style={{ color: 'var(--color-outline)', fontFamily: 'var(--font-mono)' }}>pts today</span>
       </div>
 
       {/* Line names below */}
       <div className="text-center mt-2">
-        <span className="text-xs block" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+        <span className="text-xs block" style={{ color: 'var(--color-outline)' }}>
           {lines
             .map((l) => (l.id === "SI" ? "SIR" : `${l.id}`))
             .join(" & ")}{" "}
           {lines.length === 1 ? "Train" : "Trains"}
         </span>
         {isTie && (
-          <span className="text-[10px] block" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+          <span className="text-[10px] block" style={{ color: 'var(--color-outline-variant)' }}>
             Tied for {config.label}
           </span>
         )}
@@ -156,14 +156,14 @@ export default function Podium({ podium, date }) {
     <div className="px-4 pt-4 pb-4 max-w-2xl mx-auto">
       {/* Date badge */}
       {date && (
-        <p className="text-center text-xs uppercase tracking-widest mb-2" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+        <p className="text-center text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--color-outline)' }}>
           {date}
         </p>
       )}
 
       <h2
         className="text-center mb-4"
-        style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em' }}
+        style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-on-surface-variant)', letterSpacing: '0.04em' }}
       >
         TODAY'S PODIUM
       </h2>
@@ -186,7 +186,7 @@ export default function Podium({ podium, date }) {
       </div>
 
       {/* Bottom bar */}
-      <div className="h-2 rounded-full max-w-xs mx-auto" style={{ backgroundColor: '#2A2A2A' }} />
+      <div className="h-2 rounded-full max-w-xs mx-auto" style={{ backgroundColor: 'var(--color-concrete)' }} />
     </div>
   );
 }

@@ -17,46 +17,47 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-dvh bg-gray-950 text-white flex flex-col items-center justify-center px-4">
+        <div className="min-h-dvh flex flex-col items-center justify-center px-4" style={{ backgroundColor: 'var(--color-tunnel)', color: 'var(--color-cream)' }}>
           {/* Header */}
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🚇</div>
-            <h1 className="text-3xl font-black text-white tracking-tight mb-2">
-              Subway Shame
+            <h1 className="text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--color-cream)' }}>
+              The Low Line
             </h1>
             {/* MTA line color bar */}
             <div className="flex justify-center gap-1 mt-3">
               {["#EE352E","#00933C","#B933AD","#0039A6","#FF6319","#FCCC0A","#6CBE45","#A7A9AC"].map((c,i) => (
-                <div key={i} className="w-6 h-1.5 rounded-full" style={{ backgroundColor: c }} />
+                <div key={i} className="w-6 h-1.5" style={{ backgroundColor: c }} />
               ))}
             </div>
           </div>
 
           {/* Error card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full text-center">
+          <div className="p-8 max-w-md w-full text-center" style={{ backgroundColor: 'var(--color-ballast)', border: '1px solid var(--color-outline-variant)', boxShadow: 'var(--shadow-card)' }}>
             <div className="text-5xl mb-4">💀</div>
-            <h2 className="text-xl font-bold text-white mb-2">
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-cream)' }}>
               Something derailed
             </h2>
-            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-outline)' }}>
               The app hit an unexpected error. Even our tracker occasionally delays.
-              Try refreshing — it usually works on the second attempt, much like the MTA.
+              Try refreshing. It usually works on the second attempt, much like the MTA.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-colors"
+              className="px-6 py-2.5 font-bold text-sm transition-colors press-scale"
+              style={{ backgroundColor: 'var(--color-signal-red)', color: 'var(--color-cream)', border: '2px solid var(--color-cream)' }}
               type="button"
             >
               Refresh
             </button>
             {this.state.error && (
-              <p className="text-[10px] text-gray-700 mt-4 font-mono break-all">
+              <p className="text-[10px] mt-4 font-mono break-all" style={{ color: 'var(--color-outline-variant)' }}>
                 {this.state.error.message}
               </p>
             )}
           </div>
 
-          <p className="text-xs text-gray-700 mt-8">
+          <p className="text-xs mt-8" style={{ color: 'var(--color-outline-variant)' }}>
             For entertainment purposes. The MTA has enough problems.
           </p>
         </div>

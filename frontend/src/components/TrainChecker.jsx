@@ -273,9 +273,9 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       aria-describedby={isModal ? "train-checker-description" : undefined}
       aria-labelledby={isModal ? "train-checker-title" : undefined}
       aria-modal={isModal ? "true" : undefined}
-      className="rounded-2xl p-5 sm:p-6 relative"
+      className="p-5 sm:p-6 relative"
       role={isModal ? "dialog" : undefined}
-      style={{ backgroundColor: "#1A1A1A", boxShadow: "var(--shadow-card)" }}
+      style={{ backgroundColor: "var(--color-ballast)", boxShadow: "var(--shadow-card)" }}
       tabIndex={isModal ? -1 : undefined}
     >
       {isModal && (
@@ -283,7 +283,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
           aria-label="Close train checker"
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-lg leading-none press-scale"
           onClick={onClose}
-          style={{ backgroundColor: "#2A2A2A", color: "rgba(245, 240, 232, 0.4)" }}
+          style={{ backgroundColor: "var(--color-concrete)", color: "var(--color-outline)" }}
           type="button"
         >
           ×
@@ -293,16 +293,16 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       <h2
         className="text-center mb-1 pr-8"
         id="train-checker-title"
-        style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "#F5F0E8", letterSpacing: "0.04em" }}
+        style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "var(--color-cream)", letterSpacing: "0.04em" }}
       >
         IS MY TRAIN FUCKED?
       </h2>
-      <p className="text-xs text-center mb-5" id="train-checker-description" style={{ color: "rgba(245, 240, 232, 0.25)" }}>
+      <p className="text-xs text-center mb-5" id="train-checker-description" style={{ color: "var(--color-outline-variant)" }}>
         The only question that matters.
       </p>
 
       <div className="mb-4">
-        <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: "rgba(245, 240, 232, 0.3)" }}>
+        <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
           Pick your line
         </p>
         <div className="flex flex-wrap gap-1.5 justify-center">
@@ -329,8 +329,8 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
 
       {selectedLine && directions && (
         <div className="mb-4">
-          <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: "rgba(245, 240, 232, 0.3)" }}>
-            Which direction? <span style={{ color: "rgba(245, 240, 232, 0.15)" }}>(optional)</span>
+          <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
+            Which direction? <span style={{ color: "var(--color-outline-variant)" }}>(optional)</span>
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {directions.map((directionLabel, index) => (
@@ -341,8 +341,8 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
                 onClick={() => setSelectedDirection(selectedDirection === index ? null : index)}
                 style={
                   selectedDirection === index
-                    ? { backgroundColor: "rgba(245, 240, 232, 0.1)", border: "1px solid rgba(245, 240, 232, 0.3)", color: "#F5F0E8" }
-                    : { backgroundColor: "#2A2A2A", border: "1px solid rgba(245, 240, 232, 0.08)", color: "rgba(245, 240, 232, 0.4)" }
+                    ? { backgroundColor: "var(--color-outline-variant)", border: "1px solid var(--color-outline)", color: "var(--color-cream)" }
+                    : { backgroundColor: "var(--color-concrete)", border: "1px solid var(--color-outline-variant)", color: "var(--color-outline)" }
                 }
                 type="button"
               >
@@ -358,7 +358,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
           <button
             className="px-8 py-3 font-bold rounded-full text-sm transition-colors press-scale"
             onClick={handleCheck}
-            style={{ backgroundColor: "#E8353A", color: "#F5F0E8", fontFamily: "var(--font-display)", fontSize: "16px", letterSpacing: "0.04em" }}
+            style={{ backgroundColor: "var(--color-signal-red)", color: "var(--color-cream)", fontFamily: "var(--font-display)", fontSize: "16px", letterSpacing: "0.04em" }}
             type="button"
           >
             TELL ME THE TRUTH
@@ -369,7 +369,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       {showResult && verdict && (
         <div
           aria-live="polite"
-          className={`mt-5 rounded-xl p-5 text-center ${verdict.isBad ? "verdict-shake" : "verdict-pulse-green"}`}
+          className={`mt-5 p-5 text-center ${verdict.isBad ? "verdict-shake" : "verdict-pulse-green"}`}
           key={animKey}
           style={
             verdict.isBad
@@ -381,35 +381,35 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
             {verdict.isBad ? "\uD83D\uDC80" : "\u2705"}
           </div>
 
-          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? "#E8353A" : "#22C55E" }}>
+          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? "var(--color-signal-red)" : "#22C55E" }}>
             {verdict.message}
           </p>
 
           {verdict.dailyScore > 0 && (
-            <p className="text-sm mb-3" style={{ color: "rgba(245, 240, 232, 0.3)" }}>
+            <p className="text-sm mb-3" style={{ color: "var(--color-outline)" }}>
               The{" "}
               <span className="inline-flex items-center mx-0.5 align-middle">
                 <LineBadge lineId={selectedLine} size="sm" />
               </span>
-              {" "}has racked up <span className="font-bold" style={{ color: "#F5F0E8", fontFamily: "var(--font-display)" }}>{verdict.dailyScore}</span> shame points today.
+              {" "}has racked up <span className="font-bold" style={{ color: "var(--color-cream)", fontFamily: "var(--font-display)" }}>{verdict.dailyScore}</span> shame points today.
             </p>
           )}
 
           <button
             className="mt-1 mb-1 px-4 py-1.5 rounded-full text-xs font-medium transition-colors press-scale"
             onClick={handleShare}
-            style={{ backgroundColor: "rgba(245, 240, 232, 0.1)", color: "rgba(245, 240, 232, 0.5)" }}
+            style={{ backgroundColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
             type="button"
           >
             Share this verdict
           </button>
-          <p aria-live="polite" className="text-[10px] min-h-4" style={{ color: "rgba(245, 240, 232, 0.25)" }}>
+          <p aria-live="polite" className="text-[10px] min-h-4" style={{ color: "var(--color-outline-variant)" }}>
             {shareFeedback}
           </p>
 
           {relevantAlerts.length > 0 && verdict.isBad && (
             <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "rgba(245, 240, 232, 0.2)" }}>
+              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--color-outline-variant)" }}>
                 Here's why:
               </p>
               {relevantAlerts.map((alertLike, index) => {
@@ -422,7 +422,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
                   <div
                     className="text-xs rounded p-2 leading-relaxed"
                     key={index}
-                    style={{ backgroundColor: "rgba(10, 10, 10, 0.6)", color: "rgba(245, 240, 232, 0.4)" }}
+                    style={{ backgroundColor: "var(--color-surface)", color: "var(--color-outline)" }}
                   >
                     {config && (
                       <span
@@ -450,9 +450,9 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
         onClick={(event) => {
           if (event.target === event.currentTarget) onClose?.();
         }}
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
       >
-        <div className="rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
+        <div className="max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
           {innerContent}
         </div>
       </div>

@@ -61,7 +61,7 @@ function EndpointBadge({ cx, cy, index, dataLength, lineId, offsetMap }) {
         <line x1={cx} y1={cy} x2={adjustedCx} y2={cy} stroke={bgColor} strokeWidth={1.5} strokeDasharray="3 2" opacity={0.5} />
       )}
       <circle cx={adjustedCx} cy={cy} r={r + 3} fill={bgColor} opacity={0.25} />
-      <circle cx={adjustedCx} cy={cy} r={r} fill={bgColor} stroke="#0A0A0A" strokeWidth={2} />
+      <circle cx={adjustedCx} cy={cy} r={r} fill={bgColor} stroke="var(--color-tunnel)" strokeWidth={2} />
       <text
         x={adjustedCx}
         y={cy}
@@ -114,8 +114,8 @@ function CustomTooltip({ active, payload, label }) {
   if (sorted.length === 0) return null;
 
   return (
-    <div className="rounded-lg p-3 shadow-xl text-sm max-w-[220px]" style={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(245, 240, 232, 0.12)' }}>
-      <p className="text-xs mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'rgba(245, 240, 232, 0.4)' }}>{label}</p>
+    <div className="rounded-lg p-3 shadow-xl text-sm max-w-[220px]" style={{ backgroundColor: 'var(--color-ballast)', border: '1px solid var(--color-outline-variant)' }}>
+      <p className="text-xs mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-outline)' }}>{label}</p>
       <div className="space-y-1.5">
         {sorted.slice(0, 10).map((entry) => {
           const bgColor = LINE_COLORS[entry.dataKey] || "#808183";
@@ -135,11 +135,11 @@ function CustomTooltip({ active, payload, label }) {
                 >
                   {entry.dataKey}
                 </span>
-                <span className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.4)' }}>
+                <span className="text-xs" style={{ color: 'var(--color-outline)' }}>
                   {entry.dataKey.length <= 1 ? `${entry.dataKey} Train` : entry.dataKey}
                 </span>
               </div>
-              <span className="font-bold tabular-nums" style={{ color: '#F5F0E8', fontFamily: 'var(--font-mono)' }}>
+              <span className="font-bold tabular-nums" style={{ color: 'var(--color-cream)', fontFamily: 'var(--font-mono)' }}>
                 {entry.value.toLocaleString()} pts
               </span>
             </div>
@@ -191,15 +191,15 @@ export default function ShameChart({ timeseries }) {
       <div className="px-4 py-6 max-w-2xl mx-auto">
         <h2
           className="text-lg font-semibold mb-3"
-          style={{ fontFamily: 'var(--font-display)', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em', fontSize: '22px' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-on-surface-variant)', letterSpacing: '0.04em', fontSize: '22px' }}
         >
           TODAY'S SHAME RACE
         </h2>
-        <div className="rounded-xl p-8 text-center" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-sm" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+        <div className="p-8 text-center" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-outline)' }}>
             Chart builds throughout the day as data is collected.
           </p>
-          <p className="text-xs mt-2" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>
+          <p className="text-xs mt-2" style={{ color: 'var(--color-outline-variant)' }}>
             {timeseries.length === 1
               ? "1 reading captured — check back in ~15 min for the trend line."
               : "No readings yet. The chart will appear once data starts coming in."}
@@ -215,16 +215,16 @@ export default function ShameChart({ timeseries }) {
     <div className="px-4 py-6 max-w-2xl mx-auto">
       <h2
         className="text-lg font-semibold mb-1"
-        style={{ fontFamily: 'var(--font-display)', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em', fontSize: '22px' }}
+        style={{ fontFamily: 'var(--font-display)', color: 'var(--color-on-surface-variant)', letterSpacing: '0.04em', fontSize: '22px' }}
       >
         TODAY'S SHAME RACE
       </h2>
-      <p className="text-xs mb-4" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+      <p className="text-xs mb-4" style={{ color: 'var(--color-outline)' }}>
         How shame points have accumulated since midnight — higher line = worse performance today.
         Points reset at midnight.
       </p>
 
-      <div className="rounded-xl p-4 sm:p-6 overflow-x-auto" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
+      <div className="p-4 sm:p-6 overflow-x-auto" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
         <div className="min-w-[320px]">
         <ResponsiveContainer width="100%" height={300} minHeight={240}>
           <AreaChart
@@ -288,7 +288,7 @@ export default function ShameChart({ timeseries }) {
                       offsetMap={offsetMap}
                     />
                   )}
-                  activeDot={{ r: 5, fill: color, stroke: "#0A0A0A", strokeWidth: 2 }}
+                  activeDot={{ r: 5, fill: color, stroke: "var(--color-tunnel)", strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               );
@@ -315,7 +315,7 @@ export default function ShameChart({ timeseries }) {
                 }`}
                 aria-label={`${hoveredLine === lineId ? "Show all lines" : `Highlight ${lineId} train`} in the chart`}
                 aria-pressed={hoveredLine === lineId}
-                style={{ backgroundColor: '#2A2A2A' }}
+                style={{ backgroundColor: 'var(--color-concrete)' }}
                 onMouseEnter={() => setHoveredLine(lineId)}
                 onMouseLeave={() => setHoveredLine(null)}
                 onClick={() =>
@@ -323,7 +323,7 @@ export default function ShameChart({ timeseries }) {
                 }
               >
                 <LineBadge lineId={lineId} size="sm" />
-                <span className="tabular-nums font-medium" style={{ color: 'rgba(245, 240, 232, 0.4)', fontFamily: 'var(--font-mono)' }}>
+                <span className="tabular-nums font-medium" style={{ color: 'var(--color-outline)', fontFamily: 'var(--font-mono)' }}>
                   {lastVal}
                 </span>
               </button>

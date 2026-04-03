@@ -27,10 +27,10 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             fontStyle: 'italic',
             fontSize: 'clamp(32px, 9vw, 44px)',
             lineHeight: 1,
-            color: '#F5F0E8',
+            color: 'var(--color-cream)',
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
-            borderBottom: '4px solid #E8353A',
+            borderBottom: '4px solid var(--color-signal-red)',
             paddingBottom: '4px',
           }}
         >
@@ -41,9 +41,9 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
         <div className="flex items-center gap-2 mt-2">
           <p
             style={{
-              fontFamily: 'var(--font-mono)',
+              fontFamily: 'var(--font-label)',
               fontWeight: 700,
-              color: '#E8353A',
+              color: 'var(--color-signal-red)',
               fontSize: '10px',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
@@ -51,26 +51,26 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           >
             Is My Train Fucked?
           </p>
-          <div className="w-2 h-2 rounded-full motion-reduce:animate-none" style={{ backgroundColor: '#E8353A', animation: 'verdict-pulse-green 2s ease-out infinite' }} />
+          <div className="w-2 h-2 rounded-full motion-reduce:animate-none" style={{ backgroundColor: 'var(--color-signal-red)', animation: 'verdict-pulse-green 2s ease-out infinite' }} />
         </div>
 
         {/* Status row */}
-        <div className="flex flex-wrap items-center gap-3 mt-3 text-xs" aria-live="polite" style={{ color: 'rgba(245, 240, 232, 0.35)' }}>
+        <div className="flex flex-wrap items-center gap-3 mt-3 text-xs font-label" aria-live="polite" style={{ color: 'var(--color-outline)' }}>
           {timeAgo ? (
             <span className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${error ? "bg-yellow-600" : refreshing ? "bg-green-500 animate-pulse motion-reduce:animate-none" : "bg-green-600"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${error ? "" : refreshing ? "animate-pulse motion-reduce:animate-none" : ""}`} style={{ backgroundColor: error ? 'var(--color-gold-dim)' : '#22C55E' }} />
               <span>Updated {timeAgo}</span>
             </span>
           ) : (
             <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#2A2A2A' }} />
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-concrete)' }} />
               <span>Connecting…</span>
             </span>
           )}
 
           {timeAgo && (
             <>
-              <span style={{ color: 'rgba(245, 240, 232, 0.15)' }}>·</span>
+              <span style={{ color: 'var(--color-outline-variant)' }}>·</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>Next in {countdown}</span>
             </>
           )}
@@ -79,8 +79,8 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="p-1 rounded transition-colors disabled:opacity-30 press-scale"
-            style={{ color: 'rgba(245, 240, 232, 0.35)' }}
+            className="p-1 transition-colors disabled:opacity-30 press-scale"
+            style={{ color: 'var(--color-outline)' }}
             title="Refresh now"
             aria-label="Refresh now"
           >
@@ -111,13 +111,13 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
                 fontFamily: 'var(--font-display)',
                 fontSize: '15px',
                 letterSpacing: '0.05em',
-                backgroundColor: '#E8353A',
-                color: '#F5F0E8',
-                border: '2px solid #F5F0E8',
+                backgroundColor: 'var(--color-signal-red)',
+                color: 'var(--color-cream)',
+                border: '2px solid var(--color-cream)',
                 borderRadius: '0px',
                 padding: '8px 18px',
                 cursor: 'pointer',
-                boxShadow: '3px 3px 0px 0px rgba(0,0,0,0.5)',
+                boxShadow: 'var(--shadow-card)',
               }}
             >
               IS MY TRAIN FUCKED?

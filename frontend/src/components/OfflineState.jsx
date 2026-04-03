@@ -31,7 +31,7 @@ const PREVIEW_BAR_WIDTHS = [
 
 export default function OfflineState({ onRetry, loading }) {
   return (
-    <div className="min-h-dvh antialiased" style={{ backgroundColor: '#0A0A0A', color: '#F5F0E8' }}>
+    <div className="min-h-dvh antialiased" style={{ backgroundColor: 'var(--color-tunnel)', color: 'var(--color-cream)' }}>
       {/* Top MTA color bar */}
       <div className="h-0.5 w-full flex">
         {MTA_LINE_COLORS.map((color, i) => (
@@ -47,7 +47,7 @@ export default function OfflineState({ onRetry, loading }) {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(32px, 8vw, 48px)',
             lineHeight: 1,
-            color: '#F5F0E8',
+            color: 'var(--color-cream)',
             letterSpacing: '0.04em',
           }}
         >
@@ -58,7 +58,7 @@ export default function OfflineState({ onRetry, loading }) {
           style={{
             fontFamily: 'var(--font-body)',
             fontWeight: 400,
-            color: 'rgba(245, 240, 232, 0.5)',
+            color: 'var(--color-on-surface-variant)',
             fontSize: '13px',
           }}
         >
@@ -71,14 +71,14 @@ export default function OfflineState({ onRetry, loading }) {
         <div className="text-center py-3">
           <div className="flex items-center justify-center gap-1.5 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse motion-reduce:animate-none" />
-            <span className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
+            <span className="text-xs" style={{ color: 'var(--color-outline)' }}>Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
           </div>
           <button
             type="button"
             onClick={onRetry}
             disabled={loading}
             className="px-3 py-1 text-xs rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed press-scale"
-            style={{ color: 'rgba(245, 240, 232, 0.3)', border: '1px solid rgba(245, 240, 232, 0.1)' }}
+            style={{ color: 'var(--color-outline)', border: '1px solid var(--color-outline-variant)' }}
           >
             {loading ? (
               <span className="flex items-center gap-1.5">
@@ -94,21 +94,21 @@ export default function OfflineState({ onRetry, loading }) {
 
       {/* Is My Train Fucked — preview */}
       <div className="max-w-2xl mx-auto px-4 py-5">
-        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
+        <div className=" p-5 relative overflow-hidden" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
           {/* Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-10 backdrop-blur-[1px]" style={{ backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
-            <div className="rounded-lg px-4 py-2.5" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
-              <span className="text-sm font-medium" style={{ color: 'rgba(245, 240, 232, 0.5)' }}>Available when live data connects</span>
+          <div className="absolute inset-0 flex items-center justify-center  z-10 backdrop-blur-[1px]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
+            <div className="rounded-lg px-4 py-2.5" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
+              <span className="text-sm font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>Available when live data connects</span>
             </div>
           </div>
 
           <h2
             className="text-center mb-1"
-            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#F5F0E8', letterSpacing: '0.04em' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', letterSpacing: '0.04em' }}
           >
             IS MY TRAIN FUCKED?
           </h2>
-          <p className="text-xs text-center mb-4" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+          <p className="text-xs text-center mb-4" style={{ color: 'var(--color-outline-variant)' }}>
             The only question that matters.
           </p>
           {/* All line badges */}
@@ -124,11 +124,11 @@ export default function OfflineState({ onRetry, loading }) {
       <div className="max-w-2xl mx-auto px-4 pb-8">
         <div className="flex items-center gap-3 mb-4">
           <h2
-            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'rgba(245, 240, 232, 0.5)', letterSpacing: '0.04em' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-on-surface-variant)', letterSpacing: '0.04em' }}
           >
             LIVE RANKINGS
           </h2>
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'rgba(245, 240, 232, 0.25)', border: '1px solid rgba(245, 240, 232, 0.1)' }}>
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-outline-variant)', border: '1px solid var(--color-outline-variant)' }}>
             Preview
           </span>
         </div>
@@ -143,14 +143,14 @@ export default function OfflineState({ onRetry, loading }) {
               <div
                 key={id}
                 className="rounded-lg overflow-hidden"
-                style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}
+                style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}
               >
                 <div className="p-4">
                   {/* Top row: badge + name + score */}
                   <div className="flex items-center gap-3">
                     <LineBadge lineId={id} size="md" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm" style={{ color: '#F5F0E8' }}>
+                      <div className="font-semibold text-sm" style={{ color: 'var(--color-cream)' }}>
                         {id} Train
                       </div>
                       <div
@@ -191,7 +191,7 @@ export default function OfflineState({ onRetry, loading }) {
                   {/* Breakdown bar skeleton */}
                   {hasScore && barWidths && (
                     <div className="mt-3">
-                      <div className="h-2 rounded-full overflow-hidden flex" style={{ backgroundColor: '#2A2A2A' }}>
+                      <div className="h-2 rounded-full overflow-hidden flex" style={{ backgroundColor: 'var(--color-concrete)' }}>
                         {barWidths.map((w, i) => w > 0 && (
                           <div
                             key={i}
@@ -212,13 +212,13 @@ export default function OfflineState({ onRetry, loading }) {
           })}
         </div>
 
-        <p className="text-center text-xs mt-4" style={{ color: 'rgba(245, 240, 232, 0.15)' }}>
+        <p className="text-center text-xs mt-4" style={{ color: 'var(--color-outline-variant)' }}>
           Sample data — live scores will load once the backend connects
         </p>
       </div>
 
       {/* Footer */}
-      <footer className="text-center text-xs py-6 px-4" style={{ color: 'rgba(245, 240, 232, 0.15)', borderTop: '1px solid rgba(245, 240, 232, 0.06)' }}>
+      <footer className="text-center text-xs py-6 px-4" style={{ color: 'var(--color-outline-variant)', borderTop: '1px solid var(--color-outline-variant)' }}>
         <p>
           Data from{" "}
           <a
@@ -226,7 +226,7 @@ export default function OfflineState({ onRetry, loading }) {
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
-            style={{ color: 'rgba(245, 240, 232, 0.25)' }}
+            style={{ color: 'var(--color-outline-variant)' }}
           >
             MTA GTFS-RT feeds
           </a>

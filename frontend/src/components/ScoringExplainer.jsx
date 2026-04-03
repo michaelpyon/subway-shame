@@ -21,10 +21,10 @@ export default function ScoringExplainer() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-xs transition-colors mx-auto press-scale"
+        className="flex items-center gap-2 text-xs transition-colors mx-auto press-scale font-label"
         aria-controls="scoring-explainer-panel"
         aria-expanded={open}
-        style={{ color: 'rgba(245, 240, 232, 0.3)' }}
+        style={{ color: 'var(--color-outline)' }}
       >
         <span>How are shame points calculated?</span>
         <svg
@@ -45,31 +45,31 @@ export default function ScoringExplainer() {
       {open && (
         <div
           id="scoring-explainer-panel"
-          className="mt-3 rounded-xl p-4 sm:p-6 max-w-2xl mx-auto"
-          style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}
+          className="mt-3 p-4 sm:p-6 max-w-2xl mx-auto"
+          style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}
         >
           <h3
             className="text-sm font-semibold mb-1"
-            style={{ fontFamily: 'var(--font-display)', color: '#F5F0E8', letterSpacing: '0.04em', fontSize: '18px' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-cream)', letterSpacing: '0.04em', fontSize: '18px' }}
           >
             THE SHAME POINT SYSTEM
           </h3>
 
           {/* How it works */}
-          <div className="rounded-lg px-3 py-2.5 mb-4 space-y-1" style={{ backgroundColor: '#2A2A2A' }}>
-            <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.5)' }}>
-              <strong style={{ color: '#F5F0E8' }}>How it works:</strong> Every 5 minutes the app polls the MTA
+          <div className="rounded-lg px-3 py-2.5 mb-4 space-y-1" style={{ backgroundColor: 'var(--color-concrete)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
+              <strong style={{ color: 'var(--color-cream)' }}>How it works:</strong> Every 5 minutes the app polls the MTA
               and adds points for each active alert. A brief delay earns 30 pts per poll.
               A 1-hour delay earns ~360 pts. Scores reset at midnight ET.
             </p>
-            <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
               Think of it like a tab at a bar — the longer the MTA keeps messing up, the bigger the bill.
             </p>
           </div>
 
           {/* Tier legend */}
           <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Score tiers (daily total)</p>
+            <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Score tiers (daily total)</p>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
               {[...SCORE_TIERS].reverse().slice(1).map((tier) => (
                 <div
@@ -80,7 +80,7 @@ export default function ScoringExplainer() {
                   <span className="text-sm">{tier.emoji}</span>
                   <div>
                     <p className="text-[11px] font-semibold" style={{ color: tier.color }}>{tier.label}</p>
-                    <p className="text-[9px]" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>{tier.min.toLocaleString()}+ pts</p>
+                    <p className="text-[9px]" style={{ color: 'var(--color-outline-variant)' }}>{tier.min.toLocaleString()}+ pts</p>
                   </div>
                 </div>
               ))}
@@ -88,7 +88,7 @@ export default function ScoringExplainer() {
           </div>
 
           {/* Per-alert points */}
-          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Points per alert type (per poll)</p>
+          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Points per alert type (per poll)</p>
           <div className="space-y-1.5">
             {SCORING_DATA.map(({ cat, pts, desc }) => {
               const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
@@ -96,7 +96,7 @@ export default function ScoringExplainer() {
                 <div
                   key={cat}
                   className="flex items-center gap-3 py-1.5"
-                  style={{ borderBottom: '1px solid rgba(245, 240, 232, 0.06)' }}
+                  style={{ borderBottom: '1px solid var(--color-outline-variant)' }}
                 >
                   <span
                     className="w-14 text-right text-sm font-bold tabular-nums shrink-0"
@@ -111,36 +111,36 @@ export default function ScoringExplainer() {
                     {cfg.icon}
                   </span>
                   <div className="min-w-0">
-                    <span className="text-xs font-medium" style={{ color: 'rgba(245, 240, 232, 0.6)' }}>
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-on-surface)' }}>
                       {cfg.label}
                     </span>
-                    <span className="text-xs ml-2" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>{desc}</span>
+                    <span className="text-xs ml-2" style={{ color: 'var(--color-outline-variant)' }}>{desc}</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-4 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(245, 240, 232, 0.06)' }}>
+          <div className="mt-4 pt-3 space-y-2" style={{ borderTop: '1px solid var(--color-outline-variant)' }}>
             <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>📊</span>
-              <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
-                <strong style={{ color: 'rgba(245, 240, 232, 0.5)' }}>Stacking:</strong> A line
+              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>📊</span>
+              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
+                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Stacking:</strong> A line
                 with 3 simultaneous alerts adds all their points. Suspended +
                 Delays + Skip Stop = 95 pts per snapshot.
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>⏱️</span>
-              <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
-                <strong style={{ color: 'rgba(245, 240, 232, 0.5)' }}>Accumulation:</strong> 300 pts ≈ 50 min of delays.
+              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>⏱️</span>
+              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
+                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Accumulation:</strong> 300 pts ≈ 50 min of delays.
                 1,500 pts ≈ 4 hours. 5,000+ pts means the line has been a disaster all day.
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>↕️</span>
-              <p className="text-xs" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
-                <strong style={{ color: 'rgba(245, 240, 232, 0.5)' }}>Direction:</strong> Alerts
+              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>↕️</span>
+              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
+                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Direction:</strong> Alerts
                 specify uptown/downtown. "Both directions" splits points 50/50.
               </p>
             </div>

@@ -16,7 +16,7 @@ export default function SystemHealth({ lines }) {
         <div className="text-4xl mb-3">🎉</div>
         <p
           className="text-lg font-semibold max-w-md mx-auto"
-          style={{ color: '#F5F0E8' }}
+          style={{ color: 'var(--color-cream)' }}
         >
           {allGoodMsg}
         </p>
@@ -30,7 +30,7 @@ export default function SystemHealth({ lines }) {
         className="p-4 structural-card"
         style={{
           backgroundColor: 'rgba(232, 53, 58, 0.12)',
-          borderColor: '#E8353A',
+          borderColor: 'var(--color-signal-red)',
           boxShadow: 'var(--shadow-card)',
         }}
       >
@@ -43,16 +43,16 @@ export default function SystemHealth({ lines }) {
               fontSize: '20px',
               letterSpacing: '-0.03em',
               textTransform: 'uppercase',
-              color: '#F5F0E8',
+              color: 'var(--color-cream)',
             }}
           >
             {disrupted} / {total} LINES IMPACTED RIGHT NOW
           </h2>
           <span
+            className="font-label"
             style={{
-              fontFamily: 'var(--font-mono)',
               fontSize: '10px',
-              color: '#E8353A',
+              color: 'var(--color-signal-red)',
               textTransform: 'uppercase',
               fontWeight: 700,
             }}
@@ -64,13 +64,13 @@ export default function SystemHealth({ lines }) {
           aria-label={`${pct}% of subway lines currently have live alerts`}
           className="h-3 flex"
           role="img"
-          style={{ backgroundColor: '#2A2A2A' }}
+          style={{ backgroundColor: 'var(--color-concrete)' }}
         >
           <div
             className="h-full transition-all duration-500"
             style={{
               width: `${pct}%`,
-              backgroundColor: '#E8353A',
+              backgroundColor: 'var(--color-signal-red)',
             }}
           />
         </div>

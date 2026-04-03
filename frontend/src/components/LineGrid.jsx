@@ -7,7 +7,7 @@ const SEVERITY_GROUPS = [
     key: "critical",
     label: "CRITICAL",
     sublabel: "Severe Impact",
-    borderColor: "#E8353A",
+    borderColor: "var(--color-signal-red)",
     filter: (l) => (l.daily_score || 0) >= 1500,
   },
   {
@@ -37,7 +37,7 @@ export default function LineGrid({ lines }) {
               fontFamily: 'var(--font-headline)',
               fontWeight: 900,
               fontStyle: 'italic',
-              color: 'rgba(245, 240, 232, 0.5)',
+              color: 'var(--color-on-surface-variant)',
               letterSpacing: '-0.02em',
               fontSize: '22px',
               textTransform: 'uppercase',
@@ -59,8 +59,8 @@ export default function LineGrid({ lines }) {
             }}
             className="w-4 h-4 flex items-center justify-center text-[10px] font-bold leading-none press-scale"
             style={{
-              border: '1px solid rgba(245, 240, 232, 0.15)',
-              color: 'rgba(245, 240, 232, 0.3)',
+              border: '1px solid var(--color-outline-variant)',
+              color: 'var(--color-outline)',
             }}
             title="How are shame points calculated?"
             aria-label="How are shame points calculated?"
@@ -70,7 +70,7 @@ export default function LineGrid({ lines }) {
         </div>
         <div className="flex items-center gap-3 text-xs">
           {problemCount > 0 && (
-            <span style={{ color: '#E8353A' }}>{problemCount} with issues</span>
+            <span style={{ color: 'var(--color-signal-red)' }}>{problemCount} with issues</span>
           )}
           {goodLines.length > 0 && (
             <span className="text-green-600">{goodLines.length} on time</span>
@@ -90,12 +90,12 @@ export default function LineGrid({ lines }) {
               className="severity-section-header mb-3"
               style={{ borderLeft: `4px solid ${group.borderColor}` }}
             >
-              <span style={{ color: '#F5F0E8' }}>{group.label}</span>
+              <span style={{ color: 'var(--color-cream)' }}>{group.label}</span>
               <span
                 className="text-xs font-normal"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  color: 'rgba(245, 240, 232, 0.3)',
+                  color: 'var(--color-outline)',
                   fontStyle: 'normal',
                   textTransform: 'uppercase',
                 }}
@@ -123,7 +123,7 @@ export default function LineGrid({ lines }) {
         <div
           className="text-center py-2"
           style={{
-            border: '2px dashed rgba(245, 240, 232, 0.12)',
+            border: '2px dashed var(--color-outline-variant)',
           }}
         >
           <span
@@ -134,7 +134,7 @@ export default function LineGrid({ lines }) {
               fontSize: '14px',
               letterSpacing: '-0.01em',
               textTransform: 'uppercase',
-              color: 'rgba(245, 240, 232, 0.25)',
+              color: 'var(--color-outline-variant)',
             }}
           >
             THE ONES THAT WORK (FOR NOW)
@@ -149,12 +149,12 @@ export default function LineGrid({ lines }) {
             className="severity-section-header mb-3"
             style={{ borderLeft: '4px solid #22C55E' }}
           >
-            <span style={{ color: '#F5F0E8' }}>OPERATIONAL</span>
+            <span style={{ color: 'var(--color-cream)' }}>OPERATIONAL</span>
             <span
               className="text-xs font-normal"
               style={{
                 fontFamily: 'var(--font-mono)',
-                color: 'rgba(245, 240, 232, 0.3)',
+                color: 'var(--color-outline)',
                 fontStyle: 'normal',
                 textTransform: 'uppercase',
               }}
@@ -168,8 +168,8 @@ export default function LineGrid({ lines }) {
                 key={line.id}
                 className="flex flex-col items-center justify-center py-2.5 structural-card"
                 style={{
-                  backgroundColor: '#1A1A1A',
-                  borderColor: 'rgba(245, 240, 232, 0.06)',
+                  backgroundColor: 'var(--color-ballast)',
+                  borderColor: 'var(--color-outline-variant)',
                   boxShadow: 'var(--shadow-card)',
                 }}
               >
@@ -186,7 +186,7 @@ export default function LineGrid({ lines }) {
 
       {/* All clear (no problems at all) */}
       {problemCount === 0 && (
-        <div className="text-center py-4 text-sm" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+        <div className="text-center py-4 text-sm" style={{ color: 'var(--color-outline-variant)' }}>
           All lines running normally.
         </div>
       )}

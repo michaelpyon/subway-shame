@@ -17,12 +17,12 @@ function getStatusBadge(line) {
 
   const status = (line.status || "").toLowerCase();
   if (status.includes("suspend") || status.includes("no service"))
-    return { label: "SUSPENDED", color: "#F5F0E8", bg: "#E8353A" };
+    return { label: "SUSPENDED", color: "var(--color-cream)", bg: "var(--color-signal-red)" };
   if (status.includes("delay"))
-    return { label: "DELAYED", color: "#0A0A0A", bg: "#EAB308" };
+    return { label: "DELAYED", color: "var(--color-tunnel)", bg: "#EAB308" };
   if (status.includes("slow"))
-    return { label: "SLOW", color: "#0A0A0A", bg: "#F59E0B" };
-  return { label: "DISRUPTED", color: "#F5F0E8", bg: "rgba(245,240,232,0.15)" };
+    return { label: "SLOW", color: "var(--color-tunnel)", bg: "#F59E0B" };
+  return { label: "DISRUPTED", color: "var(--color-cream)", bg: "var(--color-outline-variant)" };
 }
 
 export default function LineCard({ line, halftone = false }) {
@@ -42,7 +42,7 @@ export default function LineCard({ line, halftone = false }) {
     <div
       className={`flex flex-col p-3 relative overflow-hidden ${halftone ? "halftone" : ""}`}
       style={{
-        backgroundColor: '#1A1A1A',
+        backgroundColor: 'var(--color-ballast)',
         borderTop: `4px solid ${color}50`,
         borderLeft: `4px solid ${color}`,
         boxShadow: 'var(--shadow-card)',
@@ -53,9 +53,8 @@ export default function LineCard({ line, halftone = false }) {
         <LineBadge lineId={line.id} size="sm" />
         {statusBadge && (
           <span
-            className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wider"
+            className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wider font-label"
             style={{
-              fontFamily: 'var(--font-mono)',
               backgroundColor: statusBadge.bg,
               color: statusBadge.color,
             }}
@@ -75,7 +74,7 @@ export default function LineCard({ line, halftone = false }) {
           fontSize: '18px',
           textTransform: 'uppercase',
           letterSpacing: '-0.02em',
-          color: '#F5F0E8',
+          color: 'var(--color-cream)',
         }}
       >
         {routeName}
@@ -85,7 +84,7 @@ export default function LineCard({ line, halftone = false }) {
       {editorial && (
         <p
           className="text-[10px] leading-snug mb-2"
-          style={{ color: 'rgba(245, 240, 232, 0.4)' }}
+          style={{ color: 'var(--color-outline)' }}
         >
           {editorial}
         </p>
@@ -104,7 +103,7 @@ export default function LineCard({ line, halftone = false }) {
                 key={cat}
                 className="text-[8px] font-bold px-1.5 py-0.5 uppercase"
                 style={{
-                  backgroundColor: '#0A0A0A',
+                  backgroundColor: 'var(--color-surface)',
                   color: cfg.color,
                 }}
               >
@@ -117,7 +116,7 @@ export default function LineCard({ line, halftone = false }) {
 
       {/* Breakdown bar */}
       {line.breakdown && dailyScore > 0 && (
-        <div className="h-1.5 flex mb-2" style={{ backgroundColor: '#2A2A2A' }}>
+        <div className="h-1.5 flex mb-2" style={{ backgroundColor: 'var(--color-concrete)' }}>
           {CATEGORY_ORDER.filter((cat) => (line.breakdown[cat] || 0) > 0).map((cat) => {
             const pts = line.breakdown[cat];
             const pct = (pts / dailyScore) * 100;
