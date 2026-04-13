@@ -4,10 +4,11 @@ All MTA polling and state accumulation happens in the ingest worker.
 This server reads from Postgres only. No globals, no file I/O, no MTA calls.
 """
 
+import logging
 import os
 import time
-import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -23,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 CACHE_TTL = 60
-ET = timezone(timedelta(hours=-5))
+ET = ZoneInfo("America/New_York")
 
 # In-process response cache (safe: it's read-only, just avoids repeated DB reads)
 _cache: dict = {}

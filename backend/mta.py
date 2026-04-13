@@ -64,8 +64,8 @@ CATEGORY_SCORES = {
 
 _CATEGORY_RULES = [
     ("No Service",     ["no [", "no trains", "no service", "suspended", "out of service", "service suspended", "not running"]),
-    ("Delays",         ["running with delays", "delays", "running late", "experiencing delays", "longer travel times", "slow speeds", "held at", "holding at", "held"]),
-    ("Slow Speeds",    ["slow", "reduced speed", "running slowly"]),
+    ("Slow Speeds",    ["slow speed", "slow speeds", "reduced speed", "reduced speeds", "running slowly", "speed restriction", "speed restrictions"]),
+    ("Delays",         ["running with delays", "delays", "running late", "experiencing delays", "longer travel times", "held at", "holding at", "held"]),
     ("Skip Stop",      ["skip", "bypassing", "not stopping at", "skipping"]),
     ("Rerouted",       ["runs via", "reroute", "rerouted", "diverted", "alternate route"]),
     ("Runs Local",     ["runs local", "running local", "making local stops"]),
@@ -162,7 +162,7 @@ def add_to_breakdown(bd: dict, category: str, score: int | float):
 def _is_noise(header: str) -> bool:
     h = header.lower()
     return any(kw in h for kw in (
-        "planned work", "planned service", "running on a",
+        "planned work", "planned service",
         "schedule", "holiday service",
     ))
 

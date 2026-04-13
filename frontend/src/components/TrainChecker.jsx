@@ -1,17 +1,17 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { LINE_COLORS, LINE_DIRECTIONS, getScoreTier, CATEGORY_CONFIG, CATEGORY_ORDER } from "../constants/lines";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { LINE_DIRECTIONS, CATEGORY_CONFIG } from "../constants/lines";
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
 
 const ALL_LINES = [
-  ["1","2","3"],
-  ["4","5","6"],
+  ["1", "2", "3"],
+  ["4", "5", "6"],
   ["7"],
-  ["A","C","E"],
-  ["B","D","F","M"],
-  ["N","Q","R","W"],
+  ["A", "C", "E"],
+  ["B", "D", "F", "M"],
+  ["N", "Q", "R", "W"],
   ["G"],
-  ["J","Z"],
+  ["J", "Z"],
   ["L"],
   ["S"],
   ["SI"],
@@ -38,7 +38,7 @@ const BAD_RESPONSES = [
   "Something happened. The alerts below have the specifics.",
   "The train is running. Late.",
   "Service is disrupted. The MTA is aware.",
-  "There are issues on this line today.",
+  "There are live issues on this line.",
 ];
 
 const DIRECTION_BAD_RESPONSES = [
@@ -59,57 +59,123 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Parse hash into { line, dir } — dir is 0 (uptown) or 1 (downtown) or null
 function parseHash() {
   const hash = window.location.hash.slice(1);
   if (!hash) return { line: null, dir: null };
+
   const params = new URLSearchParams(hash);
   const line = params.get("line");
   const dirStr = params.get("dir");
   const dir = dirStr === "uptown" ? 0 : dirStr === "downtown" ? 1 : null;
+
   return {
     line: line && ALL_LINE_IDS.includes(line) ? line : null,
     dir,
   };
 }
 
+function getFocusableElements(container) {
+  if (!container) return [];
+  return [...container.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hasAttribute("disabled"));
+}
+
 export default function TrainChecker({ lines, isModal = false, onClose }) {
-  const [selectedLine, setSelectedLine] = useState(null);
-  const [selectedDirection, setSelectedDirection] = useState(null);
+  const initialHashState = useMemo(() => parseHash(), []);
+  const [selectedLine, setSelectedLine] = useState(initialHashState.line);
+  const [selectedDirection, setSelectedDirection] = useState(initialHashState.dir);
   const [verdict, setVerdict] = useState(null);
   const [showResult, setShowResult] = useState(false);
-  const [animKey, setAnimKey] = useState(0); // increment to re-trigger animation
+  const [animKey, setAnimKey] = useState(0);
+  const [shareFeedback, setShareFeedback] = useState("");
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
-  // On mount: restore state from URL hash
   useEffect(() => {
-    const { line, dir } = parseHash();
-    if (line) {
-      setSelectedLine(line);
-      if (dir !== null) setSelectedDirection(dir);
-    }
-
-    // Listen for back/forward navigation
     const onHashChange = () => {
-      const { line: l, dir: d } = parseHash();
-      setSelectedLine(l);
-      setSelectedDirection(d !== null ? d : null);
+      const { line, dir } = parseHash();
+      setSelectedLine(line);
+      setSelectedDirection(dir);
       setVerdict(null);
       setShowResult(false);
+      setShareFeedback("");
     };
+
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
-  // Update hash when selection changes
   useEffect(() => {
     if (!selectedLine) {
       history.replaceState(null, "", window.location.pathname);
       return;
     }
-    const dirStr = selectedDirection === 0 ? "uptown" : selectedDirection === 1 ? "downtown" : null;
+
+    const dirStr =
+      selectedDirection === 0
+        ? "uptown"
+        : selectedDirection === 1
+          ? "downtown"
+          : null;
     const hash = dirStr ? `#line=${selectedLine}&dir=${dirStr}` : `#line=${selectedLine}`;
     history.replaceState(null, "", hash);
   }, [selectedLine, selectedDirection]);
+
+  useEffect(() => {
+    if (!shareFeedback) return undefined;
+    const timer = window.setTimeout(() => setShareFeedback(""), 2500);
+    return () => window.clearTimeout(timer);
+  }, [shareFeedback]);
+
+  useEffect(() => {
+    if (!isModal) return undefined;
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusable = getFocusableElements(dialog);
+    (focusable[0] || dialog)?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose?.();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const nodes = getFocusableElements(dialog);
+      if (nodes.length === 0) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      previousFocusRef.current?.focus?.();
+    };
+  }, [isModal, onClose]);
 
   const directions = useMemo(() => {
     if (!selectedLine) return null;
@@ -118,26 +184,45 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
 
   const lineData = useMemo(() => {
     if (!selectedLine || !lines) return null;
-    return lines.find(l => l.id === selectedLine);
+    return lines.find((line) => line.id === selectedLine) || null;
   }, [selectedLine, lines]);
 
-  function handleLineSelect(lineId) {
+  const relevantAlerts = useMemo(() => {
+    if (!lineData?.alerts) return [];
+    if (selectedDirection === null) return lineData.alerts;
+
+    const dirKey = selectedDirection === 0 ? "uptown" : "downtown";
+    return lineData.alerts.filter((alertLike) => {
+      const alert = typeof alertLike === "string" ? { text: alertLike } : alertLike;
+      return !alert.direction || alert.direction === dirKey || alert.direction === "both";
+    });
+  }, [lineData, selectedDirection]);
+
+  const handleLineSelect = useCallback((lineId) => {
     setSelectedLine(lineId);
     setSelectedDirection(null);
     setVerdict(null);
     setShowResult(false);
-  }
+    setShareFeedback("");
+  }, []);
 
-  function handleCheck() {
+  const handleCheck = useCallback(() => {
     if (!lineData) return;
 
+    const liveScore = lineData.score || 0;
     const dailyScore = lineData.daily_score || 0;
-    const byDir = lineData.by_direction || {};
-    const dirKey = selectedDirection === 0 ? "uptown" : selectedDirection === 1 ? "downtown" : null;
+    const byDir = lineData.live_by_direction || {};
+    const dirKey =
+      selectedDirection === 0
+        ? "uptown"
+        : selectedDirection === 1
+          ? "downtown"
+          : null;
 
-    let message, isBad;
+    let message;
+    let isBad;
 
-    if (dailyScore === 0) {
+    if (liveScore === 0) {
       isBad = false;
       message = pickRandom(GOOD_RESPONSES);
     } else if (dirKey) {
@@ -160,43 +245,46 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       message = pickRandom(BAD_RESPONSES);
     }
 
-    setVerdict({ message, isBad, score: dailyScore });
+    setVerdict({ message, isBad, dailyScore });
     setShowResult(true);
-    setAnimKey(k => k + 1); // re-trigger animation on each check
-  }
+    setAnimKey((value) => value + 1);
+  }, [lineData, selectedDirection]);
 
-  const handleShare = useCallback(() => {
+  const handleShare = useCallback(async () => {
     const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: "Is My Train Fucked?", url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        alert("Link copied!");
-      });
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Is My Train Fucked?", url });
+        setShareFeedback("Verdict shared.");
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      setShareFeedback("Link copied.");
+    } catch {
+      setShareFeedback("Share failed.");
     }
   }, []);
 
-  // Get relevant alerts for the selected direction
-  const relevantAlerts = useMemo(() => {
-    if (!lineData || !lineData.alerts) return [];
-    if (selectedDirection === null) return lineData.alerts;
-
-    const dirKey = selectedDirection === 0 ? "uptown" : "downtown";
-    return lineData.alerts.filter(a => {
-      const alert = typeof a === "string" ? { text: a } : a;
-      return !alert.direction || alert.direction === dirKey || alert.direction === "both";
-    });
-  }, [lineData, selectedDirection]);
-
   const innerContent = (
-    <div className="rounded-2xl p-5 sm:p-6 relative" style={{ backgroundColor: '#1A1A1A', boxShadow: 'var(--shadow-card)' }}>
-      {/* Close button (only in modal mode) */}
+    <div
+      ref={dialogRef}
+      aria-describedby={isModal ? "train-checker-description" : undefined}
+      aria-labelledby={isModal ? "train-checker-title" : undefined}
+      aria-modal={isModal ? "true" : undefined}
+      className="p-5 sm:p-6 relative"
+      role={isModal ? "dialog" : undefined}
+      style={{ backgroundColor: "var(--color-ballast)", boxShadow: "var(--shadow-card)" }}
+      tabIndex={isModal ? -1 : undefined}
+    >
       {isModal && (
         <button
-          onClick={onClose}
+          aria-label="Close train checker"
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-lg leading-none press-scale"
-          style={{ backgroundColor: '#2A2A2A', color: 'rgba(245, 240, 232, 0.4)' }}
-          aria-label="Close"
+          onClick={onClose}
+          style={{ backgroundColor: "var(--color-concrete)", color: "var(--color-outline)" }}
+          type="button"
         >
           ×
         </button>
@@ -204,23 +292,25 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
 
       <h2
         className="text-center mb-1 pr-8"
-        style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#F5F0E8', letterSpacing: '0.04em' }}
+        id="train-checker-title"
+        style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "var(--color-cream)", letterSpacing: "0.04em" }}
       >
         IS MY TRAIN FUCKED?
       </h2>
-      <p className="text-xs text-center mb-5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+      <p className="text-xs text-center mb-5" id="train-checker-description" style={{ color: "var(--color-outline-variant)" }}>
         The only question that matters.
       </p>
 
-      {/* Line selector */}
       <div className="mb-4">
-        <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>Pick your line</p>
+        <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
+          Pick your line
+        </p>
         <div className="flex flex-wrap gap-1.5 justify-center">
-          {ALL_LINES.flat().map(lineId => (
+          {ALL_LINE_IDS.map((lineId) => (
             <button
               key={lineId}
-              onClick={() => handleLineSelect(lineId)}
               aria-label={`${lineId} train`}
+              aria-pressed={selectedLine === lineId}
               className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
                 selectedLine === lineId
                   ? "scale-110 ring-2 ring-white/40"
@@ -228,6 +318,8 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
                     ? "opacity-40 hover:opacity-70"
                     : "hover:scale-105"
               }`}
+              onClick={() => handleLineSelect(lineId)}
+              type="button"
             >
               <LineBadge lineId={lineId} size="sm" />
             </button>
@@ -235,109 +327,112 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
         </div>
       </div>
 
-      {/* Direction selector — appears after line is picked */}
       {selectedLine && directions && (
         <div className="mb-4">
-          <p className="text-xs mb-2 uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
-            Which direction? <span style={{ color: 'rgba(245, 240, 232, 0.15)' }}>(optional)</span>
+          <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
+            Which direction? <span style={{ color: "var(--color-outline-variant)" }}>(optional)</span>
           </p>
-          <div className="flex gap-2 justify-center">
-            {directions.map((dir, i) => (
+          <div className="flex flex-wrap gap-2 justify-center">
+            {directions.map((directionLabel, index) => (
               <button
-                key={dir}
-                onClick={() => setSelectedDirection(selectedDirection === i ? null : i)}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] flex items-center press-scale`}
+                key={directionLabel}
+                aria-pressed={selectedDirection === index}
+                className="px-5 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] flex items-center press-scale"
+                onClick={() => setSelectedDirection(selectedDirection === index ? null : index)}
                 style={
-                  selectedDirection === i
-                    ? { backgroundColor: 'rgba(245, 240, 232, 0.1)', border: '1px solid rgba(245, 240, 232, 0.3)', color: '#F5F0E8' }
-                    : { backgroundColor: '#2A2A2A', border: '1px solid rgba(245, 240, 232, 0.08)', color: 'rgba(245, 240, 232, 0.4)' }
+                  selectedDirection === index
+                    ? { backgroundColor: "var(--color-outline-variant)", border: "1px solid var(--color-outline)", color: "var(--color-cream)" }
+                    : { backgroundColor: "var(--color-concrete)", border: "1px solid var(--color-outline-variant)", color: "var(--color-outline)" }
                 }
+                type="button"
               >
-                {i === 0 ? "\u2191" : "\u2193"} {dir}
+                {index === 0 ? "\u2191" : "\u2193"} {directionLabel}
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Check button */}
       {selectedLine && (
         <div className="text-center mb-2">
           <button
-            onClick={handleCheck}
             className="px-8 py-3 font-bold rounded-full text-sm transition-colors press-scale"
-            style={{ backgroundColor: '#E8353A', color: '#F5F0E8', fontFamily: 'var(--font-display)', fontSize: '16px', letterSpacing: '0.04em' }}
+            onClick={handleCheck}
+            style={{ backgroundColor: "var(--color-signal-red)", color: "var(--color-cream)", fontFamily: "var(--font-display)", fontSize: "16px", letterSpacing: "0.04em" }}
+            type="button"
           >
             TELL ME THE TRUTH
           </button>
         </div>
       )}
 
-      {/* Verdict */}
       {showResult && verdict && (
         <div
+          aria-live="polite"
+          className={`mt-5 p-5 text-center ${verdict.isBad ? "verdict-shake" : "verdict-pulse-green"}`}
           key={animKey}
-          className={`mt-5 rounded-xl p-5 text-center ${
-            verdict.isBad ? "verdict-shake" : "verdict-pulse-green"
-          }`}
           style={
             verdict.isBad
-              ? { backgroundColor: 'rgba(232, 53, 58, 0.08)', border: '1px solid rgba(232, 53, 58, 0.2)' }
-              : { backgroundColor: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }
+              ? { backgroundColor: "rgba(232, 53, 58, 0.08)", border: "1px solid rgba(232, 53, 58, 0.2)" }
+              : { backgroundColor: "rgba(34, 197, 94, 0.08)", border: "1px solid rgba(34, 197, 94, 0.2)" }
           }
         >
-          {/* Icon */}
           <div className="text-4xl mb-3">
             {verdict.isBad ? "\uD83D\uDC80" : "\u2705"}
           </div>
 
-          {/* Verdict text */}
-          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? '#E8353A' : '#22C55E' }}>
+          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? "var(--color-signal-red)" : "#22C55E" }}>
             {verdict.message}
           </p>
 
-          {/* Score */}
-          {verdict.score > 0 && (
-            <p className="text-sm mb-3" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+          {verdict.dailyScore > 0 && (
+            <p className="text-sm mb-3" style={{ color: "var(--color-outline)" }}>
               The{" "}
               <span className="inline-flex items-center mx-0.5 align-middle">
                 <LineBadge lineId={selectedLine} size="sm" />
               </span>
-              {" "}has racked up <span className="font-bold" style={{ color: '#F5F0E8', fontFamily: 'var(--font-display)' }}>{verdict.score}</span> shame points today.
+              {" "}has racked up <span className="font-bold" style={{ color: "var(--color-cream)", fontFamily: "var(--font-display)" }}>{verdict.dailyScore}</span> shame points today.
             </p>
           )}
 
-          {/* Share button */}
           <button
+            className="mt-1 mb-1 px-4 py-1.5 rounded-full text-xs font-medium transition-colors press-scale"
             onClick={handleShare}
-            className="mt-1 mb-3 px-4 py-1.5 rounded-full text-xs font-medium transition-colors press-scale"
-            style={{ backgroundColor: 'rgba(245, 240, 232, 0.1)', color: 'rgba(245, 240, 232, 0.5)' }}
+            style={{ backgroundColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
+            type="button"
           >
             Share this verdict
           </button>
+          <p aria-live="polite" className="text-[10px] min-h-4" style={{ color: "var(--color-outline-variant)" }}>
+            {shareFeedback}
+          </p>
 
-          {/* Relevant alerts */}
           {relevantAlerts.length > 0 && verdict.isBad && (
             <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'rgba(245, 240, 232, 0.2)' }}>Here's why:</p>
-              {relevantAlerts.map((alert, i) => {
-                const a = typeof alert === "string" ? { text: alert } : alert;
-                const cfg = a.category ? (CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"]) : null;
+              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--color-outline-variant)" }}>
+                Here's why:
+              </p>
+              {relevantAlerts.map((alertLike, index) => {
+                const alert = typeof alertLike === "string" ? { text: alertLike } : alertLike;
+                const config = alert.category
+                  ? (CATEGORY_CONFIG[alert.category] || CATEGORY_CONFIG.Other)
+                  : null;
+
                 return (
                   <div
-                    key={i}
                     className="text-xs rounded p-2 leading-relaxed"
-                    style={{ backgroundColor: 'rgba(10, 10, 10, 0.6)', color: 'rgba(245, 240, 232, 0.4)' }}
+                    key={index}
+                    style={{ backgroundColor: "var(--color-surface)", color: "var(--color-outline)" }}
                   >
-                    {cfg && (
+                    {config && (
                       <span
                         className="text-[9px] font-medium uppercase tracking-wider mr-1.5 px-1 py-0.5 rounded"
-                        style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
+                        style={{ backgroundColor: `${config.color}20`, color: config.color }}
                       >
-                        {cfg.label}
+                        {config.label}
                       </span>
                     )}
-                    <AlertText text={a.text || alert} />
+                    <AlertText text={alert.text || alertLike} />
                   </div>
                 );
               })}
@@ -352,10 +447,12 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
     return (
       <div
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
-        onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) onClose?.();
+        }}
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
       >
-        <div className="rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
+        <div className="max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
           {innerContent}
         </div>
       </div>

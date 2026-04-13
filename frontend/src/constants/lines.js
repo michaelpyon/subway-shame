@@ -85,6 +85,82 @@ export const CATEGORY_ORDER = [
   "Rerouted", "Runs Local", "Reduced Freq", "Platform Change", "Other",
 ];
 
+// Editorial one-liners by category (sardonic, short, factual)
+// Used in LineCard when alert text is too long or generic
+export const EDITORIAL_LINES = {
+  "No Service": [
+    "Not running. Don't bother.",
+    "Service suspended. Walk it.",
+    "Completely shut down.",
+  ],
+  "Delays": [
+    "Signal failure. Again.",
+    "Running late. No surprise.",
+    "Expect unexplained pauses.",
+    "Delays in both directions.",
+  ],
+  "Slow Speeds": [
+    "Crawling through tunnels.",
+    "Speed restrictions in effect.",
+    "Moving, but barely.",
+  ],
+  "Skip Stop": [
+    "Skipping your stop, probably.",
+    "Bypassing stations. Good luck.",
+  ],
+  "Rerouted": [
+    "Taking the scenic route.",
+    "Running on a different line.",
+  ],
+  "Runs Local": [
+    "Express? Not today.",
+    "All stops, all the time.",
+  ],
+  "Reduced Freq": [
+    "Fewer trains. Longer waits.",
+    "Service cut. Pack in tight.",
+  ],
+  "Platform Change": [
+    "Wrong platform. Move.",
+  ],
+  "Other": [
+    "Something's wrong.",
+    "Unspecified problem.",
+  ],
+};
+
+// Get a short editorial line for a line's worst category
+export function getEditorialLine(line) {
+  if (!line.alerts || line.alerts.length === 0) {
+    if (line.peak_alerts && line.peak_alerts.length > 0) return "Issues earlier. Recovering.";
+    return null;
+  }
+  const alert = line.alerts[0];
+  const a = typeof alert === "string" ? { text: alert } : alert;
+  // Use the actual alert text if it's short enough
+  if (a.text && a.text.length <= 45) return a.text;
+  // Fall back to editorial quips
+  const cat = a.category || "Other";
+  const lines = EDITORIAL_LINES[cat] || EDITORIAL_LINES["Other"];
+  // Deterministic pick based on line ID
+  const idx = (line.id || "A").charCodeAt(0) % lines.length;
+  return lines[idx];
+}
+
+// Route names for line cards (short, recognizable corridor names)
+export const LINE_ROUTES = {
+  "1": "Broadway Local", "2": "7th Ave Express", "3": "7th Ave Express",
+  "4": "Lex Ave Express", "5": "Lex Ave Express", "6": "Lex Ave Local",
+  "7": "Flushing", "A": "8th Ave Express", "C": "8th Ave Local",
+  "E": "8th Ave Queens", "B": "6th Ave Express", "D": "6th Ave Express",
+  "F": "6th Ave Local", "M": "6th Ave Local",
+  "N": "Broadway Express", "Q": "Broadway Express",
+  "R": "Broadway Local", "W": "Broadway Local",
+  "G": "Crosstown", "J": "Nassau St", "Z": "Nassau St",
+  "L": "14th St-Canarsie", "S": "42nd St Shuttle",
+  "SI": "Staten Island",
+};
+
 // Direction labels per line (what uptown/downtown means for each)
 export const LINE_DIRECTIONS = {
   "1": ["Uptown", "Downtown"], "2": ["Uptown", "Downtown"], "3": ["Uptown", "Downtown"],

@@ -19,7 +19,7 @@ function BreakdownBar({ breakdown, total }) {
   return (
     <div className="space-y-1.5">
       {/* Stacked bar */}
-      <div className="h-3 rounded-full overflow-hidden flex" style={{ backgroundColor: '#2A2A2A' }}>
+      <div className="h-3 rounded-full overflow-hidden flex" style={{ backgroundColor: 'var(--color-concrete)' }}>
         {sorted.map((cat) => {
           const pts = breakdown[cat];
           const pct = (pts / total) * 100;
@@ -49,8 +49,8 @@ function BreakdownBar({ breakdown, total }) {
                 className="inline-block w-2 h-2 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              <span style={{ color: 'rgba(245, 240, 232, 0.45)' }}>{cfg.label}</span>
-              <span style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>{pts} pts</span>
+              <span style={{ color: 'var(--color-outline)' }}>{cfg.label}</span>
+              <span style={{ color: 'var(--color-outline)', fontFamily: 'var(--font-mono)' }}>{pts} pts</span>
             </span>
           );
         })}
@@ -80,9 +80,9 @@ function DirectionColumn({ label, arrow, data }) {
   );
 
   return (
-    <div className="rounded-lg p-2.5" style={{ backgroundColor: '#0A0A0A' }}>
+    <div className="rounded-lg p-2.5" style={{ backgroundColor: 'var(--color-surface)' }}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px]" style={{ color: 'rgba(245, 240, 232, 0.3)' }}>
+        <span className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
           {arrow} {label}
         </span>
         <div className="text-right">
@@ -91,13 +91,13 @@ function DirectionColumn({ label, arrow, data }) {
             style={{
               fontFamily: 'var(--font-display)',
               letterSpacing: '-0.04em',
-              color: data.score > 0 ? '#F5F0E8' : 'rgba(245, 240, 232, 0.2)',
+              color: data.score > 0 ? 'var(--color-cream)' : 'var(--color-outline-variant)',
             }}
           >
             {data.score}
           </span>
           {data.score > 0 && (
-            <span className="text-[9px] ml-0.5" style={{ color: 'rgba(245, 240, 232, 0.3)', fontFamily: 'var(--font-mono)' }}>pts</span>
+            <span className="text-[9px] ml-0.5" style={{ color: 'var(--color-outline)', fontFamily: 'var(--font-mono)' }}>pts</span>
           )}
         </div>
       </div>
@@ -115,16 +115,16 @@ function DirectionColumn({ label, arrow, data }) {
                     className="inline-block w-1.5 h-1.5 rounded-full"
                     style={{ backgroundColor: cfg.color }}
                   />
-                  <span style={{ color: 'rgba(245, 240, 232, 0.3)' }}>{cfg.label}</span>
+                  <span style={{ color: 'var(--color-outline)' }}>{cfg.label}</span>
                 </span>
-                <span style={{ color: 'rgba(245, 240, 232, 0.25)', fontFamily: 'var(--font-mono)' }}>{data.breakdown[cat]} pts</span>
+                <span style={{ color: 'var(--color-outline-variant)', fontFamily: 'var(--font-mono)' }}>{data.breakdown[cat]} pts</span>
               </div>
             );
           })}
         </div>
       )}
       {sorted.length === 0 && (
-        <span className="text-[10px]" style={{ color: 'rgba(245, 240, 232, 0.15)' }}>No issues</span>
+        <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>No issues</span>
       )}
     </div>
   );
@@ -146,21 +146,33 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
       ? line.status
       : "Issues earlier today";
 
+  const handleToggle = () => {
+    if (hasContent) setExpanded(!expanded);
+  };
+
   return (
     <div
-      className={`rounded-xl overflow-hidden transition-shadow relative ${
+      className={`overflow-hidden transition-shadow relative ${
         hasContent ? "cursor-pointer" : ""
       }`}
       style={{
-        backgroundColor: '#1A1A1A',
+        backgroundColor: 'var(--color-ballast)',
         boxShadow: 'var(--shadow-card)',
-        borderLeft: `3px solid ${hasContent ? color : 'rgba(245, 240, 232, 0.06)'}`,
+        borderLeft: `3px solid ${hasContent ? color : 'var(--color-outline-variant)'}`,
       }}
       onMouseEnter={(e) => hasContent && (e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'var(--shadow-card)')}
-      onClick={() => hasContent && setExpanded(!expanded)}
+      onClick={handleToggle}
+      onKeyDown={(e) => {
+        if (!hasContent) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
       role={hasContent ? "button" : undefined}
       aria-expanded={hasContent ? expanded : undefined}
+      tabIndex={hasContent ? 0 : undefined}
     >
       {/* Relative score background bar */}
       {dailyScore > 0 && (
@@ -189,7 +201,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         <LineBadge lineId={line.id} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold" style={{ color: '#F5F0E8' }}>
+            <span className="font-semibold" style={{ color: 'var(--color-cream)' }}>
               {line.id === "SI" ? "SIR" : `${line.id} Train`}
             </span>
           </div>
@@ -265,7 +277,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                         const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
                         const totalPts = line.breakdown[cat];
                         return (
-                          <div key={cat} className="text-[9px] text-right" style={{ color: 'rgba(245, 240, 232, 0.25)', fontFamily: 'var(--font-mono)' }}>
+                          <div key={cat} className="text-[9px] text-right" style={{ color: 'var(--color-outline-variant)', fontFamily: 'var(--font-mono)' }}>
                             {cfg.label} +{totalPts}pts
                           </div>
                         );
@@ -290,7 +302,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
             className={`w-4 h-4 transition-transform shrink-0 ${
               expanded ? "rotate-180" : ""
             }`}
-            style={{ color: 'rgba(245, 240, 232, 0.3)' }}
+            style={{ color: 'var(--color-outline)' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -309,22 +321,22 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
         <div className="px-4 pb-4 space-y-3">
           {/* Live vs daily context */}
           {liveScore > 0 && (
-            <div className="flex items-center justify-between text-xs rounded-lg px-3 py-2" style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)', color: 'rgba(245, 240, 232, 0.35)' }}>
+            <div className="flex items-center justify-between text-xs rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-outline)' }}>
               <span>🔴 Live (right now)</span>
-              <span className="font-bold" style={{ color: 'rgba(245, 240, 232, 0.5)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{liveScore.toLocaleString()} pts this snapshot</span>
+              <span className="font-bold" style={{ color: 'var(--color-on-surface-variant)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{liveScore.toLocaleString()} pts this snapshot</span>
             </div>
           )}
 
           {/* Score breakdown bar */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Today's breakdown</p>
+            <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-outline-variant)' }}>Today's breakdown</p>
             <BreakdownBar breakdown={line.breakdown} total={dailyScore} />
           </div>
 
           {/* Direction split */}
           {line.by_direction && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>By direction</p>
+              <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-outline-variant)' }}>By direction</p>
               <DirectionSplit byDirection={line.by_direction} lineId={line.id} />
             </div>
           )}
@@ -332,7 +344,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           {/* Alert texts */}
           {line.alerts && line.alerts.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Current alerts</p>
+              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-outline-variant)' }}>Current alerts</p>
               {line.alerts.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"];
@@ -340,7 +352,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                   <div
                     key={i}
                     className="text-sm rounded-lg p-2.5 leading-relaxed"
-                    style={{ backgroundColor: '#0A0A0A', color: 'rgba(245, 240, 232, 0.5)' }}
+                    style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface-variant)' }}
                   >
                     {a.category && (
                       <span
@@ -354,11 +366,11 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                       </span>
                     )}
                     {a.direction && a.direction !== "both" && (
-                      <span className="text-[10px] mr-2" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>
+                      <span className="text-[10px] mr-2" style={{ color: 'var(--color-outline-variant)' }}>
                         {a.direction === "uptown" ? "↑" : "↓"} {a.direction}
                       </span>
                     )}
-                    <span style={{ color: 'rgba(245, 240, 232, 0.5)' }}><AlertText text={a.text} /></span>
+                    <span style={{ color: 'var(--color-on-surface-variant)' }}><AlertText text={a.text} /></span>
                   </div>
                 );
               })}
@@ -368,7 +380,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
           {/* Peak alerts */}
           {(!line.alerts || line.alerts.length === 0) && line.peak_alerts && line.peak_alerts.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(245, 240, 232, 0.25)' }}>Earlier today (resolved)</p>
+              <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--color-outline-variant)' }}>Earlier today (resolved)</p>
               {line.peak_alerts.map((alert, i) => {
                 const a = typeof alert === "string" ? { text: alert } : alert;
                 const cfg = CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG["Other"];
@@ -376,7 +388,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                   <div
                     key={i}
                     className="text-sm rounded-lg p-2.5 leading-relaxed"
-                    style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)', border: '1px solid rgba(245, 240, 232, 0.06)', color: 'rgba(245, 240, 232, 0.35)' }}
+                    style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-outline-variant)', color: 'var(--color-outline)' }}
                   >
                     {a.category && (
                       <span
@@ -389,7 +401,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
                         {cfg.label}
                       </span>
                     )}
-                    <span style={{ color: 'rgba(245, 240, 232, 0.35)' }}><AlertText text={a.text} /></span>
+                    <span style={{ color: 'var(--color-outline)' }}><AlertText text={a.text} /></span>
                   </div>
                 );
               })}

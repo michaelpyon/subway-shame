@@ -68,7 +68,7 @@ export function useSubwayData(): UseSubwayDataReturn {
         }
         const json: ApiResponse = await res.json();
         setData(json);
-        setLastUpdated(new Date());
+        setLastUpdated(json.timestamp ? new Date(json.timestamp) : new Date());
         lastFetchRef.current = Date.now();
         setSecondsUntilRefresh(POLL_INTERVAL / 1000);
         hasLoadedRef.current = true;

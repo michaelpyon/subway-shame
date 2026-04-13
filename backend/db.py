@@ -26,8 +26,6 @@ except ImportError:
 
 _pool = None
 
-ET = timezone(timedelta(hours=-5))
-
 
 def _get_pool():
     """Lazily create a threaded connection pool."""

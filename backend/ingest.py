@@ -11,7 +11,8 @@ import signal
 import sys
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from mta import ALL_LINES, fetch_alerts, fetch_trip_counts, status_label
 import db
@@ -27,7 +28,7 @@ INGEST_INTERVAL = int(
     __import__("os").environ.get("INGEST_INTERVAL_SECONDS", "60")
 )
 
-ET = timezone(timedelta(hours=-5))
+ET = ZoneInfo("America/New_York")
 
 _shutdown = threading.Event()
 

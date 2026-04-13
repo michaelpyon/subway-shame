@@ -8,6 +8,9 @@ backend/data.json.tmp
 # Node
 frontend/node_modules/
 frontend/dist/
+next-frontend/node_modules/
+next-frontend/.next/
+next-frontend/out/
 
 # OS
 .DS_Store
