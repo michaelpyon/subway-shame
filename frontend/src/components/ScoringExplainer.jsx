@@ -3,12 +3,12 @@ import { CATEGORY_CONFIG, CATEGORY_ORDER, SCORE_TIERS } from "../constants/lines
 
 const SCORING_DATA = [
   { cat: "No Service",     pts: 50, desc: "Line completely stopped. Maximum shame." },
-  { cat: "Delays",         pts: 30, desc: "Running late — as is tradition." },
+  { cat: "Delays",         pts: 30, desc: "Running late, as is tradition." },
   { cat: "Slow Speeds",    pts: 20, desc: "Speed restrictions slowing all trains on this route." },
   { cat: "Skip Stop",      pts: 15, desc: "Trains bypassing certain stations without warning." },
   { cat: "Rerouted",       pts: 15, desc: "Running an alternate route instead of the normal one." },
   { cat: "Runs Local",     pts: 10, desc: "Express train making all local stops instead." },
-  { cat: "Reduced Freq",   pts: 10, desc: "Fewer trains than scheduled — longer waits." },
+  { cat: "Reduced Freq",   pts: 10, desc: "Fewer trains than scheduled. Longer waits." },
   { cat: "Platform Change",pts: 2,  desc: "Trains using a different platform than expected." },
   { cat: "Other",          pts: 5,  desc: "MTA issued an alert but didn't specify the cause." },
 ];
@@ -63,7 +63,7 @@ export default function ScoringExplainer() {
               A 1-hour delay earns ~360 pts. Scores reset at midnight ET.
             </p>
             <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-              Think of it like a tab at a bar — the longer the MTA keeps messing up, the bigger the bill.
+              Think of it like a tab at a bar. The longer the MTA keeps messing up, the bigger the bill.
             </p>
           </div>
 

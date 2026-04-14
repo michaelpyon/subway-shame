@@ -201,7 +201,7 @@ export default function ShameChart({ timeseries }) {
           </p>
           <p className="text-xs mt-2" style={{ color: 'var(--color-outline-variant)' }}>
             {timeseries.length === 1
-              ? "1 reading captured — check back in ~15 min for the trend line."
+              ? "1 reading captured. Check back in ~15 min for the trend line."
               : "No readings yet. The chart will appear once data starts coming in."}
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function ShameChart({ timeseries }) {
         TODAY'S SHAME RACE
       </h2>
       <p className="text-xs mb-4" style={{ color: 'var(--color-outline)' }}>
-        How shame points have accumulated since midnight — higher line = worse performance today.
+        How shame points have accumulated since midnight. Higher line = worse performance today.
         Points reset at midnight.
       </p>
 

@@ -77,7 +77,7 @@ export default function OfflineState({ onRetry, loading }) {
             type="button"
             onClick={onRetry}
             disabled={loading}
-            className="px-3 py-1 text-xs rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed press-scale"
+            className="px-3 py-1 text-xs rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed press-scale"
             style={{ color: 'var(--color-outline)', border: '1px solid var(--color-outline-variant)' }}
           >
             {loading ? (
@@ -213,7 +213,7 @@ export default function OfflineState({ onRetry, loading }) {
         </div>
 
         <p className="text-center text-xs mt-4" style={{ color: 'var(--color-outline-variant)' }}>
-          Sample data — live scores will load once the backend connects
+          Sample data. Live scores will load once the backend connects
         </p>
       </div>
 

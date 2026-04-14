@@ -52,7 +52,7 @@ function formatHofLabel(dateStr, lineId, score) {
   const d = new Date(dateStr + "T12:00:00");
   const month = d.toLocaleDateString("en-US", { month: "short" });
   const day = d.getDate();
-  return `${month} ${day} — ${lineId} Train — ${score} pts`;
+  return `${month} ${day}, ${lineId} Train, ${score} pts`;
 }
 
 function getTopHof(entries, n = 5) {
@@ -113,7 +113,7 @@ export default function Trophy({ winner, lines = [] }) {
 
   const handleShare = useCallback(async () => {
     setShareState("working");
-    const shareText = `🚇 The Low Line — ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://subway.michaelpyon.com`;
+    const shareText = `🚇 The Low Line, ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://subway.michaelpyon.com`;
 
     try {
       const { default: html2canvas } = await import("html2canvas");
@@ -204,7 +204,7 @@ export default function Trophy({ winner, lines = [] }) {
           <button
             type="button"
             onClick={() => setActiveTab("today")}
-            className={`flex-1 py-2 text-sm transition-all duration-200 press-scale ${
+            className={`flex-1 py-2 text-sm transition-colors duration-200 press-scale ${
               activeTab === "today"
                 ? ""
                 : ""
@@ -224,7 +224,7 @@ export default function Trophy({ winner, lines = [] }) {
           <button
             type="button"
             onClick={() => setActiveTab("hof")}
-            className={`flex-1 py-2 text-sm transition-all duration-200 press-scale`}
+            className={`flex-1 py-2 text-sm transition-colors duration-200 press-scale`}
             style={{
               fontFamily: 'var(--font-headline)',
               fontStyle: 'italic',
@@ -282,7 +282,7 @@ export default function Trophy({ winner, lines = [] }) {
                       type="button"
                       onClick={handleShare}
                       disabled={shareState === "working"}
-                      className="text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 press-scale disabled:opacity-60"
+                      className="text-xs font-medium px-3 py-1 rounded-full transition-colors duration-200 press-scale disabled:opacity-60"
                       style={{
                         backgroundColor:
                           shareState === "idle" || shareState === "working"
@@ -512,7 +512,7 @@ export default function Trophy({ winner, lines = [] }) {
                 <svg className="w-3 h-3" style={{ color: 'var(--color-outline-variant)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>Saved in your browser only — private to you, not a global record</span>
+                <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>Saved in your browser only. Private to you, not a global record</span>
               </div>
 
               {!hasHof ? (
