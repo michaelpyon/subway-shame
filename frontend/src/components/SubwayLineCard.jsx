@@ -27,7 +27,7 @@ function BreakdownBar({ breakdown, total }) {
           return (
             <div
               key={cat}
-              className="h-full transition-all"
+              className="h-full transition-colors"
               style={{
                 width: `${Math.max(pct, 4)}%`,
                 backgroundColor: cfg.color,
@@ -177,7 +177,7 @@ export default function SubwayLineCard({ line, rank = null, maxScore = 1, sparkD
       {/* Relative score background bar */}
       {dailyScore > 0 && (
         <div
-          className="absolute inset-y-0 left-0 opacity-[0.07] pointer-events-none transition-all duration-500"
+          className="absolute inset-y-0 left-0 opacity-[0.07] pointer-events-none transition-opacity duration-500"
           style={{
             width: `${scorePercent}%`,
             background: `linear-gradient(90deg, ${color}, transparent)`,

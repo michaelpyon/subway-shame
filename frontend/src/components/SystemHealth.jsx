@@ -67,7 +67,7 @@ export default function SystemHealth({ lines }) {
           style={{ backgroundColor: 'var(--color-concrete)' }}
         >
           <div
-            className="h-full transition-all duration-500"
+            className="h-full transition-[width] duration-500"
             style={{
               width: `${pct}%`,
               backgroundColor: 'var(--color-signal-red)',

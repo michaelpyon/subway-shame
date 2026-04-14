@@ -311,7 +311,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
               key={lineId}
               aria-label={`${lineId} train`}
               aria-pressed={selectedLine === lineId}
-              className={`p-1.5 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
+              className={`p-1.5 rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
                 selectedLine === lineId
                   ? "scale-110 ring-2 ring-white/40"
                   : selectedLine
@@ -337,7 +337,7 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
               <button
                 key={directionLabel}
                 aria-pressed={selectedDirection === index}
-                className="px-5 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] flex items-center press-scale"
+                className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center press-scale"
                 onClick={() => setSelectedDirection(selectedDirection === index ? null : index)}
                 style={
                   selectedDirection === index
