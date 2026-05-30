@@ -15,7 +15,7 @@ const VALID_LINES = new Set([
 export default function AlertText({ text }) {
   if (!text) return null;
 
-  // Match patterns like [7], [A], [SI], [1] — bracketed train IDs
+  // Match patterns like [7], [A], [SI], [1], bracketed train IDs
   const parts = text.split(/(\[[A-Z0-9]{1,2}\])/g);
 
   return (

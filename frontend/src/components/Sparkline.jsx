@@ -1,8 +1,8 @@
 /**
- * Sparkline — tiny inline SVG chart for score history.
+ * Sparkline, tiny inline SVG chart for score history.
  * Props:
- *   data  — array of { t: string, score: number }
- *   color — hex color string (e.g. "#EF4444")
+ *   data: array of { t: string, score: number }
+ *   color: hex color string (e.g. "#EF4444")
  */
 export default function Sparkline({ data, color = "#6B7280" }) {
   if (!data || data.length < 2) return null;

@@ -1,4 +1,4 @@
-// ShareCard.jsx — Hidden 600x315 card rendered off-screen for html2canvas capture
+// ShareCard.jsx, Hidden 600x315 card rendered off-screen for html2canvas capture
 // Uses only inline styles so html2canvas can reliably capture it.
 import { LINE_COLORS, getScoreTier } from "../constants/lines";
 
@@ -63,7 +63,7 @@ export default function ShareCard({ winner, lines = [], date }) {
           boxSizing: "border-box",
         }}
       >
-        {/* App title — Bebas Neue */}
+        {/* App title, Bebas Neue */}
         <div
           style={{
             fontSize: "18px",

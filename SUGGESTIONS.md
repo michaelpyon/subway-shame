@@ -23,7 +23,7 @@ The one real problem found this pass (now fixed): the UI copy and the score tier
 ## Deploy gap (FLAG, do not re-fix)
 
 The live site is an older build than repo HEAD. Evidence:
-- Live `<title>` is "The Low Line — NYC Subway Delay Tracker" with an em dash; repo HEAD title is "The Low Line: NYC Subway Delay Tracker" (em dash removed in commit 0652590).
+- Live `<title>` still uses an em dash before "NYC Subway Delay Tracker"; repo HEAD title is "The Low Line: NYC Subway Delay Tracker" (em dash removed in commit 0652590).
 - Live `/api/status` returns NOT_FOUND, so the Vercel serverless port (commits 541f77f, 756b1ca) has never been deployed. The live app is still pointing at the dead Railway backend model.
 
 Action for Michael: deploy repo HEAD to Vercel. Until then the live URL does not reflect any of the prior pass work or this pass. Every item below that says "deploy to verify" is gated on that one deploy.
@@ -40,10 +40,17 @@ Make the score model honest end to end. The backend is a live snapshot, so the U
 - `frontend/src/components/LineGrid.jsx`: dropped the CRITICAL grouping cutoff from 1500 (never reachable) to 60 so the severity grouping actually fires.
 Why it matters: this is the highest-leverage honesty fix. The evangelist screenshots the number, so the number and the words around it must agree.
 
+### Shipped wave 2 (S, deploy to verify)
+Put the screenshot moment above the fold and lock the share copy to one source of truth.
+- `frontend/src/utils/shareText.js` (new): single source of truth `buildShareText(winner)` plus `SHARE_URL`. Confirmed by curl with a Twitterbot user agent that `subway-shame.vercel.app` is the working host (200, real 1200x630 og.png) and the custom domain `subway.michaelpyon.com` does not resolve, so every share path points at the vercel.app host. Repo HEAD `index.html` canonical, og:url, og:image already point there, so no meta change needed.
+- `frontend/src/components/Header.jsx`: added a one tap "Copy the receipt" button next to the existing CTA, above the fold. It uses the Web Share API when available and falls back to clipboard, with copied / shared / try again states. Shows the worst line badge so the angry commuter can grab the receipt without scrolling to the Trophy.
+- `frontend/src/components/Trophy.jsx`: the share button now calls the same `buildShareText` helper, so the two share paths can never drift. Removed the now dead `goodCount`, `worstCount`, and `shareDate` locals.
+- `frontend/src/App.jsx`: passes `data.winner` into the Header.
+- Em dash scrub (house standard): removed every em dash from source comments and type docs (`index.css`, `types/api.ts`, `Sparkline.jsx`, `AlertText.jsx`, `LineCard.jsx`, `Podium.jsx`, `ShareCard.jsx`, `LineGrid.jsx`). Comment only, not user facing.
+Why it matters: the evangelist reaches for their phone on the platform and wants one tap to the receipt. The copy button surfaces that at the top of the page instead of below several sections.
+
 ### Quick wins (not yet done)
-1. Scrub the em dashes still in source comments and type docs (`frontend/src/index.css`, `frontend/src/types/api.ts`, `frontend/src/constants/lines.js`, `frontend/src/components/Sparkline.jsx`). Effort S. No deploy needed to verify (comment-only). House standard, not user-facing.
-2. Decide whether to keep the chart section at all in snapshot mode. Right now it always renders the placeholder card because the timeseries only ever has 1 point. Either hide the section when `timeseries.length < 2` to tighten the page, or keep the new honest placeholder. Effort S. Deploy to verify.
-3. Trophy share string and `og:image` are good; add a one-tap "copy the worst line" share button higher on the page so the screenshot moment is above the fold for the angry-commuter flow. Effort S to M. Deploy to verify.
+1. Decide whether to keep the chart section at all in snapshot mode. Right now it always renders the placeholder card because the timeseries only ever has 1 point. Either hide the section when `timeseries.length < 2` to tighten the page, or keep the new honest placeholder. Effort S. Deploy to verify.
 
 ### Bigger bets
 4. Real cumulative daily scoring with a datastore. This is the original product promise the snapshot cannot keep. Cheapest honest path that needs no new secret in code: a Vercel Cron job hitting an ingest route every minute that writes running totals to Vercel KV or Upstash Redis, with `/api/status` reading the total. Once this lands, restore the cumulative tiers and the "resets at midnight" copy and bring back the real trend chart. Effort L. Needs Michael's KV or Upstash keys and a deploy. Flagged in `status.js` already.
@@ -52,6 +59,12 @@ Why it matters: this is the highest-leverage honesty fix. The evangelist screens
 7. Tier calibration check after real data. The 30 / 60 / 120 snapshot cutoffs are a reasoned estimate from the category point values; once live, sanity-check them against a week of real worst-line scores and nudge if Dumpster Fire never or always fires. Effort S. Needs live data.
 
 ## Verification this pass
-- `npm run build` in `frontend/`: passes clean (Vite, 687 modules). Large-chunk warning is pre-existing and not introduced here.
-- `npx eslint` on all changed files: 0 errors (1 pre-existing unrelated warning in Trophy.jsx).
-- No em dashes introduced in changed code.
+- `npm run build` in `frontend/`: passes clean (Vite, 688 modules). Large-chunk warning is pre-existing and not introduced here.
+- `npx eslint` on all changed files: 0 errors.
+- No em dashes anywhere in `src/` or `api/` (verified by grep).
+
+## Verification wave 2
+- Confirmed the working host by curl with a Twitterbot user agent: `subway-shame.vercel.app` returns 200 and serves a real 1200x630 `og.png` (176 KB). `subway.michaelpyon.com` does not resolve (000 / 502). Repo HEAD already targets the working host, so no canonical or og:image change was needed. Live `/api/og` and `/api/status` 404 only because the serverless port has not been deployed yet (the known deploy gap above), not a code bug.
+- `npm run build` passes clean (688 modules).
+- `npx eslint` on all changed files: 0 errors.
+- Flagged defect (repo not CLI linked to Vercel) is a deploy concern only, no code fix made.

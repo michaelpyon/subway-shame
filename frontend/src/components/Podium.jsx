@@ -41,11 +41,11 @@ function groupByPlace(podium) {
 
   for (let i = 0; i < podium.length; i++) {
     if (i === 0 || podium[i].daily_score !== podium[i - 1].daily_score) {
-      // New score group — assign the current rank
+      // New score group, assign the current rank
       groups.push({ place: currentPlace, lines: [podium[i]] });
       currentPlace = i + 1; // Next distinct score gets the rank after all tied entries
     } else {
-      // Same score — tie with previous group
+      // Same score, tie with previous group
       groups[groups.length - 1].lines.push(podium[i]);
       currentPlace = i + 1;
     }
@@ -94,7 +94,7 @@ function PlacePedestal({ config, lines }) {
         ))}
       </div>
 
-      {/* Medal — outside pedestal so overflow-hidden can't clip it */}
+      {/* Medal, outside pedestal so overflow-hidden can't clip it */}
       <div className="flex justify-center mb-1">
         <span className="text-2xl">{config.emoji}</span>
       </div>
@@ -168,7 +168,7 @@ export default function Podium({ podium, date }) {
         TODAY'S PODIUM
       </h2>
 
-      {/* Podium blocks — display order: 2nd | 1st | 3rd */}
+      {/* Podium blocks, display order: 2nd | 1st | 3rd */}
       <div className="flex items-end justify-center gap-3 sm:gap-4 mb-6">
         {[0, 1, 2].map((displayIdx) => {
           const placeIdx = [1, 0, 2][displayIdx]; // visual: 2nd | 1st | 3rd

@@ -136,7 +136,7 @@ export default function LineCard({ line, halftone = false }) {
         </div>
       )}
 
-      {/* Score — large monospace, bottom right */}
+      {/* Score, large monospace, bottom right */}
       <div className="flex justify-end">
         <span
           className="leading-none"

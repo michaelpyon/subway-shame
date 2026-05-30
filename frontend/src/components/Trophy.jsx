@@ -10,6 +10,7 @@ import {
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
 import ShareCard from "./ShareCard";
+import { buildShareText } from "../utils/shareText";
 
 const HOF_KEY = "subway-shame-hof";
 const HOF_MAX = 50;
@@ -92,19 +93,6 @@ export default function Trophy({ winner, lines = [] }) {
   const dirs = LINE_DIRECTIONS[winner.id] || ["Uptown", "Downtown"];
   const byDir = winner.by_direction || {};
 
-  const worstCount = lines.filter((l) => (l.daily_score || 0) > 0).length;
-  const goodCount = lines.length - worstCount;
-
-  const shareDate = useMemo(
-    () =>
-      new Date().toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }),
-    []
-  );
-
   const shareDateShort = useMemo(
     () =>
       new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -113,11 +101,8 @@ export default function Trophy({ winner, lines = [] }) {
 
   const handleShare = useCallback(async () => {
     setShareState("working");
-    // Punchy, on-brand, no em dashes. Names today's real worst line, its live
-    // shame points and severity tier, plus the canonical URL. Strip any emoji
-    // from the tier label so the copied text stays clean.
-    const tierName = tier.label.replace(/[^ -~]/g, "").trim();
-    const shareText = `The [${winner.id}] train is the most delayed line in NYC right now - ${winner.daily_score.toLocaleString()} shame points (${tierName}). subway-shame.vercel.app`;
+    // Shared single source of truth so the copied text matches the Header copy button.
+    const shareText = buildShareText(winner);
 
     try {
       const { default: html2canvas } = await import("html2canvas");
@@ -177,7 +162,7 @@ export default function Trophy({ winner, lines = [] }) {
       }
     }
     setTimeout(() => setShareState("idle"), 2500);
-  }, [winner, worstCount, goodCount, shareDate, tier]);
+  }, [winner]);
 
   const shareLabel =
     shareState === "working"

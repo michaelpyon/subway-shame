@@ -145,7 +145,7 @@ export default function LineGrid({ lines }) {
         </div>
       )}
 
-      {/* Operational grid — compact badge tiles with green dots */}
+      {/* Operational grid, compact badge tiles with green dots */}
       {goodLines.length > 0 && (
         <div>
           <div

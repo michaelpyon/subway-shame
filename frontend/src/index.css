@@ -55,7 +55,7 @@
   --font-label: 'Lexend', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Shadows (ink-bleed system — hard offset, industrial) */
+  /* Shadows (ink-bleed system, hard offset, industrial) */
   --shadow-card:
     0px 0px 0px 1px rgba(245, 240, 232, 0.06),
     3px 3px 0px 0px rgba(0, 0, 0, 0.5);
@@ -154,7 +154,7 @@ body {
   letter-spacing: -0.03em;
 }
 
-/* ── Severity Labels (stamped badges — left-border accent) ── */
+/* ── Severity Labels (stamped badges, left-border accent) ── */
 .severity-label {
   font-family: var(--font-display);
   font-size: 13px;

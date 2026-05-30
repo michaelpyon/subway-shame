@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// API Types — Subway Shame
+// API Types, Subway Shame
 // Mirrors the shape returned by GET /api/status (backend/app.py)
 // ---------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ export interface DirectionData {
   breakdown: ScoreBreakdown;
 }
 
-/** Directional split — every LineData has one for both daily and live views. */
+/** Directional split. Every LineData has one for both daily and live views. */
 export interface ByDirection {
   uptown: DirectionData;
   downtown: DirectionData;
@@ -95,7 +95,7 @@ export interface LineData {
   status: StatusLabel;
   /** Active alerts (deduplicated by text). */
   alerts: Alert[];
-  /** Peak (worst) alerts seen today — the daily low point. */
+  /** Peak (worst) alerts seen today, the daily low point. */
   peak_alerts: Alert[];
   /** Daily accumulated score breakdown by category. */
   breakdown: ScoreBreakdown;
@@ -135,7 +135,7 @@ export interface ApiResponse {
   date: string;
   /** The line with the highest daily_score, or null if no line has been scored today. */
   winner: LineData | null;
-  /** Top 3 podium positions (includes ties — may be more than 3 entries). */
+  /** Top 3 podium positions (includes ties, may be more than 3 entries). */
   podium: LineData[];
   /** All lines, sorted by daily_score DESC then score DESC then id ASC. */
   lines: LineData[];

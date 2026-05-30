@@ -1,14 +1,54 @@
+import { useCallback, useState } from "react";
+import { LINE_COLORS } from "../constants/lines";
+import { buildShareText } from "../utils/shareText";
+
 const MTA_COLORS = [
   "#EE352E", "#00933C", "#B933AD",
   "#0039A6", "#FF6319", "#FCCC0A",
   "#6CBE45", "#996633", "#A7A9AC", "#808183",
 ];
 
-export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error, onOpenChecker }) {
+export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error, winner, onOpenChecker }) {
   const timeAgo = lastUpdated ? formatTimeAgo(lastUpdated) : null;
   const countdown = formatCountdown(secondsUntilRefresh);
   const clock = lastUpdated ? formatClock(lastUpdated) : null;
   const stale = Boolean(error && lastUpdated);
+
+  // One tap copy of today's worst line, above the fold. Uses the same share text
+  // as the Trophy card so the angry commuter can grab the receipt without scrolling.
+  const hasWinner = Boolean(winner && winner.id && (winner.daily_score || 0) > 0);
+  const [copyState, setCopyState] = useState("idle");
+
+  const handleCopy = useCallback(async () => {
+    const text = buildShareText(winner);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "The Low Line", text });
+        setCopyState("shared");
+      } else {
+        await navigator.clipboard.writeText(text);
+        setCopyState("copied");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopyState("copied");
+      } catch {
+        setCopyState("error");
+      }
+    }
+    setTimeout(() => setCopyState("idle"), 2200);
+  }, [winner]);
+
+  const winnerColor = hasWinner ? (LINE_COLORS[winner.id] || "#808183") : "#808183";
+  const copyLabel =
+    copyState === "copied"
+      ? "Copied"
+      : copyState === "shared"
+      ? "Shared"
+      : copyState === "error"
+      ? "Try again"
+      : "Copy the receipt";
 
   return (
     <header>
@@ -132,28 +172,65 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           </button>
         </div>
 
-        {/* CTA button - tighter */}
-        {onOpenChecker && (
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={onOpenChecker}
-              className="press-scale"
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '15px',
-                letterSpacing: '0.05em',
-                backgroundColor: 'var(--color-signal-red)',
-                color: 'var(--color-cream)',
-                border: '2px solid var(--color-cream)',
-                borderRadius: '0px',
-                padding: '8px 18px',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-card)',
-              }}
-            >
-              IS MY TRAIN FUCKED?
-            </button>
+        {/* CTA row - tighter */}
+        {(onOpenChecker || hasWinner) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {onOpenChecker && (
+              <button
+                type="button"
+                onClick={onOpenChecker}
+                className="press-scale"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '15px',
+                  letterSpacing: '0.05em',
+                  backgroundColor: 'var(--color-signal-red)',
+                  color: 'var(--color-cream)',
+                  border: '2px solid var(--color-cream)',
+                  borderRadius: '0px',
+                  padding: '8px 18px',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-card)',
+                }}
+              >
+                IS MY TRAIN FUCKED?
+              </button>
+            )}
+
+            {/* One tap copy the worst line, above the fold for the screenshot moment */}
+            {hasWinner && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                aria-label={`Copy the receipt: ${winner.id} train, ${winner.daily_score} shame points`}
+                className="press-scale inline-flex items-center gap-2"
+                style={{
+                  fontFamily: 'var(--font-label)',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: copyState === "error" ? '#EF4444' : (copyState === "copied" || copyState === "shared") ? '#16A34A' : 'var(--color-on-surface-variant)',
+                  backgroundColor: 'transparent',
+                  border: `2px solid ${copyState === "error" ? 'rgba(239, 68, 68, 0.5)' : (copyState === "copied" || copyState === "shared") ? 'rgba(22, 163, 74, 0.5)' : 'var(--color-outline-variant)'}`,
+                  borderRadius: '0px',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                }}
+              >
+                <span
+                  className="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0"
+                  style={{
+                    backgroundColor: winnerColor,
+                    color: ["N", "Q", "R", "W"].includes(winner.id) ? "#000" : "#fff",
+                    fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  }}
+                >
+                  {winner.id}
+                </span>
+                {copyLabel}
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -43,6 +43,7 @@ export default function App() {
           loading={loading}
           refreshing={refreshing}
           error={error}
+          winner={data?.winner}
           onOpenChecker={() => setCheckerOpen(true)}
         />
       </div>
