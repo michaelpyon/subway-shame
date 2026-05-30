@@ -39,25 +39,28 @@ export const ALL_GOOD_MESSAGES = [
 ];
 
 /**
- * SCORE TIERS — calibrated for DAILY CUMULATIVE shame points.
+ * SCORE TIERS, calibrated for a LIVE SNAPSHOT severity score.
  *
- * How scores accumulate: every ~5 minutes the app polls the MTA.
- * Each active alert adds points (e.g. Delays = 30 pts/poll).
- * So 300 pts ≈ 50 minutes of delays. 1500 pts ≈ 4 hours.
+ * The deployed backend (frontend/api) is stateless on Vercel, so it scores
+ * each line by the alerts active RIGHT NOW, not a running daily total. A line
+ * adds up the points of its currently active alerts, for example
+ * No Service 50 plus Delays 30 plus Skip Stop 15 equals 95 right now. A clean
+ * line is 0. So realistic live scores run roughly 0 to a few hundred, not the
+ * thousands a full day of accumulation would have produced.
  *
  * Tiers:
- *   0         → Good Service  (no issues)
- *   1–299     → Minor Issues  (a brief blip, < 10 min)
- *   300–1499  → Running Late  (noticeable delays, 10–50 min)
- *   1500–4999 → Rough Day     (sustained bad day, 50+ min)
- *   5000+     → Dumpster Fire (multi-hour catastrophe)
+ *   0       to Good Service  (no active alerts)
+ *   1 to 29    Limping Along (one minor alert: skip stop, platform change)
+ *   30 to 59   Pain Train    (active delays or a reroute right now)
+ *   60 to 119  Full Meltdown (delays stacked with skips and reroutes)
+ *   120+       Dumpster Fire (suspended plus multiple compounding alerts)
  */
 export const SCORE_TIERS = [
-  { min: 5000, label: "Dumpster Fire 🔥", color: "#EF4444", emoji: "🔥", severityClass: "severity-dumpster" },
-  { min: 1500, label: "Full Meltdown",    color: "#F97316", emoji: "😤", severityClass: "severity-meltdown" },
-  { min: 300,  label: "Pain Train",       color: "#EAB308", emoji: "😒", severityClass: "severity-pain-train" },
-  { min: 1,    label: "Limping Along",    color: "#9CA3AF", emoji: "😐", severityClass: "severity-limping" },
-  { min: 0,    label: "Good Service",     color: "#22C55E", emoji: "✓", severityClass: "" },
+  { min: 120, label: "Dumpster Fire 🔥", color: "#EF4444", emoji: "🔥", severityClass: "severity-dumpster" },
+  { min: 60,  label: "Full Meltdown",    color: "#F97316", emoji: "😤", severityClass: "severity-meltdown" },
+  { min: 30,  label: "Pain Train",       color: "#EAB308", emoji: "😒", severityClass: "severity-pain-train" },
+  { min: 1,   label: "Limping Along",    color: "#9CA3AF", emoji: "😐", severityClass: "severity-limping" },
+  { min: 0,   label: "Good Service",     color: "#22C55E", emoji: "✓", severityClass: "" },
 ];
 
 export function getScoreTier(score) {

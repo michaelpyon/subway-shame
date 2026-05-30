@@ -43,10 +43,11 @@ const LINE_COLORS = {
 const YELLOW_LINES = ["N", "Q", "R", "W"];
 
 // Severity tiers (mirror SCORE_TIERS in src/constants/lines.js, emoji stripped).
+// Calibrated for the live snapshot score, not a daily cumulative total.
 const SCORE_TIERS = [
-  { min: 5000, label: "Dumpster Fire", color: "#EF4444" },
-  { min: 1500, label: "Full Meltdown", color: "#F97316" },
-  { min: 300, label: "Pain Train", color: "#EAB308" },
+  { min: 120, label: "Dumpster Fire", color: "#EF4444" },
+  { min: 60, label: "Full Meltdown", color: "#F97316" },
+  { min: 30, label: "Pain Train", color: "#EAB308" },
   { min: 1, label: "Limping Along", color: "#9CA3AF" },
   { min: 0, label: "Good Service", color: "#22C55E" },
 ];

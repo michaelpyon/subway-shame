@@ -361,9 +361,9 @@ export default function Trophy({ winner, lines = [] }) {
 
               {/* Live meta */}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
-                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>accumulated today</span>
+                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>live right now</span>
                 <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
-                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>resets at midnight</span>
+                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>updates every 5 min</span>
                 {winner.score > 0 && (
                   <>
                     <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>

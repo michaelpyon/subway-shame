@@ -1,14 +1,17 @@
 import LineCard from "./LineCard";
 import LineBadge from "./LineBadge";
 
-// Severity groups: CRITICAL (>= 1500), DEGRADED (1-1499), OPERATIONAL (0)
+// Severity groups for the live snapshot score: CRITICAL (>= 60), DEGRADED
+// (1 to 59), OPERATIONAL (0). The 60 cutoff is the Full Meltdown tier, so a
+// line lands in CRITICAL once delays stack with skips or reroutes right now.
+const CRITICAL_CUTOFF = 60;
 const SEVERITY_GROUPS = [
   {
     key: "critical",
     label: "CRITICAL",
     sublabel: "Severe Impact",
     borderColor: "var(--color-signal-red)",
-    filter: (l) => (l.daily_score || 0) >= 1500,
+    filter: (l) => (l.daily_score || 0) >= CRITICAL_CUTOFF,
   },
   {
     key: "degraded",
@@ -17,7 +20,7 @@ const SEVERITY_GROUPS = [
     borderColor: "#EAB308",
     filter: (l) => {
       const s = l.daily_score || 0;
-      return s > 0 && s < 1500;
+      return s > 0 && s < CRITICAL_CUTOFF;
     },
   },
 ];

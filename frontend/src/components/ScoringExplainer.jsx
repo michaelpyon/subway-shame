@@ -58,18 +58,18 @@ export default function ScoringExplainer() {
           {/* How it works */}
           <div className="rounded-lg px-3 py-2.5 mb-4 space-y-1" style={{ backgroundColor: 'var(--color-concrete)' }}>
             <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
-              <strong style={{ color: 'var(--color-cream)' }}>How it works:</strong> Every 5 minutes the app polls the MTA
-              and adds points for each active alert. A brief delay earns 30 pts per poll.
-              A 1-hour delay earns ~360 pts. Scores reset at midnight ET.
+              <strong style={{ color: 'var(--color-cream)' }}>How it works:</strong> This is a live snapshot. Each line adds up
+              the points of the alerts active on it right now. A line with active delays scores 30. Suspended service plus
+              delays plus a skip stop scores 95 this minute. A clean line scores 0. Refreshes every 5 minutes.
             </p>
             <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-              Think of it like a tab at a bar. The longer the MTA keeps messing up, the bigger the bill.
+              The higher the number, the worse that line is behaving at this exact moment.
             </p>
           </div>
 
           {/* Tier legend */}
           <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Score tiers (daily total)</p>
+            <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Score tiers (live snapshot)</p>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
               {[...SCORE_TIERS].reverse().slice(1).map((tier) => (
                 <div
@@ -88,7 +88,7 @@ export default function ScoringExplainer() {
           </div>
 
           {/* Per-alert points */}
-          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Points per alert type (per poll)</p>
+          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Points per active alert</p>
           <div className="space-y-1.5">
             {SCORING_DATA.map(({ cat, pts, desc }) => {
               const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
@@ -126,15 +126,16 @@ export default function ScoringExplainer() {
               <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>📊</span>
               <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
                 <strong style={{ color: 'var(--color-on-surface-variant)' }}>Stacking:</strong> A line
-                with 3 simultaneous alerts adds all their points. Suspended +
-                Delays + Skip Stop = 95 pts per snapshot.
+                with 3 active alerts adds all their points. Suspended plus
+                Delays plus Skip Stop equals 95 right now.
               </p>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>⏱️</span>
               <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Accumulation:</strong> 300 pts ≈ 50 min of delays.
-                1,500 pts ≈ 4 hours. 5,000+ pts means the line has been a disaster all day.
+                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Reading the score:</strong> 30 means active delays
+                right now. 60 plus means delays stacked with skips or reroutes. 120 plus means a line is suspended and falling
+                apart. The number is a snapshot, so it rises and falls as the MTA updates its alerts.
               </p>
             </div>
             <div className="flex items-start gap-2">
