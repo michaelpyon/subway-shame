@@ -1,6 +1,7 @@
 // ShareCard.jsx, Hidden 600x315 card rendered off-screen for html2canvas capture
 // Uses only inline styles so html2canvas can reliably capture it.
 import { LINE_COLORS, getScoreTier } from "../constants/lines";
+import { SHARE_URL } from "../utils/shareText";
 
 export default function ShareCard({ winner, lines = [], date }) {
   if (!winner) return null;
@@ -194,7 +195,7 @@ export default function ShareCard({ winner, lines = [], date }) {
           letterSpacing: "1px",
         }}
       >
-        subway.michaelpyon.com
+        {SHARE_URL}
       </div>
     </div>
   );
