@@ -99,8 +99,11 @@ export default function App() {
             </div>
           )}
 
-          {/* Shame chart */}
-          {data.timeseries && data.timeseries.length > 0 && (
+          {/* Shame chart. Only render once there is a real trend to draw (2+ points).
+              The live snapshot backend emits a single point, so this stays hidden
+              until a datastore backfills intraday history. The leaderboard, trophy,
+              and line grid above are the live read in the meantime. */}
+          {data.timeseries && data.timeseries.length >= 2 && (
             <div className="stagger-section">
               <ShameChart timeseries={data.timeseries} />
             </div>
