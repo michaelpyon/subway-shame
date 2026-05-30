@@ -113,7 +113,11 @@ export default function Trophy({ winner, lines = [] }) {
 
   const handleShare = useCallback(async () => {
     setShareState("working");
-    const shareText = `🚇 The Low Line, ${shareDate}\n🏆 Worst: ${winner.id} Train (${winner.daily_score} shame pts)\n${worstCount} lines delayed, ${goodCount} running clean\nhttps://subway.michaelpyon.com`;
+    // Punchy, on-brand, no em dashes. Names today's real worst line, its live
+    // shame points and severity tier, plus the canonical URL. Strip any emoji
+    // from the tier label so the copied text stays clean.
+    const tierName = tier.label.replace(/[^ -~]/g, "").trim();
+    const shareText = `The [${winner.id}] train is the most delayed line in NYC right now - ${winner.daily_score.toLocaleString()} shame points (${tierName}). subway-shame.vercel.app`;
 
     try {
       const { default: html2canvas } = await import("html2canvas");
@@ -173,7 +177,7 @@ export default function Trophy({ winner, lines = [] }) {
       }
     }
     setTimeout(() => setShareState("idle"), 2500);
-  }, [winner, worstCount, goodCount, shareDate]);
+  }, [winner, worstCount, goodCount, shareDate, tier]);
 
   const shareLabel =
     shareState === "working"
