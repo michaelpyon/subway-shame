@@ -49,14 +49,19 @@ Put the screenshot moment above the fold and lock the share copy to one source o
 - Em dash scrub (house standard): removed every em dash from source comments and type docs (`index.css`, `types/api.ts`, `Sparkline.jsx`, `AlertText.jsx`, `LineCard.jsx`, `Podium.jsx`, `ShareCard.jsx`, `LineGrid.jsx`). Comment only, not user facing.
 Why it matters: the evangelist reaches for their phone on the platform and wants one tap to the receipt. The copy button surfaces that at the top of the page instead of below several sections.
 
-### Quick wins (not yet done)
-1. Decide whether to keep the chart section at all in snapshot mode. Right now it always renders the placeholder card because the timeseries only ever has 1 point. Either hide the section when `timeseries.length < 2` to tighten the page, or keep the new honest placeholder. Effort S. Deploy to verify.
+### Quick wins (done)
+1. [x] Hide the chart section in snapshot mode. The live snapshot backend emits a single timeseries point, so `ShameChart` only ever rendered its "this is a snapshot, not a trend" placeholder, restating what the leaderboard and line grid already show. Gated the section on `timeseries.length >= 2` so it stays hidden now and reappears automatically once a datastore backfills intraday history. Chart code untouched. Shipped 66e04a5.
 
-### Bigger bets
-4. Real cumulative daily scoring with a datastore. This is the original product promise the snapshot cannot keep. Cheapest honest path that needs no new secret in code: a Vercel Cron job hitting an ingest route every minute that writes running totals to Vercel KV or Upstash Redis, with `/api/status` reading the total. Once this lands, restore the cumulative tiers and the "resets at midnight" copy and bring back the real trend chart. Effort L. Needs Michael's KV or Upstash keys and a deploy. Flagged in `status.js` already.
-5. Trend chart that actually trends. Depends on item 4. With a datastore the `ShameChart` becomes the marquee artifact (watch the F climb all morning). Effort M after item 4.
-6. Per-line deep link and shareable per-line card, so a rider can paste "the L right now" rather than only the day's overall worst. Effort M. Deploy to verify.
-7. Tier calibration check after real data. The 30 / 60 / 120 snapshot cutoffs are a reasoned estimate from the category point values; once live, sanity-check them against a week of real worst-line scores and nudge if Dumpster Fire never or always fires. Effort S. Needs live data.
+### Integrity + house standard fixes shipped this pass (S)
+- [x] Share image dead link. The downloaded/shared PNG (`ShareCard.jsx`) watermarked `subway.michaelpyon.com`, a domain confirmed not to resolve (000 / 502) in the prior pass, so anyone sharing the receipt was advertising a dead link. Pointed it at the canonical `SHARE_URL` (`subway-shame.vercel.app`), matching the OG card, `index.html` canonical, and the copied share text. Shipped 34d17ef.
+- [x] Em dash in PWA install name. `public/manifest.json` `name` carried the only remaining user-facing em dash ("The Low Line — NYC..."). Switched to the colon style used by the page title. Shipped ba6a01f.
+
+## Bigger bets for Michael
+4. Real cumulative daily scoring with a datastore. This is the original product promise the snapshot cannot keep. Cheapest honest path that needs no new secret in code: a Vercel Cron job hitting an ingest route every minute that writes running totals to Vercel KV or Upstash Redis, with `/api/status` reading the total. Once this lands, restore the cumulative tiers and the "resets at midnight" copy and bring back the real trend chart. Reason skipped: needs Michael's KV or Upstash keys and a deploy. Flagged in `status.js` already.
+5. Trend chart that actually trends. Depends on item 4. With a datastore the `ShameChart` becomes the marquee artifact (watch the F climb all morning) and the `>= 2` gate added this pass makes it reappear automatically. Reason skipped: depends on item 4 (datastore + deploy).
+6. Per-line deep link and shareable per-line card, so a rider can paste "the L right now" rather than only the day's overall worst. Reason skipped: deploy to verify the per-line OG route.
+7. Tier calibration check after real data. The 30 / 60 / 120 snapshot cutoffs are a reasoned estimate from the category point values; once live, sanity-check them against a week of real worst-line scores and nudge if Dumpster Fire never or always fires. Reason skipped: needs live data over time.
+8. Deploy repo HEAD to Vercel (the deploy gap above). The live URL still serves an older build with no `/api/status`, so none of the prior-pass or this-pass work is visible to a real visitor yet. Reason skipped: deploy is Michael-owned; this whole repo is staged for the next flush.
 
 ## Verification this pass
 - `npm run build` in `frontend/`: passes clean (Vite, 688 modules). Large-chunk warning is pre-existing and not introduced here.
@@ -68,3 +73,9 @@ Why it matters: the evangelist reaches for their phone on the platform and wants
 - `npm run build` passes clean (688 modules).
 - `npx eslint` on all changed files: 0 errors.
 - Flagged defect (repo not CLI linked to Vercel) is a deploy concern only, no code fix made.
+
+## Verification wave 3 (this pass)
+- Backlog worked to completion: the single open quick win (chart in snapshot mode) is shipped, and two integrity/house-standard defects found while touching share code were fixed (dead-domain watermark, manifest em dash). All remaining items need a deploy, a datastore/secret, or live data, so they are in "Bigger bets for Michael".
+- Adversarial integrity scan of `src/` and `api/`: the three `Math.random` uses only pick editorial copy variants (headlines / all-good messages / checker quips), never user-facing numbers. "Real-time MTA data" claims are accurate (the app fetches live GTFS-RT feeds). No example.com, no fake authority, no invented stats. The one dead link (`subway.michaelpyon.com`) was the only finding and is fixed; the sole remaining mention of that string is an accurate code comment explaining why we use the vercel.app host.
+- `npm run build` in `frontend/`: passes clean (Vite). Large-chunk warning is pre-existing, not introduced here.
+- `npx eslint` on all changed files: 0 errors. Zero em dashes in `src/`, `api/`, `index.html`, `manifest.json` (verified by grep).
