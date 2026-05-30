@@ -54,7 +54,7 @@ Why it matters: the evangelist reaches for their phone on the platform and wants
 
 ### Integrity + house standard fixes shipped this pass (S)
 - [x] Share image dead link. The downloaded/shared PNG (`ShareCard.jsx`) watermarked `subway.michaelpyon.com`, a domain confirmed not to resolve (000 / 502) in the prior pass, so anyone sharing the receipt was advertising a dead link. Pointed it at the canonical `SHARE_URL` (`subway-shame.vercel.app`), matching the OG card, `index.html` canonical, and the copied share text. Shipped 34d17ef.
-- [x] Em dash in PWA install name. `public/manifest.json` `name` carried the only remaining user-facing em dash ("The Low Line — NYC..."). Switched to the colon style used by the page title. Shipped ba6a01f.
+- [x] Em dash in PWA install name. `public/manifest.json` `name` carried the only remaining user-facing em dash, separating "The Low Line" from "NYC Subway Delay Tracker". Switched it to the colon style used by the page title. Shipped ba6a01f.
 
 ## Bigger bets for Michael
 4. Real cumulative daily scoring with a datastore. This is the original product promise the snapshot cannot keep. Cheapest honest path that needs no new secret in code: a Vercel Cron job hitting an ingest route every minute that writes running totals to Vercel KV or Upstash Redis, with `/api/status` reading the total. Once this lands, restore the cumulative tiers and the "resets at midnight" copy and bring back the real trend chart. Reason skipped: needs Michael's KV or Upstash keys and a deploy. Flagged in `status.js` already.
