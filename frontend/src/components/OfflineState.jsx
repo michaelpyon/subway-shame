@@ -121,7 +121,7 @@ export default function OfflineState({ onRetry, loading, lastUpdated }) {
         </div>
       </div>
 
-      {/* Is My Train Fucked — preview */}
+      {/* Is My Train Fucked - preview */}
       <div className="max-w-2xl mx-auto px-4 py-5">
         <div className=" p-5 relative overflow-hidden" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
           {/* Overlay */}
@@ -149,7 +149,7 @@ export default function OfflineState({ onRetry, loading, lastUpdated }) {
         </div>
       </div>
 
-      {/* Illustrative layout sketch — UNMISTAKABLY not live. No real scores, ever. */}
+      {/* Illustrative layout sketch - UNMISTAKABLY not live. No real scores, ever. */}
       <div className="max-w-2xl mx-auto px-4 pb-8" aria-hidden="true">
         <div className="flex items-center gap-3 mb-3">
           <h2

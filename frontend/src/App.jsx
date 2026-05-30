@@ -110,7 +110,7 @@ export default function App() {
             <ScoringExplainer />
           </div>
 
-          {/* Line grid — severity grouped */}
+          {/* Line grid - severity grouped */}
           <div className="stagger-section">
             <LineGrid lines={data.lines} />
           </div>

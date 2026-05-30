@@ -12,7 +12,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
 
   return (
     <header>
-      {/* MTA color stripe — thicker accent */}
+      {/* MTA color stripe - thicker accent */}
       <div className="h-1 w-full flex">
         {MTA_COLORS.map((color, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: color }} />
@@ -20,7 +20,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
       </div>
 
       <div className="px-4 pt-6 pb-4 max-w-2xl mx-auto">
-        {/* Wordmark — Epilogue italic with red underline */}
+        {/* Wordmark - Epilogue italic with red underline */}
         <h1
           className="inline-block"
           style={{
@@ -39,7 +39,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           THE LOW LINE
         </h1>
 
-        {/* Subtitle — mono, Signal Red */}
+        {/* Subtitle - mono, Signal Red */}
         <div className="flex items-center gap-2 mt-2">
           <p
             style={{
@@ -56,7 +56,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           <div className="w-2 h-2 rounded-full motion-reduce:animate-none" style={{ backgroundColor: 'var(--color-signal-red)', animation: 'verdict-pulse-green 2s ease-out infinite' }} />
         </div>
 
-        {/* Freshness stamp — always visible, absolute clock time */}
+        {/* Freshness stamp - always visible, absolute clock time */}
         <div
           className="inline-flex items-center gap-2 mt-3 px-2.5 py-1"
           aria-live="polite"
@@ -132,7 +132,7 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
           </button>
         </div>
 
-        {/* CTA button — tighter */}
+        {/* CTA button - tighter */}
         {onOpenChecker && (
           <div className="mt-4">
             <button

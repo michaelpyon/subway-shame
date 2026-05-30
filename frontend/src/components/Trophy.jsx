@@ -199,7 +199,7 @@ export default function Trophy({ winner, lines = [] }) {
       <ShareCard winner={winner} lines={lines} date={shareDateShort} />
 
       <div className="px-4 pt-6 pb-2 max-w-2xl mx-auto">
-        {/* Tab bar — Bebas Neue labels */}
+        {/* Tab bar - Bebas Neue labels */}
         <div className="flex gap-1 mb-3">
           <button
             type="button"
