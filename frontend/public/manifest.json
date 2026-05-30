@@ -1,5 +1,5 @@
 {
-  "name": "The Low Line — NYC Subway Delay Tracker",
+  "name": "The Low Line: NYC Subway Delay Tracker",
   "short_name": "The Low Line",
   "description": "Which NYC subway line is causing the most delays right now? Real-time MTA data, scored and ranked.",
   "start_url": "/",
