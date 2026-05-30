@@ -1,16 +1,4 @@
 import LineBadge from "./LineBadge";
-import { getScoreTier } from "../constants/lines";
-
-// Preview lines — scores calibrated to the current tier thresholds so colors look right
-// Dumpster Fire >=5000 | Rough Day >=1500 | Running Late >=300 | Minor Issues >=1 | Good Service = 0
-const PREVIEW_LINES = [
-  { id: "A",  dailyScore: 5800, status: "No Service" },
-  { id: "F",  dailyScore: 2100, status: "Delays" },
-  { id: "7",  dailyScore: 750,  status: "Delays" },
-  { id: "L",  dailyScore: 150,  status: "Slow Speeds" },
-  { id: "N",  dailyScore: 0,    status: "Good Service" },
-  { id: "G",  dailyScore: 0,    status: "Good Service" },
-];
 
 const MTA_LINE_COLORS = [
   "#EE352E", "#00933C", "#B933AD",
@@ -18,18 +6,10 @@ const MTA_LINE_COLORS = [
   "#6CBE45", "#996633", "#A7A9AC", "#808183",
 ];
 
-// Static bar widths for the preview breakdown bar (just visual chrome)
-const PREVIEW_BAR_COLORS = ["#E8353A", "#F97316", "#EAB308"];
-const PREVIEW_BAR_WIDTHS = [
-  [55, 30, 15],
-  [45, 40, 15],
-  [40, 45, 15],
-  [50, 35, 15],
-  [60, 40, 0],
-  null,
-];
-
-export default function OfflineState({ onRetry, loading }) {
+export default function OfflineState({ onRetry, loading, lastUpdated }) {
+  const lastSeen = lastUpdated
+    ? new Date(lastUpdated).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+    : null;
   return (
     <div className="min-h-dvh antialiased" style={{ backgroundColor: 'var(--color-tunnel)', color: 'var(--color-cream)' }}>
       {/* Top MTA color bar */}
@@ -66,27 +46,76 @@ export default function OfflineState({ onRetry, loading }) {
         </p>
       </div>
 
-      {/* Status note */}
-      <div className="max-w-md mx-auto px-4 mt-2">
-        <div className="text-center py-3">
-          <div className="flex items-center justify-center gap-1.5 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse motion-reduce:animate-none" />
-            <span className="text-xs" style={{ color: 'var(--color-outline)' }}>Live data loads once the backend wakes up. Preview below shows what it looks like.</span>
+      {/* ── DOWN STATE: the honest hero ── */}
+      <div className="max-w-2xl mx-auto px-4 mt-4">
+        <div
+          className="relative overflow-hidden structural-card p-6 sm:p-8 text-center"
+          style={{
+            backgroundColor: 'var(--color-ballast)',
+            boxShadow: 'var(--shadow-card-shame)',
+            borderColor: 'var(--color-signal-red)',
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--color-gold-dim)' }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: 'var(--color-gold-dim)' }} />
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-gold-dim)' }}>
+              No Live Data
+            </span>
           </div>
+
+          <h2
+            style={{
+              fontFamily: 'var(--font-headline)',
+              fontWeight: 900,
+              fontStyle: 'italic',
+              fontSize: 'clamp(28px, 7vw, 44px)',
+              lineHeight: 1.02,
+              color: 'var(--color-cream)',
+              letterSpacing: '-0.03em',
+              textTransform: 'uppercase',
+            }}
+          >
+            The tracker is down.<br />Even we&apos;re delayed.
+          </h2>
+
+          <p className="text-sm mt-4 max-w-md mx-auto leading-relaxed" style={{ color: 'var(--color-on-surface-variant)' }}>
+            We cannot reach the live MTA feed right now, so there are no real scores to show.
+            We would rather show you nothing than make numbers up.
+          </p>
+
+          {lastSeen && (
+            <p className="text-xs mt-3" style={{ color: 'var(--color-outline)' }}>
+              Last good data: {lastSeen} &middot; may be stale
+            </p>
+          )}
+
           <button
             type="button"
             onClick={onRetry}
             disabled={loading}
-            className="px-3 py-1 text-xs rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed press-scale"
-            style={{ color: 'var(--color-outline)', border: '1px solid var(--color-outline-variant)' }}
+            className="mt-5 inline-flex items-center justify-center gap-2 press-scale disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '15px',
+              letterSpacing: '0.05em',
+              minHeight: '44px',
+              padding: '0 22px',
+              backgroundColor: 'var(--color-signal-red)',
+              color: 'var(--color-cream)',
+              border: '2px solid var(--color-cream)',
+              boxShadow: 'var(--shadow-card)',
+            }}
           >
             {loading ? (
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block w-2.5 h-2.5 rounded-full animate-spin motion-reduce:animate-none" style={{ border: '1px solid rgba(245, 240, 232, 0.3)', borderTopColor: 'rgba(245, 240, 232, 0.6)' }} />
-                Checking...
-              </span>
+              <>
+                <span className="inline-block w-3 h-3 rounded-full animate-spin motion-reduce:animate-none" style={{ border: '1px solid rgba(245, 240, 232, 0.4)', borderTopColor: 'var(--color-cream)' }} />
+                CHECKING...
+              </>
             ) : (
-              "Try again"
+              "TRY AGAIN"
             )}
           </button>
         </div>
@@ -120,100 +149,48 @@ export default function OfflineState({ onRetry, loading }) {
         </div>
       </div>
 
-      {/* Live Rankings Preview */}
-      <div className="max-w-2xl mx-auto px-4 pb-8">
-        <div className="flex items-center gap-3 mb-4">
+      {/* Illustrative layout sketch — UNMISTAKABLY not live. No real scores, ever. */}
+      <div className="max-w-2xl mx-auto px-4 pb-8" aria-hidden="true">
+        <div className="flex items-center gap-3 mb-3">
           <h2
-            style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-on-surface-variant)', letterSpacing: '0.04em' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-outline-variant)', letterSpacing: '0.04em' }}
           >
-            LIVE RANKINGS
+            WHAT THE RANKING LOOKS LIKE
           </h2>
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-outline-variant)', border: '1px solid var(--color-outline-variant)' }}>
-            Preview
+          <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ color: 'var(--color-outline-variant)', border: '1px dashed var(--color-outline-variant)' }}>
+            Example layout, not live
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {PREVIEW_LINES.map(({ id, dailyScore, status }, idx) => {
-            const scoreTier = getScoreTier(dailyScore);
-            const barWidths = PREVIEW_BAR_WIDTHS[idx];
-            const hasScore = dailyScore > 0;
-
-            return (
-              <div
-                key={id}
-                className="rounded-lg overflow-hidden"
-                style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}
-              >
-                <div className="p-4">
-                  {/* Top row: badge + name + score */}
-                  <div className="flex items-center gap-3">
-                    <LineBadge lineId={id} size="md" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm" style={{ color: 'var(--color-cream)' }}>
-                        {id} Train
-                      </div>
-                      <div
-                        className="text-xs mt-0.5"
-                        style={{ color: scoreTier.color }}
-                      >
-                        {status}
-                      </div>
-                    </div>
-                    <div className="text-right flex items-center gap-1.5">
-                      {hasScore ? (
-                        <>
-                          <span className="text-base">{scoreTier.emoji}</span>
-                          <div className="text-right">
-                            <div className="flex items-baseline gap-0.5 justify-end">
-                              <span
-                                className="text-xl font-bold tabular-nums leading-none"
-                                style={{ color: scoreTier.color }}
-                              >
-                                {dailyScore.toLocaleString()}
-                              </span>
-                              <span className="text-[9px]" style={{ color: `${scoreTier.color}80` }}>pts</span>
-                            </div>
-                            <span className="text-[9px] uppercase font-semibold tracking-wide" style={{ color: `${scoreTier.color}90` }}>
-                              {scoreTier.label}
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-right">
-                          <span className="text-lg" style={{ color: '#22C55E' }}>&#10003;</span>
-                          <span className="text-[9px] font-semibold uppercase tracking-wide block" style={{ color: '#166534' }}>On time</span>
-                        </div>
-                      )}
-                    </div>
+        {/* Grayscale, score-free skeleton. Dashes where numbers would be. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ filter: 'grayscale(1)', opacity: 0.32 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="rounded-lg overflow-hidden"
+              style={{ backgroundColor: 'var(--color-ballast)', border: '1px dashed var(--color-outline-variant)' }}
+            >
+              <div className="p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-concrete)' }} />
+                <div className="flex-1 min-w-0">
+                  <div className="h-3 w-20 rounded mb-1.5" style={{ backgroundColor: 'var(--color-concrete)' }} />
+                  <div className="h-2 w-12 rounded" style={{ backgroundColor: 'var(--color-concrete)' }} />
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-bold tabular-nums leading-none" style={{ color: 'var(--color-outline-variant)' }}>
+                    &mdash;&mdash;&mdash;
                   </div>
-
-                  {/* Breakdown bar skeleton */}
-                  {hasScore && barWidths && (
-                    <div className="mt-3">
-                      <div className="h-2 rounded-full overflow-hidden flex" style={{ backgroundColor: 'var(--color-concrete)' }}>
-                        {barWidths.map((w, i) => w > 0 && (
-                          <div
-                            key={i}
-                            className="h-full"
-                            style={{
-                              width: `${w}%`,
-                              backgroundColor: PREVIEW_BAR_COLORS[i],
-                              opacity: 0.7,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div className="text-[9px] uppercase tracking-wide mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>
+                    pts
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         <p className="text-center text-xs mt-4" style={{ color: 'var(--color-outline-variant)' }}>
-          Sample data. Live scores will load once the backend connects
+          This is an empty layout sketch. No scores here are real. The live ranking appears once the feed reconnects.
         </p>
       </div>
 

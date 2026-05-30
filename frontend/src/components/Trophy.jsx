@@ -257,89 +257,115 @@ export default function Trophy({ winner, lines = [] }) {
               }}
             />
 
-            {/* ── COMPACT ROW ── */}
-            <div className="relative z-10 p-4 flex items-start gap-3">
-              <div className="shrink-0 mt-0.5">
-                <LineBadge lineId={winner.id} size="md" />
+            {/* ── HERO ── worst line of the day, dominant */}
+            <div className="relative z-10 p-5 sm:p-6">
+              {/* Eyebrow: live + worst-line label */}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-outline)' }}>
+                    Live &middot; Worst Line Today
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  disabled={shareState === "working"}
+                  className="text-xs font-medium px-3 rounded-full transition-colors duration-200 press-scale disabled:opacity-60 shrink-0 inline-flex items-center"
+                  style={{
+                    minHeight: '44px',
+                    backgroundColor:
+                      shareState === "idle" || shareState === "working"
+                        ? `${color}18`
+                        : shareState === "error"
+                        ? "#EF444418"
+                        : "#16A34A18",
+                    border: `1px solid ${
+                      shareState === "idle" || shareState === "working"
+                        ? `${color}50`
+                        : shareState === "error"
+                        ? "#EF444450"
+                        : "#16A34A50"
+                    }`,
+                    color:
+                      shareState === "idle" || shareState === "working"
+                        ? color
+                        : shareState === "error"
+                        ? "#EF4444"
+                        : "#16A34A",
+                  }}
+                >
+                  {shareLabel}
+                </button>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-sm" style={{ color: 'var(--color-cream)' }}>{winner.id} Train</span>
-                  <span
-                    className="text-sm font-bold tabular-nums"
-                    style={{ color: tier.color }}
-                  >
-                    {winner.daily_score.toLocaleString()} pts
-                  </span>
-                  <span className="text-sm">{tier.emoji}</span>
-                  {/* Severity label as styled pill */}
-                  <span className={`severity-label ${tier.severityClass}`}>
-                    {tier.label.toUpperCase()}
-                  </span>
-                  <div className="flex items-center gap-1.5 ml-auto shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleShare}
-                      disabled={shareState === "working"}
-                      className="text-xs font-medium px-3 py-1 rounded-full transition-colors duration-200 press-scale disabled:opacity-60"
-                      style={{
-                        backgroundColor:
-                          shareState === "idle" || shareState === "working"
-                            ? `${color}18`
-                            : shareState === "error"
-                            ? "#EF444418"
-                            : "#16A34A18",
-                        border: `1px solid ${
-                          shareState === "idle" || shareState === "working"
-                            ? `${color}50`
-                            : shareState === "error"
-                            ? "#EF444450"
-                            : "#16A34A50"
-                        }`,
-                        color:
-                          shareState === "idle" || shareState === "working"
-                            ? color
-                            : shareState === "error"
-                            ? "#EF4444"
-                            : "#16A34A",
-                      }}
-                    >
-                      {shareLabel}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setExpanded((v) => !v)}
-                      className="text-xs transition-colors px-2 py-1 rounded-lg press-scale"
-                      aria-controls="trophy-details-panel"
-                      aria-expanded={expanded}
-                      style={{ color: 'var(--color-outline)' }}
-                    >
-                      {expanded ? "↑ Hide" : "↓ Details"}
-                    </button>
-                  </div>
+              {/* The bullet + the giant score */}
+              <div className="flex items-center gap-4 sm:gap-5">
+                <div className="shrink-0">
+                  <LineBadge lineId={winner.id} size="xl" />
                 </div>
 
-                {/* Live meta */}
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <span className="flex items-center gap-1">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span
+                      className="font-black tabular-nums leading-none"
+                      style={{
+                        color: tier.color,
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 'clamp(64px, 18vw, 96px)',
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      {winner.daily_score.toLocaleString()}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-outline)' }}>LIVE</span>
-                  </span>
-                  <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
-                  <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>accumulated today</span>
-                  <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
-                  <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>resets at midnight</span>
-                  {winner.score > 0 && (
-                    <>
-                      <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
-                      <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>+{winner.score} pts/hr right now</span>
-                    </>
-                  )}
+                    <span
+                      className="font-bold uppercase tracking-wide"
+                      style={{ color: `${tier.color}99`, fontSize: '14px' }}
+                    >
+                      pts
+                    </span>
+                  </div>
+                  <div className="mt-1 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--color-cream)' }}>
+                    {winner.id} Train
+                  </div>
                 </div>
+              </div>
+
+              {/* Stamped severity label, large */}
+              <div className="mt-4 flex items-center gap-2 flex-wrap">
+                <span className="text-2xl">{tier.emoji}</span>
+                <span
+                  className={`severity-label ${tier.severityClass}`}
+                  style={{ fontSize: '20px', padding: '6px 16px', letterSpacing: '0.1em' }}
+                >
+                  {tier.label.toUpperCase()}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="text-xs transition-colors px-3 rounded-lg press-scale ml-auto inline-flex items-center shrink-0"
+                  aria-controls="trophy-details-panel"
+                  aria-expanded={expanded}
+                  style={{ color: 'var(--color-outline)', minHeight: '44px' }}
+                >
+                  {expanded ? "↑ Hide details" : "↓ Details"}
+                </button>
+              </div>
+
+              {/* Live meta */}
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
+                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>accumulated today</span>
+                <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
+                <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>resets at midnight</span>
+                {winner.score > 0 && (
+                  <>
+                    <span className="text-[10px]" style={{ color: 'var(--color-outline-variant)' }}>·</span>
+                    <span className="text-[10px]" style={{ color: 'var(--color-outline)' }}>+{winner.score} pts/hr right now</span>
+                  </>
+                )}
               </div>
             </div>
 

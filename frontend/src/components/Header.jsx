@@ -7,6 +7,8 @@ const MTA_COLORS = [
 export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, loading, refreshing, error, onOpenChecker }) {
   const timeAgo = lastUpdated ? formatTimeAgo(lastUpdated) : null;
   const countdown = formatCountdown(secondsUntilRefresh);
+  const clock = lastUpdated ? formatClock(lastUpdated) : null;
+  const stale = Boolean(error && lastUpdated);
 
   return (
     <header>
@@ -52,6 +54,36 @@ export default function Header({ lastUpdated, secondsUntilRefresh, onRefresh, lo
             Is My Train Fucked?
           </p>
           <div className="w-2 h-2 rounded-full motion-reduce:animate-none" style={{ backgroundColor: 'var(--color-signal-red)', animation: 'verdict-pulse-green 2s ease-out infinite' }} />
+        </div>
+
+        {/* Freshness stamp — always visible, absolute clock time */}
+        <div
+          className="inline-flex items-center gap-2 mt-3 px-2.5 py-1"
+          aria-live="polite"
+          style={{
+            backgroundColor: stale ? 'rgba(233, 196, 0, 0.12)' : 'rgba(245, 240, 232, 0.06)',
+            border: `1px solid ${stale ? 'rgba(233, 196, 0, 0.3)' : 'var(--color-outline-variant)'}`,
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: stale ? 'var(--color-gold-dim)' : '#22C55E' }}
+          />
+          <span
+            className="text-[11px] uppercase tracking-wide"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
+              color: stale ? 'var(--color-gold-dim)' : 'var(--color-on-surface-variant)',
+              fontWeight: 700,
+            }}
+          >
+            {clock
+              ? stale
+                ? `Last updated ${clock} · may be stale`
+                : `Data as of ${clock}`
+              : 'Connecting to live feed...'}
+          </span>
         </div>
 
         {/* Status row */}
@@ -136,6 +168,11 @@ function formatTimeAgo(date) {
   if (diff < 120) return "1 min ago";
   if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
   return `${Math.floor(diff / 3600)}h ago`;
+}
+
+function formatClock(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
 function formatCountdown(seconds) {

@@ -20,7 +20,7 @@ export default function App() {
 
   // Full offline state
   if (error && !data) {
-    return <OfflineState onRetry={refresh} loading={loading} />;
+    return <OfflineState onRetry={refresh} loading={loading} lastUpdated={lastUpdated} />;
   }
 
   return (
