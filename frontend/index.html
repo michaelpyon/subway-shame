@@ -15,29 +15,33 @@
     <meta name="apple-mobile-web-app-title" content="The Low Line" />
 
     <!-- Open Graph. The shared link and the screenshot are the same brand object,
-         so the card carries the wordmark, an MTA bullet, and the positioning line.
-         og:image is the live edge route /api/og, which paints today's real worst
-         line; the static og.png is the documented fallback a scraper sees if the
-         route is unreachable. Both are real 1200x630 rasters, never fabricated. -->
+         so the card carries the wordmark, an MTA bullet, a sample score and stamp.
+         The static og.png is declared FIRST so a link preview ALWAYS renders even
+         if the live edge route cold-starts or fails; the live /api/og, which
+         paints today's real worst line, is the enhancement declared after it.
+         Both are real 1200x630 rasters. The static card is labeled SAMPLE so it
+         never reads as a fabricated live verdict. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="The Low Line" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://subway-shame.vercel.app/" />
     <meta property="og:title" content="The Low Line: which NYC subway line is the worst right now" />
     <meta property="og:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
-    <meta property="og:image" content="https://subway-shame.vercel.app/api/og" />
+    <meta property="og:image" content="https://subway-shame.vercel.app/og.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The Low Line: a black tabloid-style card with the MTA F bullet and the line 'Which line is ruining the most mornings right now.'" />
-    <meta property="og:image" content="https://subway-shame.vercel.app/og.png" />
+    <meta property="og:image:alt" content="The Low Line: a black tabloid card with the MTA F bullet, a sample score of 140 shame points, and a DUMPSTER FIRE stamp, marked SAMPLE." />
+    <meta property="og:image" content="https://subway-shame.vercel.app/api/og" />
 
-    <!-- Twitter / X large summary card. -->
+    <!-- Twitter / X large summary card. Static og.png first so the card always
+         renders; the live route is the enhancement, never the dependency. -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="The Low Line: which NYC subway line is the worst right now" />
     <meta name="twitter:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
+    <meta name="twitter:image" content="https://subway-shame.vercel.app/og.png" />
     <meta name="twitter:image" content="https://subway-shame.vercel.app/api/og" />
-    <meta name="twitter:image:alt" content="The Low Line: a black tabloid-style card with the MTA F bullet and the line 'Which line is ruining the most mornings right now.'" />
+    <meta name="twitter:image:alt" content="The Low Line: a black tabloid card with the MTA F bullet, a sample score of 140 shame points, and a DUMPSTER FIRE stamp, marked SAMPLE." />
     <meta name="twitter:site" content="@michaelpyon" />
     <meta name="twitter:creator" content="@michaelpyon" />
 

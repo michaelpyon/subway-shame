@@ -101,7 +101,7 @@ export default function OfflineState({ onRetry, loading, lastUpdated }) {
                 <div className="h-3 w-20 mb-1.5" style={{ backgroundColor: "var(--color-concrete)" }} />
                 <div className="h-2 w-12" style={{ backgroundColor: "var(--color-concrete)" }} />
               </div>
-              <span className="font-display" style={{ fontSize: "24px", color: "var(--color-newsprint)" }}>&mdash;&mdash;</span>
+              <span className="font-display" style={{ fontSize: "24px", color: "var(--color-newsprint)" }} aria-hidden="true">--</span>
             </div>
           ))}
         </div>

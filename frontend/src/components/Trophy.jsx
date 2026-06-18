@@ -154,6 +154,17 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
           />
 
           <div className="relative z-10 p-5">
+            {/* Wordmark inside the card frame so a lazy iOS screenshot cropped to
+                just this card still carries the brand, matching ShareCard's
+                top-left placement. The in-page hero and the captured card are the
+                same brand object regardless of how the user grabs it. */}
+            <div
+              className="font-display mb-3"
+              style={{ fontSize: "15px", letterSpacing: "0.3em", color: "var(--color-platform)", lineHeight: 1 }}
+            >
+              THE LOW LINE
+            </div>
+
             {/* Live label + share */}
             <div className="flex items-center justify-between gap-2 mb-4">
               <span className="flex items-center gap-2">
