@@ -1,17 +1,33 @@
-// ShareCard.jsx, Hidden 600x315 card rendered off-screen for html2canvas capture
-// Uses only inline styles so html2canvas can reliably capture it.
+// ShareCard.jsx, hidden 600x315 card rendered off-screen for html2canvas capture.
+// Inline styles only so html2canvas captures it reliably. This is the shared
+// object: it must carry the same 5 elements in the same arrangement as the in
+// page trophy and the live OG image, and read at 25 percent zoom inside a chat:
+//   1. THE LOW LINE wordmark
+//   2. the bullet in true MTA color
+//   3. the score with "shame points"
+//   4. the severity stamp
+//   5. the receipt line "Data as of HH:MM"
 import { LINE_COLORS, getScoreTier } from "../constants/lines";
 import { SHARE_URL } from "../utils/shareText";
 
-export default function ShareCard({ winner, lines = [], date }) {
+const DARK_TEXT_LINES = ["N", "Q", "R", "W", "L"];
+
+// Stamp tints mirror index.css .stamp-* so the captured card matches the app.
+const STAMP_STYLE = {
+  "stamp-good":     { bg: "rgba(34,197,94,0.20)",  fg: "#22C55E", border: "#22C55E" },
+  "stamp-limping":  { bg: "rgba(156,163,175,0.20)", fg: "#9CA3AF", border: "#9CA3AF" },
+  "stamp-pain":     { bg: "rgba(234,179,8,0.20)",  fg: "#EAB308", border: "#EAB308" },
+  "stamp-meltdown": { bg: "rgba(249,115,22,0.20)", fg: "#F97316", border: "#F97316" },
+  "stamp-dumpster": { bg: "rgba(232,53,58,0.45)",  fg: "#F5F0E8", border: "#E8353A" },
+};
+
+export default function ShareCard({ winner, date, clock }) {
   if (!winner) return null;
 
   const color = LINE_COLORS[winner.id] || "#808183";
-  const isYellow = ["N", "Q", "R", "W"].includes(winner.id);
+  const dark = DARK_TEXT_LINES.includes(winner.id);
   const tier = getScoreTier(winner.daily_score);
-  const delayedCount = lines.filter((l) => (l.daily_score || 0) > 0).length;
-  const onTimeCount = lines.length - delayedCount;
-  const delayedPct = lines.length > 0 ? (delayedCount / lines.length) * 100 : 0;
+  const st = STAMP_STYLE[tier.stamp] || STAMP_STYLE["stamp-limping"];
 
   return (
     <div
@@ -22,180 +38,111 @@ export default function ShareCard({ winner, lines = [], date }) {
         top: "0",
         width: "600px",
         height: "315px",
-        backgroundColor: "#0A0A0A",
-        fontFamily: "'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+        backgroundColor: "#000000",
+        // 1px Concrete border so the card holds its edge in an iMessage dark thread.
+        boxShadow: "inset 0 0 0 1px #2A2A2A",
+        fontFamily: "var(--font-text)",
         overflow: "hidden",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        padding: "28px 36px",
       }}
     >
-      {/* Top accent bar */}
+      {/* Wordmark */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "3px",
-          backgroundColor: color,
-        }}
-      />
-
-      {/* Background glow */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(circle at 50% -20%, ${color}50 0%, transparent 65%)`,
-        }}
-      />
-
-      {/* Content */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          textAlign: "center",
-          width: "100%",
-          padding: "24px 40px",
-          boxSizing: "border-box",
+          fontFamily: "'Bebas Neue', 'Arial Narrow', sans-serif",
+          fontSize: "22px",
+          letterSpacing: "6.6px",
+          color: "#F5F0E8",
+          textTransform: "uppercase",
         }}
       >
-        {/* App title, Bebas Neue */}
-        <div
-          style={{
-            fontSize: "18px",
-            letterSpacing: "6px",
-            color: "#F5F0E8",
-            textTransform: "uppercase",
-            marginBottom: "16px",
-            fontFamily: "'Bebas Neue', 'Helvetica Neue', sans-serif",
-          }}
-        >
-          THE LOW LINE
-        </div>
+        THE LOW LINE
+      </div>
 
-        {/* Row: badge + scores side by side */}
+      {/* Hero: bullet + score */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "28px",
+          marginTop: "auto",
+          marginBottom: "16px",
+        }}
+      >
         <div
           style={{
+            width: "104px",
+            height: "104px",
+            borderRadius: "50%",
+            backgroundColor: color,
+            color: dark ? "#000" : "#fff",
+            fontSize: "54px",
+            fontWeight: 800,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "28px",
-            marginBottom: "20px",
+            flexShrink: 0,
           }}
         >
-          {/* Line badge */}
-          <div
-            style={{
-              width: "88px",
-              height: "88px",
-              borderRadius: "50%",
-              backgroundColor: color,
-              color: isYellow ? "#000" : "#fff",
-              fontSize: "42px",
-              fontWeight: "900",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: `0 0 32px ${color}60`,
-            }}
-          >
-            {winner.id}
-          </div>
-
-          {/* Score block */}
-          <div style={{ textAlign: "left" }}>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#9ca3af",
-                marginBottom: "2px",
-              }}
-            >
-              WORST LINE · {date}
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "2px" }}>
-              <div
-                style={{
-                  fontSize: "56px",
-                  fontWeight: "900",
-                  color: tier.color,
-                  lineHeight: "1",
-                  fontFamily: "'Bebas Neue', 'Space Grotesk', sans-serif",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {winner.daily_score.toLocaleString()}
-              </div>
-              <div style={{ fontSize: "18px", fontWeight: "700", color: "#6b7280", fontFamily: "'JetBrains Mono', monospace" }}>pts</div>
-            </div>
-            <div
-              style={{
-                fontSize: "14px",
-                color: tier.color,
-                fontFamily: "'Bebas Neue', sans-serif",
-                letterSpacing: "0.08em",
-              }}
-            >
-              {tier.label.toUpperCase()}
-            </div>
-          </div>
+          {winner.id}
         </div>
 
-        {/* Delayed / on-time bar */}
-        <div
-          style={{
-            maxWidth: "360px",
-            margin: "0 auto 20px",
-          }}
-        >
-          <div
-            style={{
-              height: "8px",
-              borderRadius: "4px",
-              backgroundColor: "#1A1A1A",
-              overflow: "hidden",
-              marginBottom: "6px",
-            }}
-          >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
             <div
               style={{
-                width: `${delayedPct}%`,
-                height: "100%",
-                backgroundColor: "#E8353A",
-                borderRadius: "4px",
+                fontFamily: "'Bebas Neue', 'Arial Narrow', sans-serif",
+                fontSize: "100px",
+                color: tier.color,
+                lineHeight: 0.9,
+                letterSpacing: "-0.02em",
+                fontVariantNumeric: "tabular-nums",
               }}
-            />
-          </div>
-          <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-            <span style={{ color: "#E8353A", fontWeight: "700" }}>
-              {delayedCount} lines delayed
-            </span>
-            &nbsp;·&nbsp;
-            <span style={{ color: "#22C55E" }}>{onTimeCount} on time</span>
+            >
+              {winner.daily_score.toLocaleString()}
+            </div>
+            <div style={{ fontSize: "16px", fontWeight: 600, color: "#999077" }}>
+              shame points
+            </div>
           </div>
         </div>
       </div>
 
-      {/* URL watermark */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10px",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          fontSize: "10px",
-          color: "#374151",
-          letterSpacing: "1px",
-        }}
-      >
-        {SHARE_URL}
+      {/* Severity stamp + receipt line */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <div
+          style={{
+            fontFamily: "'Bebas Neue', 'Arial Narrow', sans-serif",
+            fontSize: "26px",
+            letterSpacing: "2.6px",
+            textTransform: "uppercase",
+            color: st.fg,
+            backgroundColor: st.bg,
+            borderLeft: `3px solid ${st.border}`,
+            padding: "6px 18px",
+            borderRadius: "2px",
+          }}
+        >
+          {tier.emoji ? `${tier.emoji} ` : ""}
+          {tier.label}
+        </div>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#999077",
+            fontVariantNumeric: "tabular-nums",
+            textAlign: "right",
+          }}
+        >
+          Data as of {clock || date}
+          <div style={{ color: "#5a5446", marginTop: "3px" }}>{SHARE_URL}</div>
+        </div>
       </div>
     </div>
   );

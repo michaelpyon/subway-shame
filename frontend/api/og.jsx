@@ -20,11 +20,11 @@ export const config = { runtime: "edge" };
 const STATUS_URL = "https://subway-shame.vercel.app/api/status";
 
 // Brand palette (mirrors the app's CSS tokens).
-const TUNNEL = "#0A0A0A";
-const BALLAST = "#141414";
-const CREAM = "#F5F0E8";
+const TUNNEL = "#000000";
+const CONCRETE = "#2A2A2A";
+const PLATFORM = "#F5F0E8";
+const NEWSPRINT = "#999077";
 const SIGNAL_RED = "#E8353A";
-const OUTLINE = "#9CA3AF";
 
 // MTA line colors (subset that matters for the badge; falls back to grey).
 const LINE_COLORS = {
@@ -40,16 +40,17 @@ const LINE_COLORS = {
   S: "#808183", SI: "#0078C6",
 };
 
-const YELLOW_LINES = ["N", "Q", "R", "W"];
+// Black glyph on light bullets (NQRW yellow, L gray); white everywhere else.
+const DARK_TEXT_LINES = ["N", "Q", "R", "W", "L"];
 
-// Severity tiers (mirror SCORE_TIERS in src/constants/lines.js, emoji stripped).
-// Calibrated for the live snapshot score, not a daily cumulative total.
+// Severity tiers (mirror SCORE_TIERS in src/constants/lines.js). Dumpster Fire
+// red consolidated to Signal Red. Tints mirror the .stamp-* construction.
 const SCORE_TIERS = [
-  { min: 120, label: "Dumpster Fire", color: "#EF4444" },
-  { min: 60, label: "Full Meltdown", color: "#F97316" },
-  { min: 30, label: "Pain Train", color: "#EAB308" },
-  { min: 1, label: "Limping Along", color: "#9CA3AF" },
-  { min: 0, label: "Good Service", color: "#22C55E" },
+  { min: 120, label: "Dumpster Fire", color: "#E8353A", bg: "rgba(232,53,58,0.45)", fg: "#F5F0E8", border: "#E8353A" },
+  { min: 60, label: "Full Meltdown", color: "#F97316", bg: "rgba(249,115,22,0.20)", fg: "#F97316", border: "#F97316" },
+  { min: 30, label: "Pain Train", color: "#EAB308", bg: "rgba(234,179,8,0.20)", fg: "#EAB308", border: "#EAB308" },
+  { min: 1, label: "Limping Along", color: "#9CA3AF", bg: "rgba(156,163,175,0.20)", fg: "#9CA3AF", border: "#9CA3AF" },
+  { min: 0, label: "Good Service", color: "#22C55E", bg: "rgba(34,197,94,0.20)", fg: "#22C55E", border: "#22C55E" },
 ];
 
 function getTier(score) {
@@ -62,7 +63,7 @@ function lineColor(id) {
 
 function badge(id, size) {
   const color = lineColor(id);
-  const isYellow = YELLOW_LINES.includes(id);
+  const dark = DARK_TEXT_LINES.includes(id);
   return (
     <div
       style={{
@@ -70,13 +71,12 @@ function badge(id, size) {
         height: size,
         borderRadius: "50%",
         backgroundColor: color,
-        color: isYellow ? "#000" : "#fff",
+        color: dark ? "#000" : "#fff",
         fontSize: size * 0.52,
-        fontWeight: 900,
+        fontWeight: 800,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        boxShadow: `0 0 60px ${color}55`,
       }}
     >
       {id}
@@ -84,105 +84,107 @@ function badge(id, size) {
   );
 }
 
-// On-brand card used when we DO have live data.
+function clockFromIso(iso) {
+  try {
+    const d = iso ? new Date(iso) : new Date();
+    return d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "America/New_York",
+    });
+  } catch {
+    return "";
+  }
+}
+
+// Live card: the same 5 elements as the in-page trophy and the captured share
+// card, same arrangement. Flat black field, 1px Concrete inner border, the 1
+// permitted glow behind the bullet at 20 percent.
 function liveCard(status) {
   const winner = status.winner;
-  const tier = getTier(winner.daily_score || winner.score || 0);
-  const podium = (status.podium || []).slice(0, 3);
+  const tier = getTier(winner.daily_score ?? winner.score ?? 0);
+  const color = lineColor(winner.id);
   const score = (winner.daily_score ?? winner.score ?? 0).toLocaleString("en-US");
+  const clock = clockFromIso(status.timestamp);
 
   return (
-    <div style={shell(lineColor(winner.id))}>
-      <div style={accentBar(lineColor(winner.id))} />
+    <div style={shell()}>
+      {/* The 1 permitted glow: villain color behind the bullet. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 120,
+          left: 20,
+          width: 560,
+          height: 560,
+          background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`,
+        }}
+      />
 
-      {/* Eyebrow */}
-      <div style={eyebrowRow}>
-        <div style={dot} />
-        <div style={eyebrowText}>Today's worst NYC subway line</div>
-        <div style={{ flex: 1 }} />
-        <div style={brandText}>THE LOW LINE</div>
-      </div>
+      <div style={{ ...brandText, position: "relative" }}>THE LOW LINE</div>
 
-      {/* Hero: badge + score + severity */}
-      <div style={{ display: "flex", alignItems: "center", gap: 48, marginTop: 8 }}>
-        {badge(winner.id, 220)}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
-            <div style={{ fontSize: 168, fontWeight: 900, color: tier.color, lineHeight: 1 }}>
-              {score}
-            </div>
-            <div style={{ fontSize: 40, fontWeight: 700, color: OUTLINE }}>pts</div>
+      {/* Hero: bullet + score */}
+      <div style={{ display: "flex", alignItems: "center", gap: 56, marginTop: "auto", marginBottom: 28, position: "relative" }}>
+        {badge(winner.id, 240)}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
+          <div style={{ fontSize: 280, fontWeight: 900, color: tier.color, lineHeight: 0.85, letterSpacing: "-0.02em" }}>
+            {score}
           </div>
-          <div style={{ fontSize: 40, fontWeight: 700, color: CREAM, marginTop: 8 }}>
-            {winner.id} Train
-          </div>
-          <div
-            style={{
-              marginTop: 14,
-              alignSelf: "flex-start",
-              fontSize: 34,
-              fontWeight: 800,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              color: tier.color,
-              backgroundColor: `${tier.color}22`,
-              padding: "8px 22px",
-              borderRadius: 10,
-            }}
-          >
-            {tier.label}
-          </div>
+          <div style={{ fontSize: 40, fontWeight: 600, color: NEWSPRINT }}>shame points</div>
         </div>
       </div>
 
-      {/* Podium beneath */}
-      <div style={{ display: "flex", alignItems: "center", gap: 28, marginTop: "auto" }}>
-        <div style={{ fontSize: 24, color: OUTLINE, letterSpacing: 2, textTransform: "uppercase" }}>
-          Today's podium
+      {/* Severity stamp + receipt line */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
+        <div
+          style={{
+            fontSize: 48,
+            fontWeight: 800,
+            letterSpacing: 4,
+            textTransform: "uppercase",
+            color: tier.fg,
+            backgroundColor: tier.bg,
+            borderLeft: `6px solid ${tier.border}`,
+            padding: "12px 32px",
+            borderRadius: 2,
+          }}
+        >
+          {tier.label}
         </div>
-        {podium.map((l, i) => (
-          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 28, color: OUTLINE, fontWeight: 800 }}>{i + 1}</div>
-            {badge(l.id, 56)}
-            <div style={{ fontSize: 30, fontWeight: 800, color: CREAM }}>
-              {(l.daily_score ?? l.score ?? 0).toLocaleString("en-US")}
-            </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: 3, textTransform: "uppercase", color: NEWSPRINT }}>
+            Data as of {clock}
           </div>
-        ))}
-        <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 22, color: "#4B5563", letterSpacing: 1 }}>
-          {status.date}
+          <div style={{ fontSize: 22, color: "#5a5446", letterSpacing: 2, marginTop: 6 }}>
+            subway-shame.vercel.app
+          </div>
         </div>
       </div>
-
-      <div style={watermark}>subway-shame.vercel.app</div>
     </div>
   );
 }
 
-// On-brand fallback when there is no winner (clean day) or the feed is down.
+// Fallback when there is no winner (clean day) or the feed is down. Stays honest:
+// no fabricated score, on-brand black field.
 function fallbackCard(date, reason) {
   return (
-    <div style={shell(SIGNAL_RED)}>
-      <div style={accentBar(SIGNAL_RED)} />
-      <div style={eyebrowRow}>
-        <div style={dot} />
-        <div style={eyebrowText}>{reason}</div>
-        <div style={{ flex: 1 }} />
-        <div style={brandText}>THE LOW LINE</div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", marginTop: 40, gap: 16 }}>
-        <div style={{ fontSize: 96, fontWeight: 900, color: CREAM, lineHeight: 1.05 }}>
-          Which NYC subway line is the worst right now?
+    <div style={shell()}>
+      <div style={{ ...brandText, position: "relative" }}>THE LOW LINE</div>
+      <div style={{ display: "flex", flexDirection: "column", marginTop: "auto", marginBottom: 40, gap: 18, position: "relative" }}>
+        <div style={{ fontSize: 100, fontWeight: 900, color: PLATFORM, lineHeight: 1.02 }}>
+          Which line is ruining the most mornings right now.
         </div>
-        <div style={{ fontSize: 40, color: OUTLINE, fontWeight: 600 }}>
-          Live MTA data, scored and ranked.
+        <div style={{ fontSize: 40, color: NEWSPRINT, fontWeight: 600 }}>
+          Scored, ranked, timestamped.
         </div>
       </div>
-      <div style={{ marginTop: "auto", display: "flex", alignItems: "center" }}>
-        <div style={{ fontSize: 22, color: "#4B5563", letterSpacing: 1 }}>{date || ""}</div>
-        <div style={{ flex: 1 }} />
-        <div style={watermarkInline}>subway-shame.vercel.app</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
+        <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: 3, textTransform: "uppercase", color: NEWSPRINT }}>
+          {reason}
+        </div>
+        <div style={{ fontSize: 24, color: SIGNAL_RED, fontWeight: 700, letterSpacing: 1 }}>
+          subway-shame.vercel.app
+        </div>
       </div>
     </div>
   );
@@ -190,43 +192,21 @@ function fallbackCard(date, reason) {
 
 // --- shared style fragments -------------------------------------------------
 
-function shell(glow) {
+function shell() {
   return {
     width: "1200px",
     height: "630px",
     display: "flex",
     flexDirection: "column",
     backgroundColor: TUNNEL,
-    backgroundImage: `radial-gradient(circle at 50% -10%, ${glow}30 0%, transparent 60%)`,
+    boxShadow: `inset 0 0 0 2px ${CONCRETE}`,
     padding: "56px 64px",
     fontFamily: "sans-serif",
     position: "relative",
   };
 }
 
-function accentBar(color) {
-  return { position: "absolute", top: 0, left: 0, right: 0, height: 8, backgroundColor: color };
-}
-
-const eyebrowRow = { display: "flex", alignItems: "center", gap: 14, marginBottom: 24 };
-const dot = { width: 16, height: 16, borderRadius: "50%", backgroundColor: SIGNAL_RED };
-const eyebrowText = {
-  fontSize: 26,
-  fontWeight: 700,
-  letterSpacing: 3,
-  textTransform: "uppercase",
-  color: OUTLINE,
-};
-const brandText = { fontSize: 26, fontWeight: 800, letterSpacing: 6, color: CREAM };
-const watermark = {
-  position: "absolute",
-  bottom: 24,
-  left: 64,
-  fontSize: 20,
-  color: "#374151",
-  letterSpacing: 2,
-};
-const watermarkInline = { fontSize: 24, color: SIGNAL_RED, fontWeight: 700, letterSpacing: 1 };
+const brandText = { fontSize: 36, fontWeight: 800, letterSpacing: 9, color: PLATFORM };
 
 // --- handler ----------------------------------------------------------------
 
@@ -250,7 +230,7 @@ export default async function handler() {
     }
   } catch (err) {
     console.error("og handler failed:", err);
-    element = fallbackCard(null, "Live MTA data");
+    element = fallbackCard(null, "Live MTA data, scored and ranked");
   }
 
   return new ImageResponse(element, { width: 1200, height: 630, headers });

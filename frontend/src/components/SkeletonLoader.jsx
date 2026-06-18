@@ -1,60 +1,43 @@
-function SkeletonBlock({ className }) {
-  return (
-    <div
-      className={`rounded animate-pulse ${className}`}
-      style={{ backgroundColor: 'var(--color-concrete)' }}
-    />
-  );
+// Structure-only skeleton below the masthead. No spinner, ever. Hero space is
+// reserved so the verdict paints with 0 layout shift when the data lands. The
+// copy is honest and quiet, not loading theater.
+function Block({ className }) {
+  return <div className={className} style={{ backgroundColor: "var(--color-concrete)" }} />;
 }
 
 export default function SkeletonLoader() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-      {/* Train checker skeleton */}
-      <div className="max-w-2xl mx-auto">
-        <div className="p-5" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
-          <SkeletonBlock className="h-7 w-48 mx-auto mb-2" />
-          <SkeletonBlock className="h-3 w-32 mx-auto mb-5" />
-          <div className="flex flex-wrap gap-1.5 justify-center">
-            {Array.from({ length: 21 }).map((_, i) => (
-              <div key={i} className="w-8 h-8 rounded-full animate-pulse" style={{ backgroundColor: 'var(--color-concrete)' }} />
-            ))}
+    <div className="max-w-[672px] mx-auto px-4 pt-5" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      {/* Trophy hero placeholder, same footprint as the real card. */}
+      <div className="p-5" style={{ backgroundColor: "var(--color-ballast)", boxShadow: "0 0 0 1px var(--color-concrete)" }}>
+        <Block className="h-3 w-40 mb-5" />
+        <div className="flex items-center gap-4">
+          <div className="w-[5.5rem] h-[5.5rem] rounded-full shrink-0" style={{ backgroundColor: "var(--color-concrete)" }} />
+          <div className="flex-1">
+            <Block className="h-20 w-40 mb-2" />
+            <Block className="h-3 w-28" />
           </div>
         </div>
+        <Block className="h-8 w-44 mt-4" />
       </div>
 
-      {/* Trophy skeleton */}
-      <div className="max-w-2xl mx-auto">
-        <div className="p-8 text-center space-y-4" style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}>
-          <SkeletonBlock className="w-16 h-16 rounded-full mx-auto" />
-          <SkeletonBlock className="h-4 w-40 mx-auto" />
-          <SkeletonBlock className="w-24 h-24 rounded-full mx-auto" />
-          <SkeletonBlock className="h-12 w-24 mx-auto" />
-          <SkeletonBlock className="h-4 w-32 mx-auto" />
-          <SkeletonBlock className="h-4 w-full" />
-          <SkeletonBlock className="h-4 w-3/4 mx-auto" />
-        </div>
-      </div>
-
-      {/* Line grid skeleton */}
-      <div>
-        <SkeletonBlock className="h-5 w-24 mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="rounded-lg p-4 flex items-center gap-3" style={{ backgroundColor: 'var(--color-ballast)' }}>
-              <div className="w-10 h-10 rounded-full animate-pulse shrink-0" style={{ backgroundColor: 'var(--color-concrete)' }} />
-              <div className="flex-1 space-y-2">
-                <SkeletonBlock className="h-3 w-20" />
-                <SkeletonBlock className="h-2.5 w-14" />
-              </div>
-              <SkeletonBlock className="h-6 w-8" />
+      {/* Leaderboard rows placeholder */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: "var(--color-ballast)", boxShadow: "0 0 0 1px var(--color-concrete)" }}>
+            <Block className="h-6 w-6 shrink-0" />
+            <div className="w-9 h-9 rounded-full shrink-0" style={{ backgroundColor: "var(--color-concrete)" }} />
+            <div className="flex-1">
+              <Block className="h-3 w-24 mb-1.5" />
+              <Block className="h-2.5 w-16" />
             </div>
-          ))}
-        </div>
+            <Block className="h-6 w-12" />
+          </div>
+        ))}
       </div>
 
-      <p className="text-xs text-center animate-pulse" style={{ color: 'var(--color-outline-variant)' }}>
-        Fetching live MTA alerts and calculating today's shame scores...
+      <p className="receipt text-center" style={{ color: "var(--color-newsprint)" }}>
+        Reading the live MTA feed
       </p>
     </div>
   );

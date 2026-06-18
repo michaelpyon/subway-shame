@@ -1,5 +1,12 @@
 import { Component } from "react";
 
+// Last-resort error state. On brand, honest, no emoji spam. The verdict the
+// product cannot give becomes a plain "we broke, try again".
+const MTA_COLORS = [
+  "var(--mta-123)", "var(--mta-456)", "var(--mta-7)", "var(--mta-ace)",
+  "var(--mta-bdfm)", "var(--mta-nqrw)", "var(--mta-g)", "var(--mta-l)",
+];
+
 export default class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -11,54 +18,62 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("Subway Shame caught error:", error, info);
+    console.error("The Low Line caught error:", error, info);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-dvh flex flex-col items-center justify-center px-4" style={{ backgroundColor: 'var(--color-tunnel)', color: 'var(--color-cream)' }}>
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🚇</div>
-            <h1 className="text-3xl font-black tracking-tight mb-2" style={{ color: 'var(--color-cream)' }}>
-              The Low Line
-            </h1>
-            {/* MTA line color bar */}
-            <div className="flex justify-center gap-1 mt-3">
-              {["#EE352E","#00933C","#B933AD","#0039A6","#FF6319","#FCCC0A","#6CBE45","#A7A9AC"].map((c,i) => (
+        <div
+          className="min-h-dvh flex flex-col items-center justify-center px-4"
+          style={{ backgroundColor: "var(--color-tunnel)", color: "var(--color-platform)" }}
+        >
+          <div className="text-center mb-6">
+            <div className="flex justify-center gap-1 mb-4">
+              {MTA_COLORS.map((c, i) => (
                 <div key={i} className="w-6 h-1.5" style={{ backgroundColor: c }} />
               ))}
             </div>
+            <h1 className="font-display" style={{ fontSize: "22px", letterSpacing: "0.3em", color: "var(--color-platform)" }}>
+              THE LOW LINE
+            </h1>
           </div>
 
-          {/* Error card */}
-          <div className="p-8 max-w-md w-full text-center" style={{ backgroundColor: 'var(--color-ballast)', border: '1px solid var(--color-outline-variant)', boxShadow: 'var(--shadow-card)' }}>
-            <div className="text-5xl mb-4">💀</div>
-            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-cream)' }}>
-              Something derailed
-            </h2>
-            <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-outline)' }}>
-              The app hit an unexpected error. Even our tracker occasionally delays.
-              Try refreshing. It usually works on the second attempt, much like the MTA.
+          <div
+            className="p-6 max-w-md w-full text-center"
+            style={{ backgroundColor: "var(--color-ballast)", boxShadow: "var(--shadow-card)" }}
+          >
+            <span className="stamp stamp-dumpster">Something derailed</span>
+            <p className="mt-4 mb-6" style={{ fontSize: "15px", lineHeight: 1.5, color: "var(--color-platform)" }}>
+              The app hit an error. Even our tracker delays sometimes. Refresh and try again.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2.5 font-bold text-sm transition-colors press-scale"
-              style={{ backgroundColor: 'var(--color-signal-red)', color: 'var(--color-cream)', border: '2px solid var(--color-cream)' }}
+              className="font-display press-scale"
+              style={{
+                fontSize: "20px",
+                letterSpacing: "0.04em",
+                minHeight: "48px",
+                padding: "0 24px",
+                backgroundColor: "var(--color-signal-red)",
+                color: "var(--color-platform)",
+                border: "none",
+                borderRadius: 0,
+                cursor: "pointer",
+              }}
               type="button"
             >
-              Refresh
+              REFRESH
             </button>
             {this.state.error && (
-              <p className="text-[10px] mt-4 font-mono break-all" style={{ color: 'var(--color-outline-variant)' }}>
+              <p className="receipt mt-4 break-all" style={{ color: "var(--color-newsprint)" }}>
                 {this.state.error.message}
               </p>
             )}
           </div>
 
-          <p className="text-xs mt-8" style={{ color: 'var(--color-outline-variant)' }}>
-            For entertainment purposes. The MTA has enough problems.
+          <p className="receipt mt-8" style={{ color: "var(--color-newsprint)" }}>
+            For entertainment. The MTA has enough problems.
           </p>
         </div>
       );
