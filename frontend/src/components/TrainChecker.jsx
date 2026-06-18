@@ -1,92 +1,107 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { LINE_DIRECTIONS, CATEGORY_CONFIG } from "../constants/lines";
+import { LINE_DIRECTIONS, CATEGORY_CONFIG, getScoreTier } from "../constants/lines";
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
 
-const ALL_LINES = [
-  ["1", "2", "3"],
-  ["4", "5", "6"],
-  ["7"],
-  ["A", "C", "E"],
-  ["B", "D", "F", "M"],
-  ["N", "Q", "R", "W"],
-  ["G"],
-  ["J", "Z"],
-  ["L"],
-  ["S"],
-  ["SI"],
+// "Is my train fucked?" The single-line lookup. Answer pattern, in order:
+// severity stamp, score, then 1 deadpan line. Verdict first, joke second.
+// Used two ways: as a launcher card on the page (onOpen) and as the modal it
+// opens (isModal). The persona checks 1 line at 7:40 AM, so the lookup is fast
+// and the verdict is the loud part.
+
+const ALL_LINE_IDS = [
+  "1", "2", "3", "4", "5", "6", "7",
+  "A", "C", "E", "B", "D", "F", "M",
+  "N", "Q", "R", "W", "G", "J", "Z", "L", "S", "SI",
 ];
 
-const ALL_LINE_IDS = ALL_LINES.flat();
-
-const GOOD_RESPONSES = [
-  "Running on time. Don't overthink it.",
-  "No delays reported. Check again in ten minutes if you need to be sure.",
-  "Service is normal. That's the full update.",
-  "Nothing wrong at this moment.",
-  "Looks clear. The platform may tell a different story.",
-  "No issues. This is unusual for a weekday.",
-  "The train is running as scheduled. We noted it.",
-  "Clean bill of health. For now.",
+const GOOD_LINES = [
+  "Running. Don't overthink it.",
+  "No alerts on this one right now.",
+  "Clean board. Unusual, but real.",
+  "Nothing wrong this minute. The platform may disagree.",
+  "Clear right now. Check again before you leave.",
 ];
 
-const BAD_RESPONSES = [
-  "There are delays.",
-  "The MTA reports a service disruption. They are working on it.",
-  "It's not running well.",
-  "Delays are in effect. Additional delays are possible.",
-  "Something happened. The alerts below have the specifics.",
-  "The train is running. Late.",
-  "Service is disrupted. The MTA is aware.",
-  "There are live issues on this line.",
+const BAD_LINES = [
+  "It is not running well.",
+  "Delays are live. More are possible.",
+  "The MTA is aware. That is all they will say.",
+  "Running. Late.",
+  "Something is wrong. The alerts below have it.",
 ];
 
-const DIRECTION_BAD_RESPONSES = [
-  "That direction is affected.",
-  "Your direction has delays.",
-  "Issues are concentrated in your direction.",
-  "That way is part of this.",
+const DIR_BAD = [
+  "Your direction is in it.",
+  "That way is affected right now.",
+  "The trouble is on your side.",
 ];
 
-const DIRECTION_GOOD_OTHER_BAD = [
-  "Your direction is fine. The return trip may not be.",
-  "Going that way, service is normal. The other direction has delays.",
-  "Clear in your direction. The opposite is not.",
-  "You'll get there. Getting back is the open question.",
+const DIR_GOOD_OTHER_BAD = [
+  "Your direction is fine. The way back is not.",
+  "Clear going that way. The opposite has delays.",
+  "You will get there. Getting back is the open question.",
 ];
 
-function pickRandom(arr) {
+function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function parseHash() {
   const hash = window.location.hash.slice(1);
   if (!hash) return { line: null, dir: null };
-
   const params = new URLSearchParams(hash);
   const line = params.get("line");
   const dirStr = params.get("dir");
   const dir = dirStr === "uptown" ? 0 : dirStr === "downtown" ? 1 : null;
-
-  return {
-    line: line && ALL_LINE_IDS.includes(line) ? line : null,
-    dir,
-  };
+  return { line: line && ALL_LINE_IDS.includes(line) ? line : null, dir };
 }
 
-function getFocusableElements(container) {
+function getFocusable(container) {
   if (!container) return [];
   return [...container.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  )].filter((element) => !element.hasAttribute("disabled"));
+  )].filter((el) => !el.hasAttribute("disabled"));
 }
 
-export default function TrainChecker({ lines, isModal = false, onClose }) {
-  const initialHashState = useMemo(() => parseHash(), []);
-  const [selectedLine, setSelectedLine] = useState(initialHashState.line);
-  const [selectedDirection, setSelectedDirection] = useState(initialHashState.dir);
+export default function TrainChecker({ lines, isModal = false, onClose, onOpen }) {
+  // Launcher card: render the prompt + a single tap that opens the modal.
+  if (!isModal && onOpen) {
+    return (
+      <section className="px-4 max-w-[672px] mx-auto">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="press-scale w-full flex items-center justify-between gap-3 px-4 py-4"
+          style={{
+            backgroundColor: "var(--color-signal-red)",
+            border: "none",
+            boxShadow: "var(--shadow-card)",
+            cursor: "pointer",
+          }}
+        >
+          <span
+            className="font-display text-left"
+            style={{ fontSize: "24px", letterSpacing: "0.04em", color: "var(--color-platform)" }}
+          >
+            Is my train fucked?
+          </span>
+          <span className="receipt" style={{ color: "var(--color-platform)" }}>
+            Check 1 line &rarr;
+          </span>
+        </button>
+      </section>
+    );
+  }
+
+  return <TrainCheckerBody lines={lines} isModal={isModal} onClose={onClose} />;
+}
+
+function TrainCheckerBody({ lines, isModal, onClose }) {
+  const initial = useMemo(() => parseHash(), []);
+  const [selectedLine, setSelectedLine] = useState(initial.line);
+  const [selectedDir, setSelectedDir] = useState(initial.dir);
   const [verdict, setVerdict] = useState(null);
-  const [showResult, setShowResult] = useState(false);
   const [animKey, setAnimKey] = useState(0);
   const [shareFeedback, setShareFeedback] = useState("");
   const dialogRef = useRef(null);
@@ -96,12 +111,10 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
     const onHashChange = () => {
       const { line, dir } = parseHash();
       setSelectedLine(line);
-      setSelectedDirection(dir);
+      setSelectedDir(dir);
       setVerdict(null);
-      setShowResult(false);
       setShareFeedback("");
     };
-
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
@@ -111,68 +124,53 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       history.replaceState(null, "", window.location.pathname);
       return;
     }
-
-    const dirStr =
-      selectedDirection === 0
-        ? "uptown"
-        : selectedDirection === 1
-          ? "downtown"
-          : null;
+    const dirStr = selectedDir === 0 ? "uptown" : selectedDir === 1 ? "downtown" : null;
     const hash = dirStr ? `#line=${selectedLine}&dir=${dirStr}` : `#line=${selectedLine}`;
     history.replaceState(null, "", hash);
-  }, [selectedLine, selectedDirection]);
+  }, [selectedLine, selectedDir]);
 
   useEffect(() => {
     if (!shareFeedback) return undefined;
-    const timer = window.setTimeout(() => setShareFeedback(""), 2500);
-    return () => window.clearTimeout(timer);
+    const t = window.setTimeout(() => setShareFeedback(""), 2500);
+    return () => window.clearTimeout(t);
   }, [shareFeedback]);
 
   useEffect(() => {
     if (!isModal) return undefined;
-
-    previousFocusRef.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = dialogRef.current;
-    const previousOverflow = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    const focusable = getFocusableElements(dialog);
+    const focusable = getFocusable(dialog);
     (focusable[0] || dialog)?.focus();
 
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
         onClose?.();
         return;
       }
-
-      if (event.key !== "Tab") return;
-
-      const nodes = getFocusableElements(dialog);
+      if (e.key !== "Tab") return;
+      const nodes = getFocusable(dialog);
       if (nodes.length === 0) {
-        event.preventDefault();
+        e.preventDefault();
         dialog?.focus();
         return;
       }
-
       const first = nodes[0];
       const last = nodes[nodes.length - 1];
-      const activeElement = document.activeElement;
-
-      if (event.shiftKey && activeElement === first) {
-        event.preventDefault();
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && activeElement === last) {
-        event.preventDefault();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
         first.focus();
       }
     };
-
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKeyDown);
       previousFocusRef.current?.focus?.();
     };
   }, [isModal, onClose]);
@@ -184,82 +182,67 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
 
   const lineData = useMemo(() => {
     if (!selectedLine || !lines) return null;
-    return lines.find((line) => line.id === selectedLine) || null;
+    return lines.find((l) => l.id === selectedLine) || null;
   }, [selectedLine, lines]);
 
   const relevantAlerts = useMemo(() => {
     if (!lineData?.alerts) return [];
-    if (selectedDirection === null) return lineData.alerts;
-
-    const dirKey = selectedDirection === 0 ? "uptown" : "downtown";
-    return lineData.alerts.filter((alertLike) => {
-      const alert = typeof alertLike === "string" ? { text: alertLike } : alertLike;
-      return !alert.direction || alert.direction === dirKey || alert.direction === "both";
+    if (selectedDir === null) return lineData.alerts;
+    const dirKey = selectedDir === 0 ? "uptown" : "downtown";
+    return lineData.alerts.filter((al) => {
+      const a = typeof al === "string" ? { text: al } : al;
+      return !a.direction || a.direction === dirKey || a.direction === "both";
     });
-  }, [lineData, selectedDirection]);
+  }, [lineData, selectedDir]);
 
-  const handleLineSelect = useCallback((lineId) => {
-    setSelectedLine(lineId);
-    setSelectedDirection(null);
+  const handleSelect = useCallback((id) => {
+    setSelectedLine(id);
+    setSelectedDir(null);
     setVerdict(null);
-    setShowResult(false);
     setShareFeedback("");
   }, []);
 
   const handleCheck = useCallback(() => {
     if (!lineData) return;
-
     const liveScore = lineData.score || 0;
     const dailyScore = lineData.daily_score || 0;
     const byDir = lineData.live_by_direction || {};
-    const dirKey =
-      selectedDirection === 0
-        ? "uptown"
-        : selectedDirection === 1
-          ? "downtown"
-          : null;
+    const dirKey = selectedDir === 0 ? "uptown" : selectedDir === 1 ? "downtown" : null;
 
     let message;
     let isBad;
-
     if (liveScore === 0) {
       isBad = false;
-      message = pickRandom(GOOD_RESPONSES);
+      message = pick(GOOD_LINES);
     } else if (dirKey) {
-      const dirData = byDir[dirKey] || { score: 0 };
-      const otherKey = dirKey === "uptown" ? "downtown" : "uptown";
-      const otherData = byDir[otherKey] || { score: 0 };
-
-      if (dirData.score > 0) {
+      const dd = byDir[dirKey] || { score: 0 };
+      const other = byDir[dirKey === "uptown" ? "downtown" : "uptown"] || { score: 0 };
+      if (dd.score > 0) {
         isBad = true;
-        message = pickRandom([...BAD_RESPONSES, ...DIRECTION_BAD_RESPONSES]);
-      } else if (otherData.score > 0) {
+        message = pick([...BAD_LINES, ...DIR_BAD]);
+      } else if (other.score > 0) {
         isBad = false;
-        message = pickRandom(DIRECTION_GOOD_OTHER_BAD);
+        message = pick(DIR_GOOD_OTHER_BAD);
       } else {
         isBad = false;
-        message = pickRandom(GOOD_RESPONSES);
+        message = pick(GOOD_LINES);
       }
     } else {
       isBad = true;
-      message = pickRandom(BAD_RESPONSES);
+      message = pick(BAD_LINES);
     }
-
     setVerdict({ message, isBad, dailyScore });
-    setShowResult(true);
-    setAnimKey((value) => value + 1);
-  }, [lineData, selectedDirection]);
+    setAnimKey((v) => v + 1);
+  }, [lineData, selectedDir]);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
-
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Is My Train Fucked?", url });
-        setShareFeedback("Verdict shared.");
+        await navigator.share({ title: "Is my train fucked?", url });
+        setShareFeedback("Shared.");
         return;
       }
-
       await navigator.clipboard.writeText(url);
       setShareFeedback("Link copied.");
     } catch {
@@ -267,86 +250,85 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
     }
   }, []);
 
-  const innerContent = (
+  const verdictTier = verdict ? getScoreTier(verdict.dailyScore) : null;
+
+  const inner = (
     <div
       ref={dialogRef}
-      aria-describedby={isModal ? "train-checker-description" : undefined}
-      aria-labelledby={isModal ? "train-checker-title" : undefined}
+      aria-describedby={isModal ? "tc-desc" : undefined}
+      aria-labelledby={isModal ? "tc-title" : undefined}
       aria-modal={isModal ? "true" : undefined}
-      className="p-5 sm:p-6 relative"
+      className="p-5 relative"
       role={isModal ? "dialog" : undefined}
       style={{ backgroundColor: "var(--color-ballast)", boxShadow: "var(--shadow-card)" }}
       tabIndex={isModal ? -1 : undefined}
     >
       {isModal && (
         <button
-          aria-label="Close train checker"
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-lg leading-none press-scale"
+          aria-label="Close"
+          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-xl leading-none press-scale"
           onClick={onClose}
-          style={{ backgroundColor: "var(--color-concrete)", color: "var(--color-outline)" }}
+          style={{ backgroundColor: "var(--color-concrete)", color: "var(--color-newsprint)", borderRadius: 0 }}
           type="button"
         >
-          ×
+          &times;
         </button>
       )}
 
       <h2
-        className="text-center mb-1 pr-8"
-        id="train-checker-title"
-        style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "var(--color-cream)", letterSpacing: "0.04em" }}
+        className="font-display pr-8"
+        id="tc-title"
+        style={{ fontSize: "24px", letterSpacing: "0.04em", color: "var(--color-platform)" }}
       >
-        IS MY TRAIN FUCKED?
+        Is my train fucked?
       </h2>
-      <p className="text-xs text-center mb-5" id="train-checker-description" style={{ color: "var(--color-outline-variant)" }}>
-        The only question that matters.
+      <p className="receipt mt-1 mb-4" id="tc-desc" style={{ color: "var(--color-newsprint)" }}>
+        Pick a line. Get the verdict.
       </p>
 
-      <div className="mb-4">
-        <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
-          Pick your line
-        </p>
-        <div className="flex flex-wrap gap-1.5 justify-center">
-          {ALL_LINE_IDS.map((lineId) => (
-            <button
-              key={lineId}
-              aria-label={`${lineId} train`}
-              aria-pressed={selectedLine === lineId}
-              className={`p-1.5 rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
-                selectedLine === lineId
-                  ? "scale-110 ring-2 ring-white/40"
-                  : selectedLine
-                    ? "opacity-40 hover:opacity-70"
-                    : "hover:scale-105"
-              }`}
-              onClick={() => handleLineSelect(lineId)}
-              type="button"
-            >
-              <LineBadge lineId={lineId} size="sm" />
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-wrap gap-1.5">
+        {ALL_LINE_IDS.map((id) => (
+          <button
+            key={id}
+            aria-label={`${id} train`}
+            aria-pressed={selectedLine === id}
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center press-scale ${
+              selectedLine && selectedLine !== id ? "opacity-40" : ""
+            }`}
+            onClick={() => handleSelect(id)}
+            style={{
+              background: "transparent",
+              border: selectedLine === id ? "2px solid var(--color-platform)" : "2px solid transparent",
+              borderRadius: 0,
+              cursor: "pointer",
+            }}
+            type="button"
+          >
+            <LineBadge lineId={id} size="sm" />
+          </button>
+        ))}
       </div>
 
       {selectedLine && directions && (
-        <div className="mb-4">
-          <p className="text-xs mb-2 uppercase tracking-wider font-label" style={{ color: "var(--color-outline)" }}>
-            Which direction? <span style={{ color: "var(--color-outline-variant)" }}>(optional)</span>
+        <div className="mt-4">
+          <p className="receipt mb-2" style={{ color: "var(--color-newsprint)" }}>
+            Which way? (optional)
           </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {directions.map((directionLabel, index) => (
+          <div className="flex flex-wrap gap-2">
+            {directions.map((label, i) => (
               <button
-                key={directionLabel}
-                aria-pressed={selectedDirection === index}
-                className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center press-scale"
-                onClick={() => setSelectedDirection(selectedDirection === index ? null : index)}
+                key={label}
+                aria-pressed={selectedDir === i}
+                className="px-4 py-2.5 min-h-[44px] flex items-center press-scale"
+                onClick={() => setSelectedDir(selectedDir === i ? null : i)}
                 style={
-                  selectedDirection === index
-                    ? { backgroundColor: "var(--color-outline-variant)", border: "1px solid var(--color-outline)", color: "var(--color-cream)" }
-                    : { backgroundColor: "var(--color-concrete)", border: "1px solid var(--color-outline-variant)", color: "var(--color-outline)" }
+                  selectedDir === i
+                    ? { backgroundColor: "var(--color-concrete)", border: "1px solid var(--color-platform)", color: "var(--color-platform)", borderRadius: 0, fontSize: "13px" }
+                    : { backgroundColor: "var(--color-tunnel)", border: "1px solid var(--color-concrete)", color: "var(--color-newsprint)", borderRadius: 0, fontSize: "13px" }
                 }
                 type="button"
               >
-                {index === 0 ? "\u2191" : "\u2193"} {directionLabel}
+                {label}
               </button>
             ))}
           </div>
@@ -354,90 +336,88 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
       )}
 
       {selectedLine && (
-        <div className="text-center mb-2">
-          <button
-            className="px-8 py-3 font-bold rounded-full text-sm transition-colors press-scale"
-            onClick={handleCheck}
-            style={{ backgroundColor: "var(--color-signal-red)", color: "var(--color-cream)", fontFamily: "var(--font-display)", fontSize: "16px", letterSpacing: "0.04em" }}
-            type="button"
-          >
-            TELL ME THE TRUTH
-          </button>
-        </div>
+        <button
+          className="font-display w-full mt-4 press-scale"
+          onClick={handleCheck}
+          style={{
+            backgroundColor: "var(--color-signal-red)",
+            color: "var(--color-platform)",
+            fontSize: "20px",
+            letterSpacing: "0.04em",
+            minHeight: "48px",
+            border: "none",
+            borderRadius: 0,
+            cursor: "pointer",
+          }}
+          type="button"
+        >
+          TELL ME THE TRUTH
+        </button>
       )}
 
-      {showResult && verdict && (
+      {verdict && verdictTier && (
         <div
           aria-live="polite"
-          className={`mt-5 p-5 text-center ${verdict.isBad ? "verdict-shake" : "verdict-pulse-green"}`}
+          className="mt-5 p-4"
           key={animKey}
-          style={
-            verdict.isBad
-              ? { backgroundColor: "rgba(232, 53, 58, 0.08)", border: "1px solid rgba(232, 53, 58, 0.2)" }
-              : { backgroundColor: "rgba(34, 197, 94, 0.08)", border: "1px solid rgba(34, 197, 94, 0.2)" }
-          }
+          style={{
+            backgroundColor: "var(--color-tunnel)",
+            border: `1px solid var(--color-concrete)`,
+          }}
         >
-          <div className="text-4xl mb-3">
-            {verdict.isBad ? "\uD83D\uDC80" : "\u2705"}
+          {/* Stamp first, then score, then the deadpan line. */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className={`stamp ${verdictTier.stamp} stamp-slam`}>
+              {verdictTier.emoji ? `${verdictTier.emoji} ` : ""}
+              {verdictTier.label}
+            </span>
+            {verdict.dailyScore > 0 && (
+              <span className="flex items-baseline gap-1">
+                <span className="font-display tabular" style={{ fontSize: "32px", color: verdictTier.color }}>
+                  {verdict.dailyScore.toLocaleString()}
+                </span>
+                <span className="receipt" style={{ color: "var(--color-newsprint)" }}>shame points</span>
+              </span>
+            )}
           </div>
 
-          <p className="text-lg font-bold mb-2" style={{ color: verdict.isBad ? "var(--color-signal-red)" : "#22C55E" }}>
-            {verdict.message}
-          </p>
-
-          {verdict.dailyScore > 0 && (
-            <p className="text-sm mb-3" style={{ color: "var(--color-outline)" }}>
-              The{" "}
-              <span className="inline-flex items-center mx-0.5 align-middle">
-                <LineBadge lineId={selectedLine} size="sm" />
-              </span>
-              {" "}has racked up <span className="font-bold" style={{ color: "var(--color-cream)", fontFamily: "var(--font-display)" }}>{verdict.dailyScore}</span> shame points today.
-            </p>
-          )}
-
-          <button
-            className="mt-1 mb-1 px-4 py-1.5 rounded-full text-xs font-medium transition-colors press-scale"
-            onClick={handleShare}
-            style={{ backgroundColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
-            type="button"
-          >
-            Share this verdict
-          </button>
-          <p aria-live="polite" className="text-[10px] min-h-4" style={{ color: "var(--color-outline-variant)" }}>
-            {shareFeedback}
+          <p className="mt-3" style={{ fontSize: "15px", color: "var(--color-platform)" }}>
+            The {selectedLine}. {verdict.message}
           </p>
 
           {relevantAlerts.length > 0 && verdict.isBad && (
-            <div className="mt-3 space-y-1.5 text-left max-w-md mx-auto">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--color-outline-variant)" }}>
-                Here's why:
-              </p>
-              {relevantAlerts.map((alertLike, index) => {
-                const alert = typeof alertLike === "string" ? { text: alertLike } : alertLike;
-                const config = alert.category
-                  ? (CATEGORY_CONFIG[alert.category] || CATEGORY_CONFIG.Other)
-                  : null;
-
+            <div className="mt-3 space-y-2">
+              <p className="receipt" style={{ color: "var(--color-newsprint)" }}>Straight from the MTA</p>
+              {relevantAlerts.map((al, i) => {
+                const a = typeof al === "string" ? { text: al } : al;
+                const cfg = a.category ? CATEGORY_CONFIG[a.category] || CATEGORY_CONFIG.Other : null;
                 return (
                   <div
-                    className="text-xs rounded p-2 leading-relaxed"
-                    key={index}
-                    style={{ backgroundColor: "var(--color-surface)", color: "var(--color-outline)" }}
+                    className="p-2.5"
+                    key={i}
+                    style={{ backgroundColor: "var(--color-ballast)", border: "1px solid var(--color-concrete)", fontSize: "13px", lineHeight: 1.4, color: "var(--color-platform)" }}
                   >
-                    {config && (
-                      <span
-                        className="text-[9px] font-medium uppercase tracking-wider mr-1.5 px-1 py-0.5 rounded"
-                        style={{ backgroundColor: `${config.color}20`, color: config.color }}
-                      >
-                        {config.label}
-                      </span>
-                    )}
-                    <AlertText text={alert.text || alertLike} />
+                    {cfg && <span className="receipt mr-2" style={{ color: cfg.color }}>{cfg.label}</span>}
+                    <AlertText text={a.text || al} />
                   </div>
                 );
               })}
             </div>
           )}
+
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              className="receipt press-scale"
+              onClick={handleShare}
+              style={{ color: "var(--color-newsprint)", textDecoration: "underline", background: "transparent", border: "none", cursor: "pointer", padding: "4px" }}
+              type="button"
+            >
+              Share this verdict
+            </button>
+            <span aria-live="polite" className="receipt" style={{ color: "var(--color-newsprint)" }}>
+              {shareFeedback}
+            </span>
+          </div>
         </div>
       )}
     </div>
@@ -446,22 +426,16 @@ export default function TrainChecker({ lines, isModal = false, onClose }) {
   if (isModal) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) onClose?.();
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose?.();
         }}
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.85)" }}
       >
-        <div className="max-h-[85vh] overflow-y-auto w-full sm:max-w-lg">
-          {innerContent}
-        </div>
+        <div className="max-h-[88vh] overflow-y-auto w-full sm:max-w-[672px]">{inner}</div>
       </div>
     );
   }
 
-  return (
-    <div className="px-4 py-6 max-w-2xl mx-auto">
-      {innerContent}
-    </div>
-  );
+  return <div className="px-4 max-w-[672px] mx-auto">{inner}</div>;
 }

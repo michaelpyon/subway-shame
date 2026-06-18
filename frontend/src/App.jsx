@@ -3,190 +3,80 @@ import { useSubwayData } from "./hooks/useSubwayData";
 import Header from "./components/Header";
 import Trophy from "./components/Trophy";
 import SystemHealth from "./components/SystemHealth";
-import LeaderboardTicker from "./components/LeaderboardTicker";
-import ShameChart from "./components/ShameChart";
+import Leaderboard from "./components/Leaderboard";
 import LineGrid from "./components/LineGrid";
 import ScoringExplainer from "./components/ScoringExplainer";
 import TrainChecker from "./components/TrainChecker";
+import HallOfShame from "./components/HallOfShame";
 import AlertMarquee from "./components/AlertMarquee";
 import OfflineState from "./components/OfflineState";
 import SkeletonLoader from "./components/SkeletonLoader";
+import Footer from "./components/Footer";
 import "./App.css";
 
 export default function App() {
-  const { data, loading, error, lastUpdated, refreshing, secondsUntilRefresh, refresh } = useSubwayData();
-
+  const { data, loading, error, lastUpdated, refresh } = useSubwayData();
   const [checkerOpen, setCheckerOpen] = useState(false);
 
-  // Full offline state
+  // Full offline state: no data at all. The honest down screen takes over.
   if (error && !data) {
     return <OfflineState onRetry={refresh} loading={loading} lastUpdated={lastUpdated} />;
   }
 
   return (
-    <div
-      className="min-h-dvh antialiased"
-      style={{
-        backgroundColor: 'var(--color-tunnel)',
-        color: 'var(--color-cream)',
-        backgroundImage: [
-          'radial-gradient(circle at 20% 80%, rgba(232, 53, 58, 0.04) 0%, transparent 50%)',
-          'radial-gradient(circle at 80% 20%, rgba(0, 57, 166, 0.04) 0%, transparent 50%)',
-        ].join(', '),
-      }}
-    >
-      <div className="stagger-section">
-        <Header
-          lastUpdated={lastUpdated}
-          secondsUntilRefresh={secondsUntilRefresh}
-          onRefresh={refresh}
-          loading={loading}
-          refreshing={refreshing}
-          error={error}
-          winner={data?.winner}
-          onOpenChecker={() => setCheckerOpen(true)}
-        />
-      </div>
+    // Flat black field. No gradients, no corner washes, no textures.
+    <div className="min-h-dvh antialiased" style={{ backgroundColor: "var(--color-tunnel)", color: "var(--color-platform)" }}>
+      <Header lastUpdated={lastUpdated} error={error} onRefresh={refresh} loading={loading} />
 
-      {/* Alert marquee */}
-      {data && data.lines && (
-        <AlertMarquee lines={data.lines} />
-      )}
+      {/* Alert marquee, only when something is actually wrong */}
+      {data && data.lines && <AlertMarquee lines={data.lines} />}
 
-      {/* Soft error banner */}
-      {error && data && (
-        <div className="max-w-2xl mx-auto px-4 mb-2">
-          <div className="px-4 py-2 flex items-center justify-between gap-3" style={{ backgroundColor: 'rgba(233, 196, 0, 0.12)', border: '1px solid rgba(233, 196, 0, 0.25)' }}>
-            <p className="text-xs" style={{ color: 'var(--color-gold-dim)' }}>
-              Showing last known data. Auto-retries every 5 min.
-            </p>
-            <button
-              onClick={refresh}
-              disabled={loading}
-              className="text-xs underline disabled:opacity-40 shrink-0 press-scale"
-              style={{ color: 'var(--color-gold-dim)' }}
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Loading: structure-only skeleton below the masthead, never a spinner. */}
+      {loading && !data && <SkeletonLoader />}
 
-      {/* Loading state */}
-      {loading && !data && (
-        <SkeletonLoader />
-      )}
-
-      {/* Main content */}
       {data && (
-        <>
-          {/* System health summary */}
-          <div className="stagger-section">
+        <main className="pt-5" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* JOB 1: the verdict. Paints with the data, NO entrance animation,
+              so "is the F fucked" is answered in 0 scrolls and 0 taps. */}
+          {data.winner ? (
+            <Trophy winner={data.winner} lines={data.lines || []} lastUpdated={lastUpdated} />
+          ) : (
             <SystemHealth lines={data.lines || []} />
-          </div>
+          )}
 
-          {/* Leaderboard ticker (replaces podium) */}
+          {/* JOB 3: the standings, so the chat argument ends. */}
           {data.winner && (
-            <div className="stagger-section">
-              <LeaderboardTicker podium={data.podium || []} />
+            <div className="section-rise">
+              <Leaderboard podium={data.podium || []} />
             </div>
           )}
 
-          {/* Trophy / winner card */}
-          {data.winner && (
-            <div className="stagger-section">
-              <Trophy winner={data.winner} lines={data.lines || []} />
-            </div>
-          )}
-
-          {/* Shame chart. Only render once there is a real trend to draw (2+ points).
-              The live snapshot backend emits a single point, so this stays hidden
-              until a datastore backfills intraday history. The leaderboard, trophy,
-              and line grid above are the live read in the meantime. */}
-          {data.timeseries && data.timeseries.length >= 2 && (
-            <div className="stagger-section">
-              <ShameChart timeseries={data.timeseries} />
-            </div>
-          )}
-
-          {/* Scoring explainer */}
-          <div className="stagger-section">
-            <ScoringExplainer />
-          </div>
-
-          {/* Line grid - severity grouped */}
-          <div className="stagger-section">
+          {/* JOB 2 support: every line, grouped by severity. */}
+          <div className="section-rise">
             <LineGrid lines={data.lines} />
           </div>
-        </>
+
+          {/* Secondary tools below the verdict: the checker and the explainer. */}
+          <div className="section-rise">
+            <TrainChecker lines={data.lines} onOpen={() => setCheckerOpen(true)} />
+          </div>
+
+          <div className="section-rise">
+            <HallOfShame winner={data.winner} />
+          </div>
+
+          <div className="section-rise">
+            <ScoringExplainer />
+          </div>
+        </main>
       )}
 
       {/* TrainChecker modal */}
       {data && checkerOpen && (
-        <TrainChecker lines={data.lines} isModal={true} onClose={() => setCheckerOpen(false)} />
+        <TrainChecker lines={data.lines} isModal onClose={() => setCheckerOpen(false)} />
       )}
 
-      {/* Footer */}
-      <footer className="stagger-section max-w-2xl mx-auto px-4 py-8">
-        {/* Terminal footer */}
-        <div
-          className="text-center py-4 mb-4"
-          style={{ border: '2px dashed var(--color-outline-variant)' }}
-        >
-          <p
-            className="text-xs leading-relaxed mb-2 font-label"
-            style={{
-              fontWeight: 800,
-              color: 'var(--color-outline)',
-              textTransform: 'uppercase',
-            }}
-          >
-            All service is theoretical.<br />
-            Do not rely on schedules.
-          </p>
-          <p
-            className="text-[10px] uppercase tracking-widest"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              color: 'var(--color-outline-variant)',
-            }}
-          >
-            DATA: MTA GTFS-RT · REFRESH: 300s · COVERAGE: 24 LINES
-          </p>
-        </div>
-
-        {/* FML easter egg */}
-        <div className="text-center" style={{ color: 'var(--color-outline)' }}>
-          <div className="flex items-center justify-center gap-1.5 mb-3" title="F*** My Life" aria-label="F M L train lines">
-            {[
-              { id: "F", color: "var(--mta-bdfm)" },
-              { id: "M", color: "var(--mta-bdfm)" },
-              { id: "L", color: "var(--mta-l)" },
-            ].map(({ id, color }) => (
-              <div
-                key={id}
-                className="w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] shrink-0"
-                style={{ backgroundColor: color, color: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-              >
-                {id}
-              </div>
-            ))}
-            <span className="text-[9px] tracking-widest uppercase ml-1" style={{ fontFamily: 'var(--font-mono)' }}>14 St · 6 Av</span>
-          </div>
-          <p className="text-xs">
-            Built by{" "}
-            <a
-              href="https://pyon.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-              style={{ color: 'var(--color-on-surface-variant)' }}
-            >
-              Michael Pyon
-            </a>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

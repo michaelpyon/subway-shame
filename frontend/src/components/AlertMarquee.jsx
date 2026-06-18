@@ -5,16 +5,15 @@ export default function AlertMarquee({ lines }) {
   if (disrupted.length === 0) return null;
 
   const count = disrupted.length;
-  const label = `${count} LINE${count !== 1 ? "S" : ""} DISRUPTED RIGHT NOW`;
+  const label = `${count} LINE${count !== 1 ? "S" : ""} ACTING UP RIGHT NOW`;
   const lineSummary = disrupted.map((line) => line.id).join(", ");
 
   // Render one "segment" of the scrolling content
   const Segment = ({ idx }) => (
     <div className="alert-marquee-segment" key={idx}>
-      <span style={{ fontFamily: "var(--font-display)", letterSpacing: "0.06em" }}>
-        ⚠ {label}
+      <span className="font-display" style={{ letterSpacing: "0.08em", fontSize: "16px" }}>
+        {label}
       </span>
-      <span style={{ color: "var(--color-on-surface-variant)" }}>·</span>
       <span className="inline-flex items-center gap-1">
         {disrupted.map((l) => (
           <LineBadge key={l.id} lineId={l.id} size="xs" />
@@ -33,8 +32,7 @@ export default function AlertMarquee({ lines }) {
         className="alert-marquee"
         style={{
           backgroundColor: "var(--color-signal-red)",
-          color: "var(--color-cream)",
-          fontSize: "13px",
+          color: "var(--color-platform)",
           fontWeight: 700,
           padding: "6px 0",
         }}

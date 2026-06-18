@@ -1,151 +1,101 @@
 import { useState } from "react";
-import { CATEGORY_CONFIG, CATEGORY_ORDER, SCORE_TIERS } from "../constants/lines";
+import { CATEGORY_CONFIG, SCORE_TIERS } from "../constants/lines";
 
-const SCORING_DATA = [
-  { cat: "No Service",     pts: 50, desc: "Line completely stopped. Maximum shame." },
-  { cat: "Delays",         pts: 30, desc: "Running late, as is tradition." },
-  { cat: "Slow Speeds",    pts: 20, desc: "Speed restrictions slowing all trains on this route." },
-  { cat: "Skip Stop",      pts: 15, desc: "Trains bypassing certain stations without warning." },
-  { cat: "Rerouted",       pts: 15, desc: "Running an alternate route instead of the normal one." },
-  { cat: "Runs Local",     pts: 10, desc: "Express train making all local stops instead." },
-  { cat: "Reduced Freq",   pts: 10, desc: "Fewer trains than scheduled. Longer waits." },
-  { cat: "Platform Change",pts: 2,  desc: "Trains using a different platform than expected." },
-  { cat: "Other",          pts: 5,  desc: "MTA issued an alert but didn't specify the cause." },
+// How shame points are scored. Collapsed by default: the persona never reads
+// this, but when the chat argues about the number it should hold up. Honest
+// about being a live snapshot, not a daily total. No jargon, no "methodology".
+const SCORING = [
+  { cat: "No Service", pts: 50, desc: "The line is stopped. The worst thing it can do." },
+  { cat: "Delays", pts: 30, desc: "Running late. The usual." },
+  { cat: "Slow Speeds", pts: 20, desc: "Crawling. Speed limits on the whole route." },
+  { cat: "Skip Stop", pts: 15, desc: "Blowing past stations with no warning." },
+  { cat: "Rerouted", pts: 15, desc: "Taking some other line instead of yours." },
+  { cat: "Runs Local", pts: 10, desc: "Express making every local stop." },
+  { cat: "Reduced Freq", pts: 10, desc: "Fewer trains. Longer waits." },
+  { cat: "Platform Change", pts: 2, desc: "Different platform than you expect." },
+  { cat: "Other", pts: 5, desc: "An alert with no clear cause." },
 ];
 
 export default function ScoringExplainer() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div id="scoring-explainer" className="px-4 py-2 max-w-2xl mx-auto">
+    <div id="scoring-explainer" className="px-4 max-w-[672px] mx-auto">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-xs transition-colors mx-auto press-scale font-label"
-        aria-controls="scoring-explainer-panel"
+        aria-controls="scoring-panel"
         aria-expanded={open}
-        style={{ color: 'var(--color-outline)' }}
+        className="press-scale w-full flex items-center justify-between gap-2 py-3 px-4"
+        style={{ backgroundColor: "var(--color-ballast)", border: "none", boxShadow: "0 0 0 1px var(--color-concrete)", cursor: "pointer" }}
       >
-        <span>How are shame points calculated?</span>
-        <svg
-          className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        <span className="kicker" style={{ color: "var(--color-platform)" }}>
+          How the points work
+        </span>
+        <span className="receipt" style={{ color: "var(--color-newsprint)" }}>{open ? "Hide" : "Show"}</span>
       </button>
 
       {open && (
         <div
-          id="scoring-explainer-panel"
-          className="mt-3 p-4 sm:p-6 max-w-2xl mx-auto"
-          style={{ backgroundColor: 'var(--color-ballast)', boxShadow: 'var(--shadow-card)' }}
+          id="scoring-panel"
+          className="p-4 mt-px"
+          style={{ backgroundColor: "var(--color-ballast)", boxShadow: "0 0 0 1px var(--color-concrete)" }}
         >
-          <h3
-            className="text-sm font-semibold mb-1"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-cream)', letterSpacing: '0.04em', fontSize: '18px' }}
-          >
-            THE SHAME POINT SYSTEM
-          </h3>
+          <p style={{ fontSize: "15px", lineHeight: 1.5, color: "var(--color-platform)" }}>
+            This is a live snapshot. Each line adds up the points of every alert active on
+            it right now. A line with delays is 30 this minute. Suspended plus delays plus
+            a skip stop is 95. A clean line is 0. It rises and falls as the MTA updates.
+          </p>
 
-          {/* How it works */}
-          <div className="rounded-lg px-3 py-2.5 mb-4 space-y-1" style={{ backgroundColor: 'var(--color-concrete)' }}>
-            <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
-              <strong style={{ color: 'var(--color-cream)' }}>How it works:</strong> This is a live snapshot. Each line adds up
-              the points of the alerts active on it right now. A line with active delays scores 30. Suspended service plus
-              delays plus a skip stop scores 95 this minute. A clean line scores 0. Refreshes every 5 minutes.
-            </p>
-            <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-              The higher the number, the worse that line is behaving at this exact moment.
-            </p>
-          </div>
-
-          {/* Tier legend */}
-          <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Score tiers (live snapshot)</p>
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              {[...SCORE_TIERS].reverse().slice(1).map((tier) => (
-                <div
-                  key={tier.label}
-                  className="flex items-center gap-2 rounded px-2 py-1.5"
-                  style={{ backgroundColor: `${tier.color}12`, border: `1px solid ${tier.color}25` }}
-                >
-                  <span className="text-sm">{tier.emoji}</span>
-                  <div>
-                    <p className="text-[11px] font-semibold" style={{ color: tier.color }}>{tier.label}</p>
-                    <p className="text-[9px]" style={{ color: 'var(--color-outline-variant)' }}>{tier.min.toLocaleString()}+ pts</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Tiers */}
+          <p className="receipt mt-5 mb-2" style={{ color: "var(--color-newsprint)" }}>The tiers</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[...SCORE_TIERS].reverse().slice(1).map((tier) => (
+              <div
+                key={tier.label}
+                className="flex items-center justify-between gap-2 px-3 py-2"
+                style={{ backgroundColor: "var(--color-tunnel)", borderLeft: `3px solid ${tier.color}` }}
+              >
+                <span className="font-display" style={{ fontSize: "18px", letterSpacing: "0.04em", color: tier.color }}>
+                  {tier.label}
+                </span>
+                <span className="receipt tabular" style={{ color: "var(--color-newsprint)" }}>
+                  {tier.min.toLocaleString()}+ pts
+                </span>
+              </div>
+            ))}
           </div>
 
           {/* Per-alert points */}
-          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--color-outline-variant)' }}>Points per active alert</p>
-          <div className="space-y-1.5">
-            {SCORING_DATA.map(({ cat, pts, desc }) => {
-              const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["Other"];
+          <p className="receipt mt-5 mb-2" style={{ color: "var(--color-newsprint)" }}>Points per active alert</p>
+          <div>
+            {SCORING.map(({ cat, pts, desc }) => {
+              const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.Other;
               return (
                 <div
                   key={cat}
-                  className="flex items-center gap-3 py-1.5"
-                  style={{ borderBottom: '1px solid var(--color-outline-variant)' }}
+                  className="flex items-baseline gap-3 py-2"
+                  style={{ borderBottom: "1px solid var(--color-concrete)" }}
                 >
                   <span
-                    className="w-14 text-right text-sm font-bold tabular-nums shrink-0"
-                    style={{ color: cfg.color, fontFamily: 'var(--font-mono)' }}
+                    className="font-display tabular text-right shrink-0"
+                    style={{ width: "52px", fontSize: "20px", color: cfg.color }}
                   >
-                    +{pts} pts
-                  </span>
-                  <span
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0"
-                    style={{ backgroundColor: `${cfg.color}20` }}
-                  >
-                    {cfg.icon}
+                    +{pts}
                   </span>
                   <div className="min-w-0">
-                    <span className="text-xs font-medium" style={{ color: 'var(--color-on-surface)' }}>
-                      {cfg.label}
-                    </span>
-                    <span className="text-xs ml-2" style={{ color: 'var(--color-outline-variant)' }}>{desc}</span>
+                    <span style={{ fontSize: "15px", color: "var(--color-platform)" }}>{cfg.label}</span>
+                    <span className="ml-2" style={{ fontSize: "13px", color: "var(--color-newsprint)" }}>{desc}</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-4 pt-3 space-y-2" style={{ borderTop: '1px solid var(--color-outline-variant)' }}>
-            <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>📊</span>
-              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Stacking:</strong> A line
-                with 3 active alerts adds all their points. Suspended plus
-                Delays plus Skip Stop equals 95 right now.
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>⏱️</span>
-              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Reading the score:</strong> 30 means active delays
-                right now. 60 plus means delays stacked with skips or reroutes. 120 plus means a line is suspended and falling
-                apart. The number is a snapshot, so it rises and falls as the MTA updates its alerts.
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-xs mt-0.5" style={{ color: 'var(--color-outline-variant)' }}>↕️</span>
-              <p className="text-xs" style={{ color: 'var(--color-outline)' }}>
-                <strong style={{ color: 'var(--color-on-surface-variant)' }}>Direction:</strong> Alerts
-                specify uptown/downtown. "Both directions" splits points 50/50.
-              </p>
-            </div>
-          </div>
+          <p className="mt-4" style={{ fontSize: "13px", lineHeight: 1.5, color: "var(--color-newsprint)" }}>
+            Alerts that name a direction split their points between uptown and downtown.
+            The number is a snapshot of this exact minute, not a running total for the day.
+          </p>
         </div>
       )}
     </div>
