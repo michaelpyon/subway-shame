@@ -1,73 +1,57 @@
 @import "tailwindcss";
 
-/* ── Brand Palette ── */
+/* ──────────────────────────────────────────────────────────────────────────
+   THE LOW LINE
+   A tabloid front page printed on MTA signage. Black field, warm white
+   Helvetica facts, true bullet colors, 1 red stamp. The UI is monochrome;
+   color enters only as data. Tokens follow DESIGN.md, voice follows BRAND.md.
+   ────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  /* Core Colors */
-  --color-tunnel: #000000;
-  --color-platform: #F5F0E8;
-  --color-ballast: #1A1A1A;
-  --color-concrete: #2A2A2A;
-  --color-signal-red: #E8353A;
+  color-scheme: dark;
 
-  /* Stitch: Gold accent system */
-  --color-gold: #ffd700;
-  --color-gold-dim: #e9c400;
-  --color-cream: #fff6df;
+  /* Surfaces */
+  --color-tunnel:   #000000;  /* page background, always flat */
+  --color-ballast:  #1A1A1A;  /* cards */
+  --color-concrete: #2A2A2A;  /* raised surfaces, hairlines, dividers */
 
-  /* Stitch: Surface scale */
-  --color-surface: #131313;
-  --color-surface-container: #1f1f1f;
-  --color-surface-container-high: #2a2a2a;
-  --color-surface-container-highest: #353535;
-  --color-surface-container-low: #1b1b1b;
-  --color-surface-bright: #393939;
-  --color-on-surface: #e2e2e2;
-  --color-on-surface-variant: #d0c6ab;
+  /* Ink */
+  --color-platform:  #F5F0E8; /* primary text, warm white */
+  --color-newsprint: #999077; /* secondary text, captions, receipt line */
 
-  /* Stitch: Semantic colors */
-  --color-primary: #fff6df;
-  --color-primary-container: #ffd700;
-  --color-primary-fixed-dim: #e9c400;
-  --color-secondary: #ffb4aa;
-  --color-secondary-container: #bb030f;
-  --color-tertiary: #f6f5ff;
-  --color-tertiary-container: #d0d8ff;
-  --color-outline: #999077;
-  --color-outline-variant: #4d4732;
+  /* Channels */
+  --color-signal-red: #E8353A; /* severity, alarms, stale data; the only UI red */
+  --color-gold:       #FFD700; /* Hall of Shame medals ONLY */
+  --color-good:       #22C55E; /* good service only */
 
-  /* Stitch: MTA line colors */
-  --mta-123: #EE352E;
-  --mta-456: #00933C;
-  --mta-7: #B933AD;
-  --mta-ace: #0039A6;
-  --mta-bdfm: #FF6319;
-  --mta-nqrw: #FCCC0A;
-  --mta-g: #6CBE45;
-  --mta-jz: #996633;
-  --mta-l: #A7A9AC;
-  --mta-s: #808183;
-  --mta-sir: #003DA5;
+  /* Severity ramp */
+  --tier-good:     #22C55E;
+  --tier-limping:  #9CA3AF;
+  --tier-pain:     #EAB308;
+  --tier-meltdown: #F97316;
+  --tier-dumpster: #E8353A;
 
-  /* Typography */
-  --font-headline: 'Epilogue', system-ui, sans-serif;
-  --font-display: 'Bebas Neue', system-ui, sans-serif;
-  --font-body: 'Space Grotesk', system-ui, sans-serif;
-  --font-label: 'Lexend', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* MTA bullets: sacred data, exact hex, never tinted, never decorative */
+  --mta-123: #EE352E;  --mta-456: #00933C;  --mta-7:   #B933AD;
+  --mta-ace: #0039A6;  --mta-bdfm: #FF6319; --mta-nqrw: #FCCC0A;
+  --mta-g:   #6CBE45;  --mta-jz:  #996633;  --mta-l:   #A7A9AC;
+  --mta-s:   #808183;  --mta-sir: #003DA5;
 
-  /* Shadows (ink-bleed system, hard offset, industrial) */
+  /* Type: 2 families, 1 shouts, 1 informs. Nothing else ships. */
+  --font-display: 'Bebas Neue', 'Arial Narrow', Impact, sans-serif;
+  --font-text: -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+               Helvetica, 'Segoe UI', Arial, sans-serif;
+
+  /* Shadows: print, not glass. Hard offset ink-bleed only. */
   --shadow-card:
-    0px 0px 0px 1px rgba(245, 240, 232, 0.06),
-    3px 3px 0px 0px rgba(0, 0, 0, 0.5);
+    0 0 0 1px rgba(245, 240, 232, 0.06),
+    3px 3px 0 0 rgba(0, 0, 0, 0.5);
   --shadow-card-hover:
-    0px 0px 0px 1px rgba(245, 240, 232, 0.12),
-    4px 4px 0px 0px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(245, 240, 232, 0.12),
+    4px 4px 0 0 rgba(0, 0, 0, 0.6);
   --shadow-card-shame:
-    0px 0px 0px 1px rgba(232, 53, 58, 0.30),
-    4px 4px 0px 0px rgba(232, 53, 58, 0.15),
-    0px 0px 20px -4px rgba(232, 53, 58, 0.15);
-  --shadow-gold-glow:
-    0 0 10px rgba(255, 215, 0, 0.6);
+    0 0 0 1px rgba(232, 53, 58, 0.30),
+    4px 4px 0 0 rgba(232, 53, 58, 0.15);
 }
 
 html {
@@ -78,30 +62,178 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  font-family: var(--font-body);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.5;
   background-color: var(--color-tunnel);
   color: var(--color-platform);
 }
 
-/* ── Font utility classes ── */
+/* ── Type utility classes ── */
 .font-display {
   font-family: var(--font-display);
+  font-weight: 400;
 }
 
-.font-headline {
-  font-family: var(--font-headline);
-}
-
-.font-mono-data {
-  font-family: var(--font-mono);
+.tabular {
   font-variant-numeric: tabular-nums;
 }
 
-.font-label {
-  font-family: var(--font-label);
+/* Section kicker: display face, caps, +0.05em */
+.kicker {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
-/* ── Stitch: Receipt edge (torn paper bottom) ── */
+/* Receipt micro: 11px caps, +0.08em, tabular. The citation voice. */
+.receipt {
+  font-family: var(--font-text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Severity stamp ──
+   Display 20px, +0.1em, caps, 2px radius, 6px 16px padding, tier-tinted bg at
+   ~20%, 2px left border in tier color. A score never renders without its stamp. */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stamp-good {
+  background: rgba(34, 197, 94, 0.20);
+  color: var(--tier-good);
+  border-left: 2px solid var(--tier-good);
+}
+.stamp-limping {
+  background: rgba(156, 163, 175, 0.20);
+  color: var(--tier-limping);
+  border-left: 2px solid var(--tier-limping);
+}
+.stamp-pain {
+  background: rgba(234, 179, 8, 0.20);
+  color: var(--tier-pain);
+  border-left: 2px solid var(--tier-pain);
+}
+.stamp-meltdown {
+  background: rgba(249, 115, 22, 0.20);
+  color: var(--tier-meltdown);
+  border-left: 2px solid var(--tier-meltdown);
+}
+/* Dumpster Fire: Platform text on a 45% Signal Red field. */
+.stamp-dumpster {
+  background: rgba(232, 53, 58, 0.45);
+  color: var(--color-platform);
+  border-left: 2px solid var(--color-signal-red);
+}
+
+/* ── Section entry: opacity + 8px rise, 40ms stagger. No blur, ever. ── */
+.section-rise {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: rise 150ms ease-out forwards;
+}
+.section-rise:nth-child(1) { animation-delay: 0ms; }
+.section-rise:nth-child(2) { animation-delay: 40ms; }
+.section-rise:nth-child(3) { animation-delay: 80ms; }
+.section-rise:nth-child(4) { animation-delay: 120ms; }
+.section-rise:nth-child(5) { animation-delay: 160ms; }
+.section-rise:nth-child(6) { animation-delay: 200ms; }
+.section-rise:nth-child(7) { animation-delay: 240ms; }
+
+@keyframes rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Severity stamp slam: scale 1.15 to 1.0 + fade, on data paint, runs once. ── */
+.stamp-slam {
+  animation: slam 150ms ease-out;
+}
+@keyframes slam {
+  from { opacity: 0; transform: scale(1.15); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Live dot: pulse on a 2s loop. ── */
+.live-dot {
+  position: relative;
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+}
+.live-dot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-signal-red);
+  animation: live-pulse 2s ease-out infinite;
+}
+.live-dot::after {
+  content: "";
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-signal-red);
+}
+@keyframes live-pulse {
+  0%   { transform: scale(1); opacity: 0.7; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── Alert marquee: linear scroll, 25s. ── */
+.alert-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.alert-marquee-track {
+  display: inline-flex;
+  animation: marquee-scroll 25s linear infinite;
+}
+.alert-marquee-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Press: any interactive compresses to 0.96, 120ms. ── */
+.press-scale {
+  transition: scale 120ms ease-out;
+}
+.press-scale:active {
+  scale: 0.96;
+}
+
+/* ── Focus-visible: 2px Platform outline. ── */
+:focus-visible {
+  outline: 2px solid var(--color-platform);
+  outline-offset: 2px;
+}
+
+/* ── Receipt edge (torn paper bottom). Signature detail, 1 use max per page. ── */
 .receipt-edge {
   clip-path: polygon(
     0% 0%, 100% 0%, 100% calc(100% - 6px),
@@ -119,185 +251,27 @@ body {
   );
 }
 
-/* ── Stitch: Gold glow header ── */
-.gold-glow {
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
-}
-
-.gold-border-header {
-  border-bottom: 2px solid rgba(255, 215, 0, 0.2);
-}
-
-/* ── Structural card (Level 3 brutalist borders) ── */
-.structural-card {
-  border-top: 4px solid rgba(245, 240, 232, 0.12);
-  border-left: 4px solid rgba(245, 240, 232, 0.12);
-}
-
-/* ── Halftone texture overlay ── */
-.halftone {
-  background-image: radial-gradient(rgba(245, 240, 232, 0.04) 1px, transparent 0);
-  background-size: 4px 4px;
-}
-
-/* ── Severity section headers ── */
-.severity-section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-left: 12px;
-  font-family: var(--font-headline);
-  font-weight: 800;
-  font-style: italic;
-  font-size: 18px;
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
-}
-
-/* ── Severity Labels (stamped badges, left-border accent) ── */
-.severity-label {
-  font-family: var(--font-display);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  padding: 3px 10px;
-  border-radius: 2px;
-  border-left: 2px solid currentColor;
-  text-wrap: balance;
-}
-
-.severity-limping {
-  background: rgba(156, 163, 175, 0.18);
-  color: #9CA3AF;
-}
-
-.severity-pain-train {
-  background: rgba(234, 179, 8, 0.22);
-  color: #EAB308;
-}
-
-.severity-meltdown {
-  background: rgba(255, 99, 25, 0.28);
-  color: #FF6319;
-}
-
-.severity-dumpster {
-  background: rgba(232, 53, 58, 0.45);
-  color: #F5F0E8;
-  border-left: 3px solid #E8353A;
-}
-
-/* ── Entrance Animation (staggered) ── */
-.stagger-section {
-  opacity: 0;
-  transform: translateY(12px);
-  filter: blur(4px);
-  animation: fadeInUp 350ms ease-out forwards;
-}
-
-.stagger-section:nth-child(1) { animation-delay: 0ms; }
-.stagger-section:nth-child(2) { animation-delay: 80ms; }
-.stagger-section:nth-child(3) { animation-delay: 160ms; }
-.stagger-section:nth-child(4) { animation-delay: 240ms; }
-.stagger-section:nth-child(5) { animation-delay: 320ms; }
-.stagger-section:nth-child(6) { animation-delay: 400ms; }
-.stagger-section:nth-child(7) { animation-delay: 480ms; }
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
-
-/* ── Alert marquee ── */
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.alert-marquee {
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.alert-marquee-track {
-  display: inline-flex;
-  animation: marquee-scroll 25s linear infinite;
-}
-
-.alert-marquee-segment {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 16px;
-}
-
-/* ── Skeleton shimmer ── */
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ── Verdict animations ── */
-@keyframes verdict-shake {
-  0%, 100% { transform: translateX(0); }
-  15% { transform: translateX(-5px); }
-  30% { transform: translateX(5px); }
-  45% { transform: translateX(-4px); }
-  60% { transform: translateX(4px); }
-  75% { transform: translateX(-2px); }
-  90% { transform: translateX(2px); }
-}
-@keyframes verdict-pulse-green {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-  50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-}
-.verdict-shake {
-  animation: verdict-shake 0.5s ease-in-out;
-}
-.verdict-pulse-green {
-  animation: verdict-pulse-green 0.7s ease-out;
-}
-
-/* ── Global interactive states ── */
-.press-scale {
-  transition-property: scale;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
-}
-.press-scale:active {
-  scale: 0.96;
-}
-
-/* Focus-visible for keyboard navigation */
-:focus-visible {
-  outline: 2px solid var(--color-platform);
-  outline-offset: 2px;
-}
-
+/* prefers-reduced-motion: kill everything except content. Marquee wraps static. */
 @media (prefers-reduced-motion: reduce) {
-  .stagger-section,
-  .verdict-shake,
-  .verdict-pulse-green {
+  .section-rise,
+  .stamp-slam {
     animation: none !important;
-    filter: none;
     opacity: 1;
     transform: none;
   }
-
+  .live-dot::before {
+    animation: none;
+    opacity: 0;
+  }
   .alert-marquee {
     white-space: normal;
   }
-
   .alert-marquee-track {
     animation: none;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .press-scale {
     transition: none;
   }

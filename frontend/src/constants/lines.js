@@ -19,23 +19,23 @@ export const LINE_NAMES = {
   "L": "L", "S": "S", "SI": "SI",
 };
 
+// Deadpan one-liners for the verdict. Verdict first, joke second, straight face.
+// Each one blames the train, carries no advice for the rider, no exclamation.
 export const SHAME_HEADLINES = [
-  "Today's worst line",
-  "A difficult day for this one",
-  "Most delays today",
-  "This line had a hard day",
-  "Today's delay leader",
-  "More delays than the others",
-  "The day's most-delayed service",
-  "This line was the problem today",
+  "Winning the wrong leaderboard.",
+  "The villain line, certified.",
+  "Top of the board. Bottom of the barrel.",
+  "No other line came close.",
+  "Crowned today. Earned it.",
+  "The morning ruiner of record.",
 ];
 
+// Rare by design: a green day should feel like an event.
 export const ALL_GOOD_MESSAGES = [
-  "All lines running normally.",
-  "No delays to report.",
-  "Nothing to report today.",
-  "The trains are fine.",
-  "All clear.",
+  "Every line is running. Screenshot it, nobody will believe you.",
+  "No shame points anywhere. A clean board.",
+  "All 24 lines are behaving. This will not last.",
+  "Nothing to report. The trains are fine right now.",
 ];
 
 /**
@@ -55,12 +55,16 @@ export const ALL_GOOD_MESSAGES = [
  *   60 to 119  Full Meltdown (delays stacked with skips and reroutes)
  *   120+       Dumpster Fire (suspended plus multiple compounding alerts)
  */
+// Canon tiers (BRAND.md / DESIGN.md). Color is the score and stamp color. The
+// stamp class drives the .stamp-* construction in index.css. emoji is the 1
+// permitted tier emoji per surface: ✓ for Good Service, 🔥 for Dumpster Fire,
+// none for the middle tiers (no decorative faces).
 export const SCORE_TIERS = [
-  { min: 120, label: "Dumpster Fire 🔥", color: "#EF4444", emoji: "🔥", severityClass: "severity-dumpster" },
-  { min: 60,  label: "Full Meltdown",    color: "#F97316", emoji: "😤", severityClass: "severity-meltdown" },
-  { min: 30,  label: "Pain Train",       color: "#EAB308", emoji: "😒", severityClass: "severity-pain-train" },
-  { min: 1,   label: "Limping Along",    color: "#9CA3AF", emoji: "😐", severityClass: "severity-limping" },
-  { min: 0,   label: "Good Service",     color: "#22C55E", emoji: "✓", severityClass: "" },
+  { min: 120, label: "Dumpster Fire", color: "#E8353A", emoji: "🔥", stamp: "stamp-dumpster" },
+  { min: 60,  label: "Full Meltdown", color: "#F97316", emoji: "",   stamp: "stamp-meltdown" },
+  { min: 30,  label: "Pain Train",    color: "#EAB308", emoji: "",   stamp: "stamp-pain" },
+  { min: 1,   label: "Limping Along", color: "#9CA3AF", emoji: "",   stamp: "stamp-limping" },
+  { min: 0,   label: "Good Service",  color: "#22C55E", emoji: "✓",  stamp: "stamp-good" },
 ];
 
 export function getScoreTier(score) {
@@ -68,18 +72,19 @@ export function getScoreTier(score) {
 }
 
 // Category colors and labels for score breakdown.
-// label = short display name (plain English, no jargon)
-// sublabel = what it actually means in plain terms
+// Decorative emoji are retired (anti-reference: meme repost energy). Categories
+// carry text labels only. Colors stay on the severity ramp so the breakdown bar
+// reads worst-to-least without leaning on the rainbow palette the old config had.
 export const CATEGORY_CONFIG = {
-  "No Service":     { color: "#EF4444", icon: "🚫", label: "No Service",       sublabel: "Not running" },
-  "Delays":         { color: "#F97316", icon: "🐌", label: "Delays",            sublabel: "Running late" },
-  "Slow Speeds":    { color: "#F59E0B", icon: "🐢", label: "Slow Speeds",       sublabel: "Speed restrictions" },
-  "Skip Stop":      { color: "#EAB308", icon: "⏭️", label: "Skipping Stops",   sublabel: "Bypassing stations" },
-  "Rerouted":       { color: "#A855F7", icon: "↪️", label: "Rerouted",          sublabel: "Running alternate route" },
-  "Runs Local":     { color: "#6366F1", icon: "🔄", label: "Running Local",     sublabel: "Express running local" },
-  "Reduced Freq":   { color: "#8B5CF6", icon: "⏳", label: "Reduced Service",   sublabel: "Fewer trains running" },
-  "Platform Change":{ color: "#6B7280", icon: "🔀", label: "Platform Change",   sublabel: "Different platform" },
-  "Other":          { color: "#9CA3AF", icon: "⚠️", label: "Other Issue",       sublabel: "Unspecified problem" },
+  "No Service":     { color: "#E8353A", label: "No trains",       sublabel: "Not running" },
+  "Delays":         { color: "#F97316", label: "Delays",          sublabel: "Running late" },
+  "Slow Speeds":    { color: "#F97316", label: "Crawling",        sublabel: "Speed restrictions" },
+  "Skip Stop":      { color: "#EAB308", label: "Skipping stops",  sublabel: "Bypassing stations" },
+  "Rerouted":       { color: "#EAB308", label: "Rerouted",        sublabel: "Running alternate route" },
+  "Runs Local":     { color: "#EAB308", label: "Running local",   sublabel: "Express running local" },
+  "Reduced Freq":   { color: "#EAB308", label: "Fewer trains",    sublabel: "Reduced service" },
+  "Platform Change":{ color: "#9CA3AF", label: "Platform change", sublabel: "Different platform" },
+  "Other":          { color: "#9CA3AF", label: "Other",           sublabel: "Unspecified problem" },
 };
 
 // Sort order for breakdown display (worst first)

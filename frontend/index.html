@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Low Line: NYC Subway Delay Tracker</title>
-    <meta name="description" content="Which NYC subway line is causing the most delays right now? Real-time MTA data, scored and ranked." />
+    <title>The Low Line</title>
+    <meta name="description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
     <meta property="og:title" content="The Low Line" />
-    <meta property="og:description" content="Which NYC subway line is causing the most delays right now? Real-time MTA data, scored and ranked." />
+    <meta property="og:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://subway-shame.vercel.app" />
     <!-- Live OG card renders today's real worst line. The route sets its own ~10 min
@@ -16,7 +16,7 @@
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="The Low Line" />
-    <meta name="twitter:description" content="Which NYC subway line is causing the most delays right now? Real-time MTA data, scored and ranked." />
+    <meta name="twitter:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
     <meta name="twitter:image" content="https://subway-shame.vercel.app/api/og" />
     <meta name="twitter:site" content="@michaelpyon" />
     <meta name="twitter:creator" content="@michaelpyon" />
@@ -25,9 +25,22 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/og.png" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚇</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- 1 webfont on the wire, ever. Bebas Neue is the only display face; body
+         text rides the system stack (resolves to SF on the persona's iPhone, 0
+         bytes on platform LTE). Preload the woff2 so the masthead and the hero
+         score paint with the data, not after a swap flash. -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Epilogue:ital,wght@1,800;1,900&family=Lexend:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2">
+    <style>
+      @font-face {
+        font-family: 'Bebas Neue';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2') format('woff2');
+      }
+    </style>
     <meta name="color-scheme" content="dark">
   </head>
   <body>

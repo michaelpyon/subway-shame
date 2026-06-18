@@ -1,12 +1,3 @@
-@keyframes trophy-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.trophy-float {
-  animation: trophy-float 4s ease-in-out infinite;
-}
-
-.trophy-card {
-  box-shadow: var(--shadow-card-shame);
-}
+/* App-specific styles. The brand system lives in index.css. Float and count-up
+   animations were retired in the AAA relaunch: the score is a sign, it does not
+   bounce. This file is intentionally near-empty. */
