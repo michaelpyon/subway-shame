@@ -49,19 +49,40 @@ export function useSubwayData(): UseSubwayDataReturn {
     }
     setError(null);
 
-    // Retry up to 4 times with exponential backoff to smooth over brief API
-    // refresh windows or deploy restarts.
-    const MAX_ATTEMPTS = 4;
-    const BACKOFF_MS = [2000, 4000, 6000]; // waits between retries
+    // Backoff only smooths over real cold starts (502/503). A hard 500 or a
+    // network error is a definitive outage, so we bail immediately and let the
+    // honest OfflineState take over. The persona bounces if nothing meaningful
+    // resolves in about 2 seconds on platform LTE, so the down screen must
+    // arrive fast, not after a long retry loop.
+    const RETRYABLE = new Set([502, 503]);
+    const MAX_ATTEMPTS = 3;
+    const BACKOFF_MS = [800, 1200]; // short waits, only between cold-start retries.
+
+    // Hard total-timeout cap. No matter what, the loading skeleton can never
+    // persist past this, so the verdict or the down screen always paints inside
+    // the persona's attention window.
+    const TOTAL_TIMEOUT_MS = 3500;
+    const startedAt = Date.now();
+    const timeLeft = () => TOTAL_TIMEOUT_MS - (Date.now() - startedAt);
 
     let lastErr: Error | null = null;
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       try {
-        const res = await fetch(`${API_BASE}/api/status`);
+        // Per-request abort so a hanging fetch cannot outlive the total cap.
+        const controller = new AbortController();
+        const reqTimer = setTimeout(() => controller.abort(), Math.max(0, timeLeft()));
+        let res: Response;
+        try {
+          res = await fetch(`${API_BASE}/api/status`, { signal: controller.signal });
+        } finally {
+          clearTimeout(reqTimer);
+        }
         if (!res.ok) {
-          // 502/503 = cold start; retry. Other errors = real failure.
-          if ((res.status === 502 || res.status === 503) && attempt < MAX_ATTEMPTS - 1) {
-            await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt] ?? 6000));
+          // Only cold-start codes are worth a retry. Everything else (500, 4xx)
+          // is a hard failure: stop now so the down screen paints fast.
+          const backoff = BACKOFF_MS[attempt];
+          if (RETRYABLE.has(res.status) && attempt < MAX_ATTEMPTS - 1 && timeLeft() > backoff) {
+            await new Promise((r) => setTimeout(r, backoff));
             continue;
           }
           throw new Error(`HTTP ${res.status}`);
@@ -76,9 +97,9 @@ export function useSubwayData(): UseSubwayDataReturn {
         break; // success
       } catch (err) {
         lastErr = err instanceof Error ? err : new Error(String(err));
-        if (attempt < MAX_ATTEMPTS - 1) {
-          await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt] ?? 6000));
-        }
+        // A network error or abort is a hard failure too: do not keep spinning.
+        // We have already paid one request; bail so OfflineState renders fast.
+        break;
       }
     }
 
