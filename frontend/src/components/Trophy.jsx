@@ -189,7 +189,7 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
             {/* Bullet + giant score. The number never count-ups; it is just there. */}
             <div className="flex items-center gap-4">
               <div className="shrink-0">
-                <LineBadge lineId={winner.id} size="xl" />
+                <LineBadge lineId={winner.id} size="xl" decorative />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 flex-wrap">

@@ -233,6 +233,29 @@ body {
   outline-offset: 2px;
 }
 
+/* ── Skip link: off-screen until a keyboard user tabs to it, then it lands as a
+   loud Signal Red chip above the masthead. Lets a keyboard or screen reader
+   user jump past the header straight to the verdict. ── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-signal-red);
+  color: var(--color-platform);
+  font-family: var(--font-text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 16px;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
 /* ── Receipt edge (torn paper bottom). Signature detail, 1 use max per page. ── */
 .receipt-edge {
   clip-path: polygon(

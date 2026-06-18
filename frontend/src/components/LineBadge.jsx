@@ -12,13 +12,21 @@ const SIZES = {
 // This is a data rule from DESIGN.md, not a style choice.
 const DARK_TEXT_LINES = new Set(["N", "Q", "R", "W", "L"]);
 
-export default function LineBadge({ lineId, size = "md" }) {
+// A11y: the bullet is named for screen readers as "<id> train" so a standalone
+// bullet (the good-lines wrap, the offline bullet row) is not announced as a
+// lone letter. Where the line name is already spoken in adjacent text (the
+// Trophy, the Leaderboard rows), pass decorative so it is skipped instead of
+// double read. The visible glyph is always aria-hidden; the label carries it.
+export default function LineBadge({ lineId, size = "md", decorative = false }) {
   const color = LINE_COLORS[lineId] || "#808183";
   const dark = DARK_TEXT_LINES.has(lineId);
 
   return (
     <div
       className={`${SIZES[size]} rounded-full flex items-center justify-center shrink-0`}
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : `${lineId} train`}
+      aria-hidden={decorative ? "true" : undefined}
       style={{
         backgroundColor: color,
         color: dark ? "#000" : "#fff",
@@ -27,7 +35,7 @@ export default function LineBadge({ lineId, size = "md" }) {
         fontWeight: 800,
       }}
     >
-      {lineId}
+      <span aria-hidden="true">{lineId}</span>
     </div>
   );
 }

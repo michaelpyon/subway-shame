@@ -33,7 +33,7 @@ export default function LineCard({ line }) {
     >
       {/* Top row: bullet + score */}
       <div className="flex justify-between items-start gap-2 mb-2">
-        <LineBadge lineId={line.id} size="sm" />
+        <LineBadge lineId={line.id} size="sm" decorative />
         <span
           className="font-display tabular leading-none"
           style={{ fontSize: "32px", color: tier.color }}

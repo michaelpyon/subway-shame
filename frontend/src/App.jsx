@@ -26,6 +26,9 @@ export default function App() {
   return (
     // Flat black field. No gradients, no corner washes, no textures.
     <div className="min-h-dvh antialiased" style={{ backgroundColor: "var(--color-tunnel)", color: "var(--color-platform)" }}>
+      {/* Keyboard skip link: jump past the masthead straight to the verdict. */}
+      <a href="#verdict" className="skip-link">Skip to the verdict</a>
+
       <Header lastUpdated={lastUpdated} error={error} onRefresh={refresh} loading={loading} />
 
       {/* Alert marquee, only when something is actually wrong */}
@@ -35,7 +38,7 @@ export default function App() {
       {loading && !data && <SkeletonLoader />}
 
       {data && (
-        <main className="pt-5" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <main id="verdict" className="pt-5" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           {/* JOB 1: the verdict. Paints with the data, NO entrance animation,
               so "is the F fucked" is answered in 0 scrolls and 0 taps. */}
           {data.winner ? (

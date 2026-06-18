@@ -304,7 +304,7 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
             }}
             type="button"
           >
-            <LineBadge lineId={id} size="sm" />
+            <LineBadge lineId={id} size="sm" decorative />
           </button>
         ))}
       </div>

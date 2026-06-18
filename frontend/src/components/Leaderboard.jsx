@@ -55,7 +55,7 @@ export default function Leaderboard({ podium }) {
               >
                 {rank}
               </span>
-              <LineBadge lineId={line.id} size="sm" />
+              <LineBadge lineId={line.id} size="sm" decorative />
               <div className="flex-1 min-w-0">
                 <p
                   className="truncate"

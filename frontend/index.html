@@ -2,46 +2,84 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Low Line</title>
-    <meta name="description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
-    <meta property="og:title" content="The Low Line" />
-    <meta property="og:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Title and description in brand voice. Profanity cannot run in metadata,
+         so this is the clean positioning line from BRAND.md verbatim. -->
+    <title>The Low Line: which NYC subway line is the worst right now</title>
+    <meta name="description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped. A live shame leaderboard for the NYC subway." />
+    <link rel="canonical" href="https://subway-shame.vercel.app/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="apple-mobile-web-app-title" content="The Low Line" />
+
+    <!-- Open Graph. The shared link and the screenshot are the same brand object,
+         so the card carries the wordmark, an MTA bullet, and the positioning line.
+         og:image is the live edge route /api/og, which paints today's real worst
+         line; the static og.png is the documented fallback a scraper sees if the
+         route is unreachable. Both are real 1200x630 rasters, never fabricated. -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://subway-shame.vercel.app" />
-    <!-- Live OG card renders today's real worst line. The route sets its own ~10 min
-         edge cache; og.png stays as a static fallback only. -->
+    <meta property="og:site_name" content="The Low Line" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://subway-shame.vercel.app/" />
+    <meta property="og:title" content="The Low Line: which NYC subway line is the worst right now" />
+    <meta property="og:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
     <meta property="og:image" content="https://subway-shame.vercel.app/api/og" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Low Line: a black tabloid-style card with the MTA F bullet and the line 'Which line is ruining the most mornings right now.'" />
+    <meta property="og:image" content="https://subway-shame.vercel.app/og.png" />
+
+    <!-- Twitter / X large summary card. -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="The Low Line" />
+    <meta name="twitter:title" content="The Low Line: which NYC subway line is the worst right now" />
     <meta name="twitter:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
     <meta name="twitter:image" content="https://subway-shame.vercel.app/api/og" />
+    <meta name="twitter:image:alt" content="The Low Line: a black tabloid-style card with the MTA F bullet and the line 'Which line is ruining the most mornings right now.'" />
     <meta name="twitter:site" content="@michaelpyon" />
     <meta name="twitter:creator" content="@michaelpyon" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="canonical" href="https://subway-shame.vercel.app" />
+
+    <!-- Favicon set: the F bullet, the brand mark. Replaces the default emoji. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/og.png" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚇</text></svg>">
+
     <!-- 1 webfont on the wire, ever. Bebas Neue is the only display face; body
          text rides the system stack (resolves to SF on the persona's iPhone, 0
-         bytes on platform LTE). Preload the woff2 so the masthead and the hero
-         score paint with the data, not after a swap flash. -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+         bytes on platform LTE). Self-hosted so there is no third-party connection
+         to set up on 2 bar platform LTE; preloaded so the masthead and hero score
+         paint with the data, not after a swap flash. -->
     <link rel="preload" as="font" type="font/woff2" crossorigin
-          href="https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2">
+          href="/fonts/bebas-neue-v14-latin-400.woff2" />
     <style>
       @font-face {
         font-family: 'Bebas Neue';
         font-style: normal;
         font-weight: 400;
         font-display: swap;
-        src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2') format('woff2');
+        src: url('/fonts/bebas-neue-v14-latin-400.woff2') format('woff2');
       }
     </style>
-    <meta name="color-scheme" content="dark">
+
+    <!-- Structured data: a free utility web app, no fabricated ratings. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "The Low Line",
+        "url": "https://subway-shame.vercel.app/",
+        "description": "Which line is ruining the most mornings right now. Scored, ranked, timestamped. A live shame leaderboard for the NYC subway.",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Michael Pyon", "url": "https://pyon.dev" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
