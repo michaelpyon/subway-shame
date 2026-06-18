@@ -26,4 +26,12 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Serverless API functions and build/serve scripts run in Node, not the
+    // browser, so they need Node globals (Buffer, process, console, etc.).
+    files: ['api/**/*.{js,jsx}', 'scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

@@ -2,7 +2,7 @@
 
 Real-time NYC subway delay tracker. Pulls live MTA GTFS-RT protobuf feeds, scores each train line by alert severity, and displays a shame leaderboard with historical trending.
 
-**Live:** https://web-production-be47b.up.railway.app
+**Live:** https://subway-shame.vercel.app (canonical deploy host; the frontend in `frontend/` runs on Vercel with serverless API routes in `frontend/api/`)
 **GitHub:** https://github.com/michaelpyon/subway-shame
 
 ## Tech stack
