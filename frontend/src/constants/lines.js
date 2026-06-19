@@ -30,6 +30,17 @@ export const SHAME_HEADLINES = [
   "Morning ruiner of record.",
 ];
 
+// Quiet-day headlines for the worst line when it is barely scoring (under the
+// Pain Train threshold). The line is still the worst, but "villain certified"
+// reads wrong on a calm board, so these lean into clean-board energy and keep a
+// postable hook. Reads as "The {id} {headline}". Verdict first, straight face.
+export const QUIET_DAY_HEADLINES = [
+  "is the worst line today, and it is barely trying.",
+  "wins by default. Slow day for shame.",
+  "tops the board on a clean morning. Screenshot it.",
+  "is the worst there is right now, which is not much.",
+];
+
 // Rare by design: a green day should feel like an event.
 export const ALL_GOOD_MESSAGES = [
   "Every line is running. Screenshot it, nobody will believe you.",

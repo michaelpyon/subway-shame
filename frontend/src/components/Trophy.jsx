@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from "react";
 import {
   LINE_COLORS,
   SHAME_HEADLINES,
+  QUIET_DAY_HEADLINES,
   getScoreTier,
   CATEGORY_CONFIG,
   CATEGORY_ORDER,
@@ -32,6 +33,12 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
   const headline = useMemo(() => {
     // Deterministic by line + score so the card does not reshuffle on re-render.
     const seed = (winner.id || "F").charCodeAt(0) + (winner.daily_score || 0);
+    // On a quiet day the worst line is barely scoring, so a "villain certified"
+    // line reads wrong. Lean into clean-board energy so a calm day still has a
+    // deadpan hook that matches the share text.
+    if (winner.daily_score < 30) {
+      return QUIET_DAY_HEADLINES[seed % QUIET_DAY_HEADLINES.length];
+    }
     return SHAME_HEADLINES[seed % SHAME_HEADLINES.length];
   }, [winner.id, winner.daily_score]);
 
