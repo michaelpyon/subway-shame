@@ -1,13 +1,16 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { LINE_DIRECTIONS, CATEGORY_CONFIG, getScoreTier } from "../constants/lines";
 import LineBadge from "./LineBadge";
 import AlertText from "./AlertText";
 
 // "Is my train fucked?" The single-line lookup. Answer pattern, in order:
 // severity stamp, score, then 1 deadpan line. Verdict first, joke second.
-// Used two ways: as a launcher card on the page (onOpen) and as the modal it
-// opens (isModal). The persona checks 1 line at 7:40 AM, so the lookup is fast
-// and the verdict is the loud part.
+// The persona checks 1 line at 7:40 AM, so this is her personal job (Job 2) and
+// it must be zero taps, the same as the top verdict. The checker renders open in
+// place with a line pre-selected and its verdict already painted: a deep link
+// (#line=F) wins, otherwise the worst-scoring line is chosen so the answer is
+// there on first load. It sits below the hero verdict so the personal answer
+// costs 0 taps without pushing "is the F fucked" below the fold.
 
 const ALL_LINE_IDS = [
   "1", "2", "3", "4", "5", "6", "7",
@@ -47,6 +50,54 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// The line with the highest live snapshot score, so the personal job has an
+// answer with 0 taps on first load. Returns null if nothing is scoring.
+function pickWorstLineId(lines) {
+  if (!lines || lines.length === 0) return null;
+  let worst = null;
+  for (const l of lines) {
+    const s = l.score || 0;
+    if (s > 0 && (!worst || s > (worst.score || 0))) worst = l;
+  }
+  return worst ? worst.id : null;
+}
+
+// Pure verdict from a line + optional direction. Shared by the on-mount
+// pre-computed verdict and the manual re-check, so a tap and a default render
+// produce the exact same answer. Scores off the LIVE snapshot (score), never an
+// implied daily total.
+function computeVerdict(lineData, selectedDir) {
+  if (!lineData) return null;
+  const liveScore = lineData.score || 0;
+  const dailyScore = lineData.daily_score || 0;
+  const byDir = lineData.live_by_direction || {};
+  const dirKey = selectedDir === 0 ? "uptown" : selectedDir === 1 ? "downtown" : null;
+
+  let message;
+  let isBad;
+  if (liveScore === 0) {
+    isBad = false;
+    message = pick(GOOD_LINES);
+  } else if (dirKey) {
+    const dd = byDir[dirKey] || { score: 0 };
+    const other = byDir[dirKey === "uptown" ? "downtown" : "uptown"] || { score: 0 };
+    if (dd.score > 0) {
+      isBad = true;
+      message = pick([...BAD_LINES, ...DIR_BAD]);
+    } else if (other.score > 0) {
+      isBad = false;
+      message = pick(DIR_GOOD_OTHER_BAD);
+    } else {
+      isBad = false;
+      message = pick(GOOD_LINES);
+    }
+  } else {
+    isBad = true;
+    message = pick(BAD_LINES);
+  }
+  return { message, isBad, dailyScore };
+}
+
 function parseHash() {
   const hash = window.location.hash.slice(1);
   if (!hash) return { line: null, dir: null };
@@ -57,70 +108,43 @@ function parseHash() {
   return { line: line && ALL_LINE_IDS.includes(line) ? line : null, dir };
 }
 
-function getFocusable(container) {
-  if (!container) return [];
-  return [...container.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  )].filter((el) => !el.hasAttribute("disabled"));
+export default function TrainChecker({ lines }) {
+  return <TrainCheckerBody lines={lines} />;
 }
 
-export default function TrainChecker({ lines, isModal = false, onClose, onOpen }) {
-  // Launcher card: render the prompt + a single tap that opens the modal.
-  if (!isModal && onOpen) {
-    return (
-      <section className="px-4 max-w-[672px] mx-auto">
-        <button
-          type="button"
-          onClick={onOpen}
-          className="press-scale w-full flex items-center justify-between gap-3 px-4 py-4"
-          style={{
-            // Monochrome chrome per the Buttons law: Ballast surface, 1px
-            // Concrete border, Platform text. The rider-voice copy stays; the
-            // red band does not, since red is reserved for severity data.
-            backgroundColor: "var(--color-ballast)",
-            border: "1px solid var(--color-concrete)",
-            boxShadow: "var(--shadow-card)",
-            cursor: "pointer",
-          }}
-        >
-          <span
-            className="font-display text-left"
-            style={{ fontSize: "24px", letterSpacing: "0.04em", color: "var(--color-platform)" }}
-          >
-            Is my train fucked?
-          </span>
-          <span className="receipt" style={{ color: "var(--color-newsprint)" }}>
-            Check 1 line &rarr;
-          </span>
-        </button>
-      </section>
-    );
-  }
-
-  return <TrainCheckerBody lines={lines} isModal={isModal} onClose={onClose} />;
-}
-
-function TrainCheckerBody({ lines, isModal, onClose }) {
-  const initial = useMemo(() => parseHash(), []);
+function TrainCheckerBody({ lines }) {
+  // Seed the line: a deep link wins, otherwise the worst-scoring line, so the
+  // personal job is answered with 0 taps on first load. Pre-compute its verdict
+  // from the same pure function the manual re-check uses, so the default render
+  // and a tap give the identical answer.
+  const initial = useMemo(() => {
+    const fromHash = parseHash();
+    const line = fromHash.line || pickWorstLineId(lines);
+    const lineData = line && lines ? lines.find((l) => l.id === line) || null : null;
+    return { line, dir: fromHash.dir, verdict: computeVerdict(lineData, fromHash.dir) };
+    // Seed once on mount; live refreshes update the verdict via the data effect
+    // below, not by reseeding (which would stomp a line the rider just picked).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [selectedLine, setSelectedLine] = useState(initial.line);
   const [selectedDir, setSelectedDir] = useState(initial.dir);
-  const [verdict, setVerdict] = useState(null);
+  const [verdict, setVerdict] = useState(initial.verdict);
   const [animKey, setAnimKey] = useState(0);
   const [shareFeedback, setShareFeedback] = useState("");
-  const dialogRef = useRef(null);
-  const previousFocusRef = useRef(null);
 
   useEffect(() => {
     const onHashChange = () => {
       const { line, dir } = parseHash();
       setSelectedLine(line);
       setSelectedDir(dir);
-      setVerdict(null);
+      // Recompute, do not blank: a deep-linked line still answers with 0 taps.
+      const ld = line && lines ? lines.find((l) => l.id === line) || null : null;
+      setVerdict(computeVerdict(ld, dir));
       setShareFeedback("");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  }, [lines]);
 
   useEffect(() => {
     if (!selectedLine) {
@@ -138,46 +162,6 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
     return () => window.clearTimeout(t);
   }, [shareFeedback]);
 
-  useEffect(() => {
-    if (!isModal) return undefined;
-    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const dialog = dialogRef.current;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const focusable = getFocusable(dialog);
-    (focusable[0] || dialog)?.focus();
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose?.();
-        return;
-      }
-      if (e.key !== "Tab") return;
-      const nodes = getFocusable(dialog);
-      if (nodes.length === 0) {
-        e.preventDefault();
-        dialog?.focus();
-        return;
-      }
-      const first = nodes[0];
-      const last = nodes[nodes.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-      previousFocusRef.current?.focus?.();
-    };
-  }, [isModal, onClose]);
-
   const directions = useMemo(() => {
     if (!selectedLine) return null;
     return LINE_DIRECTIONS[selectedLine] || ["Uptown", "Downtown"];
@@ -187,6 +171,20 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
     if (!selectedLine || !lines) return null;
     return lines.find((l) => l.id === selectedLine) || null;
   }, [selectedLine, lines]);
+
+  // Keep the verdict live: when a 5 min poll changes the selected line's score,
+  // re-answer so a stale verdict never sits on screen. Keyed on the score so it
+  // fires only on real data changes, not every render. Skips when nothing is
+  // showing yet (the on-mount seed and tap handlers own that path).
+  const liveScore = lineData?.score ?? null;
+  useEffect(() => {
+    if (!verdict || !lineData) return;
+    setVerdict(computeVerdict(lineData, selectedDir));
+    // verdict and selectedDir are intentionally out of deps: this fires on a new
+    // poll (liveScore change) only, and reading verdict here would re-roll the
+    // deadpan line on every direction tap, which those handlers already own.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveScore, selectedLine]);
 
   const relevantAlerts = useMemo(() => {
     if (!lineData?.alerts) return [];
@@ -201,40 +199,17 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
   const handleSelect = useCallback((id) => {
     setSelectedLine(id);
     setSelectedDir(null);
-    setVerdict(null);
     setShareFeedback("");
-  }, []);
+    // Answer on tap: picking a line is the whole interaction, so the verdict
+    // paints immediately instead of waiting for a second button press.
+    const ld = lines ? lines.find((l) => l.id === id) || null : null;
+    setVerdict(computeVerdict(ld, null));
+    setAnimKey((v) => v + 1);
+  }, [lines]);
 
   const handleCheck = useCallback(() => {
     if (!lineData) return;
-    const liveScore = lineData.score || 0;
-    const dailyScore = lineData.daily_score || 0;
-    const byDir = lineData.live_by_direction || {};
-    const dirKey = selectedDir === 0 ? "uptown" : selectedDir === 1 ? "downtown" : null;
-
-    let message;
-    let isBad;
-    if (liveScore === 0) {
-      isBad = false;
-      message = pick(GOOD_LINES);
-    } else if (dirKey) {
-      const dd = byDir[dirKey] || { score: 0 };
-      const other = byDir[dirKey === "uptown" ? "downtown" : "uptown"] || { score: 0 };
-      if (dd.score > 0) {
-        isBad = true;
-        message = pick([...BAD_LINES, ...DIR_BAD]);
-      } else if (other.score > 0) {
-        isBad = false;
-        message = pick(DIR_GOOD_OTHER_BAD);
-      } else {
-        isBad = false;
-        message = pick(GOOD_LINES);
-      }
-    } else {
-      isBad = true;
-      message = pick(BAD_LINES);
-    }
-    setVerdict({ message, isBad, dailyScore });
+    setVerdict(computeVerdict(lineData, selectedDir));
     setAnimKey((v) => v + 1);
   }, [lineData, selectedDir]);
 
@@ -257,36 +232,17 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
 
   const inner = (
     <div
-      ref={dialogRef}
-      aria-describedby={isModal ? "tc-desc" : undefined}
-      aria-labelledby={isModal ? "tc-title" : undefined}
-      aria-modal={isModal ? "true" : undefined}
       className="p-5 relative"
-      role={isModal ? "dialog" : undefined}
       style={{ backgroundColor: "var(--color-ballast)", boxShadow: "var(--shadow-card)" }}
-      tabIndex={isModal ? -1 : undefined}
     >
-      {isModal && (
-        <button
-          aria-label="Close"
-          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-xl leading-none press-scale"
-          onClick={onClose}
-          style={{ backgroundColor: "var(--color-concrete)", color: "var(--color-newsprint)", borderRadius: 0 }}
-          type="button"
-        >
-          &times;
-        </button>
-      )}
-
       <h2
-        className="font-display pr-8"
-        id="tc-title"
+        className="font-display"
         style={{ fontSize: "24px", letterSpacing: "0.04em", color: "var(--color-platform)" }}
       >
         Is my train fucked?
       </h2>
-      <p className="receipt mt-1 mb-4" id="tc-desc" style={{ color: "var(--color-newsprint)" }}>
-        Pick a line. Get the verdict.
+      <p className="receipt mt-1 mb-4" style={{ color: "var(--color-newsprint)" }}>
+        Your line is checked already. Tap another to switch.
       </p>
 
       <div className="flex flex-wrap gap-1.5">
@@ -323,7 +279,15 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
                 key={label}
                 aria-pressed={selectedDir === i}
                 className="px-4 py-2.5 min-h-[44px] flex items-center press-scale"
-                onClick={() => setSelectedDir(selectedDir === i ? null : i)}
+                onClick={() => {
+                  const next = selectedDir === i ? null : i;
+                  setSelectedDir(next);
+                  // Re-answer on direction change: still 0 extra taps to read.
+                  if (verdict) {
+                    setVerdict(computeVerdict(lineData, next));
+                    setAnimKey((v) => v + 1);
+                  }
+                }}
                 style={
                   selectedDir === i
                     ? { backgroundColor: "var(--color-concrete)", border: "1px solid var(--color-platform)", color: "var(--color-platform)", borderRadius: 0, fontSize: "13px" }
@@ -338,7 +302,11 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
         </div>
       )}
 
-      {selectedLine && (
+      {/* The verdict is pre-computed and re-answers on every line/direction tap,
+          so the personal job is 0 taps. The button only appears in the rare case
+          a line is selected with no verdict yet (so there is never a dangling CTA
+          sitting under an answer that is already shown). */}
+      {selectedLine && !verdict && (
         <button
           className="font-display w-full mt-4 press-scale"
           onClick={handleCheck}
@@ -428,20 +396,6 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
       )}
     </div>
   );
-
-  if (isModal) {
-    return (
-      <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose?.();
-        }}
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.85)" }}
-      >
-        <div className="max-h-[88vh] overflow-y-auto w-full sm:max-w-[672px]">{inner}</div>
-      </div>
-    );
-  }
 
   return <div className="px-4 max-w-[672px] mx-auto">{inner}</div>;
 }

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useSubwayData } from "./hooks/useSubwayData";
 import Header from "./components/Header";
 import Trophy from "./components/Trophy";
@@ -16,26 +15,6 @@ import "./App.css";
 
 export default function App() {
   const { data, loading, error, lastUpdated, refresh } = useSubwayData();
-  // Persist the checker open state so an orientation flip or any breakpoint
-  // remount on a phone does not drop the user's verdict. Seeded from
-  // sessionStorage on mount and written on every change.
-  const [checkerOpen, setCheckerOpen] = useState(() => {
-    try {
-      return sessionStorage.getItem("checkerOpen") === "1";
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      if (checkerOpen) sessionStorage.setItem("checkerOpen", "1");
-      else sessionStorage.removeItem("checkerOpen");
-    } catch {
-      // sessionStorage unavailable (private mode quota): open state stays in
-      // memory only, which is still correct for the common case.
-    }
-  }, [checkerOpen]);
 
   // Full offline state: no data at all. The honest down screen takes over.
   if (error && !data) {
@@ -78,9 +57,13 @@ export default function App() {
             <LineGrid lines={data.lines} />
           </div>
 
-          {/* Secondary tools below the verdict: the checker and the explainer. */}
+          {/* JOB 2: "is MY train fucked". Renders open with a line already
+              checked (the worst scorer, or a #line= deep link), so the personal
+              job is 0 taps like the top verdict. It sits below the hero verdict
+              and the standings, so it never pushes "is the F fucked" below the
+              fold on a 390px phone. */}
           <div className="section-rise">
-            <TrainChecker lines={data.lines} onOpen={() => setCheckerOpen(true)} />
+            <TrainChecker lines={data.lines} />
           </div>
 
           <div className="section-rise">
@@ -91,11 +74,6 @@ export default function App() {
             <ScoringExplainer />
           </div>
         </main>
-      )}
-
-      {/* TrainChecker modal */}
-      {data && checkerOpen && (
-        <TrainChecker lines={data.lines} isModal onClose={() => setCheckerOpen(false)} />
       )}
 
       <Footer />
