@@ -26,7 +26,7 @@ export const SHAME_HEADLINES = [
   "Villain line, certified.",
   "Top of the board. Bottom of the barrel.",
   "No other line came close.",
-  "Crowned today. Earned it.",
+  "Crowned right now. Earned it.",
   "Morning ruiner of record.",
 ];
 
@@ -35,8 +35,8 @@ export const SHAME_HEADLINES = [
 // reads wrong on a calm board, so these lean into clean-board energy and keep a
 // postable hook. Reads as "The {id} {headline}". Verdict first, straight face.
 export const QUIET_DAY_HEADLINES = [
-  "is the worst line today, and it is barely trying.",
-  "wins by default. Slow day for shame.",
+  "is the worst line right now, and it is barely trying.",
+  "wins by default. Slow minute for shame.",
   "tops the board on a clean morning. Screenshot it.",
   "is the worst there is right now, which is not much.",
 ];

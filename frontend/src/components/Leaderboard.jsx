@@ -2,7 +2,8 @@ import LineBadge from "./LineBadge";
 import { getScoreTier, LINE_ROUTES } from "../constants/lines";
 
 // The standings. Job 3 from the persona: the chat argues whose line is worse,
-// this ends the argument. 1 villain per day; ties share the crown explicitly.
+// this ends the argument. 1 villain right now (the live snapshot, not a daily
+// total); ties share the crown explicitly.
 // Rank in display 24px, bullet, line name in body, score right-aligned tabular
 // with tier color, stamp at micro size.
 export default function Leaderboard({ podium }) {
@@ -28,7 +29,7 @@ export default function Leaderboard({ podium }) {
           The standings
         </h2>
         <span className="receipt" style={{ color: "var(--color-newsprint)" }}>
-          {tieAtTop ? "Tie for the crown" : "1 villain today"}
+          {tieAtTop ? "Tie for the crown" : "1 villain right now"}
         </span>
       </div>
 
