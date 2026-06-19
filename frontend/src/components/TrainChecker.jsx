@@ -74,8 +74,11 @@ export default function TrainChecker({ lines, isModal = false, onClose, onOpen }
           onClick={onOpen}
           className="press-scale w-full flex items-center justify-between gap-3 px-4 py-4"
           style={{
-            backgroundColor: "var(--color-signal-red)",
-            border: "none",
+            // Monochrome chrome per the Buttons law: Ballast surface, 1px
+            // Concrete border, Platform text. The rider-voice copy stays; the
+            // red band does not, since red is reserved for severity data.
+            backgroundColor: "var(--color-ballast)",
+            border: "1px solid var(--color-concrete)",
             boxShadow: "var(--shadow-card)",
             cursor: "pointer",
           }}
@@ -86,7 +89,7 @@ export default function TrainChecker({ lines, isModal = false, onClose, onOpen }
           >
             Is my train fucked?
           </span>
-          <span className="receipt" style={{ color: "var(--color-platform)" }}>
+          <span className="receipt" style={{ color: "var(--color-newsprint)" }}>
             Check 1 line &rarr;
           </span>
         </button>
@@ -340,12 +343,15 @@ function TrainCheckerBody({ lines, isModal, onClose }) {
           className="font-display w-full mt-4 press-scale"
           onClick={handleCheck}
           style={{
-            backgroundColor: "var(--color-signal-red)",
+            // Primary action, still monochrome: Platform border on Ballast so it
+            // reads as the dominant control without using red as chrome. Red is
+            // reserved for the verdict stamp that lands below.
+            backgroundColor: "var(--color-ballast)",
             color: "var(--color-platform)",
             fontSize: "20px",
             letterSpacing: "0.04em",
             minHeight: "48px",
-            border: "none",
+            border: "1px solid var(--color-platform)",
             borderRadius: 0,
             cursor: "pointer",
           }}

@@ -188,8 +188,11 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
                   padding: "0 14px",
                   borderRadius: "0",
                   backgroundColor: "transparent",
-                  border: "1px solid var(--color-signal-red)",
-                  color: "var(--color-signal-red)",
+                  // Monochrome chrome per the Buttons law: Concrete border,
+                  // Platform text. Signal Red is reserved for severity and
+                  // villain data, never for UI chrome.
+                  border: "1px solid var(--color-concrete)",
+                  color: "var(--color-platform)",
                   cursor: "pointer",
                 }}
               >

@@ -199,20 +199,27 @@ body {
   100% { transform: scale(2.4); opacity: 0; }
 }
 
-/* ── Alert marquee: linear scroll, 25s. ── */
+/* ── Alert marquee: linear scroll, 25s. ──
+   The track holds exactly two identical runs and slides by -50%, so the loop is
+   seamless. Each run is at least the full container width, so on a wide desktop
+   the content fills the bar instead of visibly tiling a short string. */
 .alert-marquee {
   overflow: hidden;
   white-space: nowrap;
 }
 .alert-marquee-track {
-  display: inline-flex;
+  display: flex;
+  width: max-content;
   animation: marquee-scroll 25s linear infinite;
 }
-.alert-marquee-segment {
+.alert-marquee-run {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 0 16px;
+  min-width: 100%;
+  flex-shrink: 0;
 }
 @keyframes marquee-scroll {
   0%   { transform: translateX(0); }
