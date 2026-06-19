@@ -20,3 +20,4 @@ next-frontend/out/
 # Env
 .env
 .env.*
+.gstack/
