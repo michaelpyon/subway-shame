@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSubwayData } from "./hooks/useSubwayData";
 import Header from "./components/Header";
 import Trophy from "./components/Trophy";
@@ -16,7 +16,26 @@ import "./App.css";
 
 export default function App() {
   const { data, loading, error, lastUpdated, refresh } = useSubwayData();
-  const [checkerOpen, setCheckerOpen] = useState(false);
+  // Persist the checker open state so an orientation flip or any breakpoint
+  // remount on a phone does not drop the user's verdict. Seeded from
+  // sessionStorage on mount and written on every change.
+  const [checkerOpen, setCheckerOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem("checkerOpen") === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (checkerOpen) sessionStorage.setItem("checkerOpen", "1");
+      else sessionStorage.removeItem("checkerOpen");
+    } catch {
+      // sessionStorage unavailable (private mode quota): open state stays in
+      // memory only, which is still correct for the common case.
+    }
+  }, [checkerOpen]);
 
   // Full offline state: no data at all. The honest down screen takes over.
   if (error && !data) {
