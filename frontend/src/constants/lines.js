@@ -23,11 +23,11 @@ export const LINE_NAMES = {
 // Each one blames the train, carries no advice for the rider, no exclamation.
 export const SHAME_HEADLINES = [
   "Winning the wrong leaderboard.",
-  "The villain line, certified.",
+  "Villain line, certified.",
   "Top of the board. Bottom of the barrel.",
   "No other line came close.",
   "Crowned today. Earned it.",
-  "The morning ruiner of record.",
+  "Morning ruiner of record.",
 ];
 
 // Rare by design: a green day should feel like an event.

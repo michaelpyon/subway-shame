@@ -118,7 +118,7 @@ export default function OfflineState({ onRetry, loading, lastUpdated }) {
           ))}
         </div>
         <p className="receipt mt-3 text-center" style={{ color: "var(--color-newsprint)" }}>
-          DATA: MTA GTFS-RT &middot; For entertainment. The MTA has enough problems.
+          DATA: LIVE FROM THE MTA &middot; For entertainment. The MTA has enough problems.
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 // Footer. Canon copy, kept verbatim. The FML easter egg and the data source
-// line in receipt micro. The GTFS-RT source line is the 1 sanctioned jargon
-// exception: fine print is a receipt.
+// line in receipt micro. Source line stays in rider language: no GTFS, no
+// jargon, even in the fine print (it is on the persona repel list).
 const FML = [
   { id: "F", color: "var(--mta-bdfm)" },
   { id: "M", color: "var(--mta-bdfm)" },
@@ -20,7 +20,7 @@ export default function Footer() {
           DO NOT RELY ON SCHEDULES.
         </p>
         <p className="receipt" style={{ color: "var(--color-newsprint)" }}>
-          DATA: MTA GTFS-RT &middot; REFRESH: 300s &middot; COVERAGE: 24 LINES
+          DATA: LIVE FROM THE MTA &middot; REFRESHES EVERY 5 MIN &middot; 24 LINES TRACKED
         </p>
       </div>
 
