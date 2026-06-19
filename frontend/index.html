@@ -27,21 +27,22 @@
     <meta property="og:url" content="https://subway-shame.vercel.app/" />
     <meta property="og:title" content="The Low Line: which NYC subway line is the worst right now" />
     <meta property="og:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
-    <meta property="og:image" content="https://subway-shame.vercel.app/og.png" />
+    <!-- One canonical social image: the live /api/og card. It renders today's
+         real verdict and has an internal on-brand fallback that never 500s, so
+         a pasted link always previews the live receipt, never a SAMPLE card.
+         One tag per property avoids scraper first-vs-last ambiguity. -->
+    <meta property="og:image" content="https://subway-shame.vercel.app/api/og" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The Low Line: a black tabloid card with the MTA F bullet, a sample score of 140 shame points, and a DUMPSTER FIRE stamp, marked SAMPLE." />
-    <meta property="og:image" content="https://subway-shame.vercel.app/api/og" />
+    <meta property="og:image:alt" content="The Low Line: a black tabloid card with today's worst NYC subway line, its shame score, severity stamp, and the time the data was read." />
 
-    <!-- Twitter / X large summary card. Static og.png first so the card always
-         renders; the live route is the enhancement, never the dependency. -->
+    <!-- Twitter / X large summary card. Same single live card. -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="The Low Line: which NYC subway line is the worst right now" />
     <meta name="twitter:description" content="Which line is ruining the most mornings right now. Scored, ranked, timestamped." />
-    <meta name="twitter:image" content="https://subway-shame.vercel.app/og.png" />
     <meta name="twitter:image" content="https://subway-shame.vercel.app/api/og" />
-    <meta name="twitter:image:alt" content="The Low Line: a black tabloid card with the MTA F bullet, a sample score of 140 shame points, and a DUMPSTER FIRE stamp, marked SAMPLE." />
+    <meta name="twitter:image:alt" content="The Low Line: a black tabloid card with today's worst NYC subway line, its shame score, severity stamp, and the time the data was read." />
     <meta name="twitter:site" content="@michaelpyon" />
     <meta name="twitter:creator" content="@michaelpyon" />
 
