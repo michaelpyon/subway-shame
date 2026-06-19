@@ -163,11 +163,13 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
           <div className="relative z-10 p-5">
             {/* Wordmark inside the card frame so a lazy iOS screenshot cropped to
                 just this card still carries the brand, matching ShareCard's
-                top-left placement. The in-page hero and the captured card are the
-                same brand object regardless of how the user grabs it. */}
+                top-left placement. Rendered as a small Newsprint kicker, not a
+                second masthead, so the masthead stays the one dominant wordmark
+                in the first screen and there is no stutter. The captured
+                ShareCard carries the full-size wordmark for the actual share. */}
             <div
               className="font-display mb-3"
-              style={{ fontSize: "15px", letterSpacing: "0.3em", color: "var(--color-platform)", lineHeight: 1 }}
+              style={{ fontSize: "12px", letterSpacing: "0.3em", color: "var(--color-newsprint)", lineHeight: 1 }}
             >
               THE LOW LINE
             </div>
