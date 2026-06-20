@@ -130,7 +130,7 @@ function liveCard(status) {
           <div style={{ fontSize: 280, fontWeight: 900, color: tier.color, lineHeight: 0.85, letterSpacing: "-0.02em" }}>
             {score}
           </div>
-          <div style={{ fontSize: 40, fontWeight: 600, color: NEWSPRINT }}>shame points</div>
+          <div style={{ fontSize: 40, fontWeight: 600, color: NEWSPRINT }}>{score === 1 ? "shame point" : "shame points"}</div>
         </div>
       </div>
 

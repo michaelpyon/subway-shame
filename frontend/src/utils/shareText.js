@@ -21,6 +21,7 @@ export function buildShareText(winner, clock) {
   const tier = getScoreTier(winner.daily_score);
   const tierName = tier.label.replace(/[^ -~]/g, "").trim();
   const score = (winner.daily_score || 0).toLocaleString();
+  const unit = winner.daily_score === 1 ? "shame point" : "shame points";
   const stamp = clock ? ` as of ${clock}` : "";
 
   // Quiet day: the worst line is barely scoring. Keep the number and tier honest
@@ -29,8 +30,8 @@ export function buildShareText(winner, clock) {
     if (winner.daily_score === 0) {
       return `Every line is running right now${stamp}. Screenshot it, nobody will believe you. ${SHARE_URL}`;
     }
-    return `Quietest the subway gets: the ${winner.id} is the worst line and it is only ${score} shame points${stamp}. ${tierName}. Screenshot it, nobody will believe you. ${SHARE_URL}`;
+    return `Quietest the subway gets: the ${winner.id} is the worst line and it is only ${score} ${unit}${stamp}. ${tierName}. Screenshot it, nobody will believe you. ${SHARE_URL}`;
   }
 
-  return `The ${winner.id} is ${score} shame points of fucked${stamp}. ${tierName}. I have receipts. ${SHARE_URL}`;
+  return `The ${winner.id} is ${score} ${unit} of fucked${stamp}. ${tierName}. I have receipts. ${SHARE_URL}`;
 }

@@ -36,10 +36,15 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
     // On a quiet day the worst line is barely scoring, so a "villain certified"
     // line reads wrong. Lean into clean-board energy so a calm day still has a
     // deadpan hook that matches the share text.
+    // standalone: SHAME_HEADLINES are full sentences, so they read "The 7. Top
+    // of the board." with a period after the id. QUIET_DAY_HEADLINES are clause
+    // continuations ("is the worst line right now"), so they read "The 7 is the
+    // worst line right now" with no period. Mixing them up makes the most
+    // screenshotted line read as a broken fragment.
     if (winner.daily_score < 30) {
-      return QUIET_DAY_HEADLINES[seed % QUIET_DAY_HEADLINES.length];
+      return { text: QUIET_DAY_HEADLINES[seed % QUIET_DAY_HEADLINES.length], standalone: false };
     }
-    return SHAME_HEADLINES[seed % SHAME_HEADLINES.length];
+    return { text: SHAME_HEADLINES[seed % SHAME_HEADLINES.length], standalone: true };
   }, [winner.id, winner.daily_score]);
 
   const clockStr = useMemo(() => {
@@ -230,7 +235,7 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
                     className="receipt"
                     style={{ color: "var(--color-newsprint)", fontSize: "13px" }}
                   >
-                    shame points
+                    {winner.daily_score === 1 ? "shame point" : "shame points"}
                   </span>
                 </div>
                 <div
@@ -241,7 +246,7 @@ export default function Trophy({ winner, lines = [], lastUpdated }) {
                     color: "var(--color-platform)",
                   }}
                 >
-                  The {winner.id} {headline}
+                  The {winner.id}{headline.standalone ? "." : ""} {headline.text}
                 </div>
               </div>
             </div>

@@ -105,7 +105,7 @@ export default function ShareCard({ winner, date, clock }) {
               {winner.daily_score.toLocaleString()}
             </div>
             <div style={{ fontSize: "16px", fontWeight: 600, color: "#999077" }}>
-              shame points
+              {winner.daily_score === 1 ? "shame point" : "shame points"}
             </div>
           </div>
         </div>

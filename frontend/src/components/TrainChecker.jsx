@@ -354,7 +354,7 @@ function TrainCheckerBody({ lines }) {
                 <span className="font-display tabular" style={{ fontSize: "32px", color: verdictTier.color }}>
                   {verdict.dailyScore.toLocaleString()}
                 </span>
-                <span className="receipt" style={{ color: "var(--color-newsprint)" }}>shame points</span>
+                <span className="receipt" style={{ color: "var(--color-newsprint)" }}>{verdict.dailyScore === 1 ? "shame point" : "shame points"}</span>
               </span>
             )}
           </div>
