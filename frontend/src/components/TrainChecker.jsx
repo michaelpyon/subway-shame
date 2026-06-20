@@ -26,11 +26,15 @@ const GOOD_LINES = [
   "Clear right now. Check again before you leave.",
 ];
 
+// Category-agnostic on purpose. The checker gives a verdict (bad or fine); the
+// specific problem (delays, skip stop, entrance closed) is shown verbatim from
+// the real MTA alert below, so a one-liner must never assert a category the data
+// does not back, e.g. claiming delays on a station-entrance closure.
 const BAD_LINES = [
-  "It is not running well.",
-  "Delays are live. More are possible.",
+  "It is not running clean.",
+  "It is in it right now. The alerts below say how.",
   "The MTA is aware. That is all they will say.",
-  "Running. Late.",
+  "Not behaving. Receipts below.",
   "Something is wrong. The alerts below have it.",
 ];
 
@@ -42,7 +46,7 @@ const DIR_BAD = [
 
 const DIR_GOOD_OTHER_BAD = [
   "Your direction is fine. The way back is not.",
-  "Clear going that way. The opposite has delays.",
+  "Clear going that way. The opposite is in it.",
   "You will get there. Getting back is the open question.",
 ];
 

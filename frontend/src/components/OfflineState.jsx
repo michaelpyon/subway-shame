@@ -3,12 +3,6 @@ import LineBadge from "./LineBadge";
 // The honest down screen. When the live MTA feed is unreachable there are no
 // real scores, so we show none. We would rather show nothing than make a number
 // up: 1 fabricated score mid-meltdown and the persona never trusts us again.
-const MTA_COLORS = [
-  "var(--mta-123)", "var(--mta-456)", "var(--mta-7)",
-  "var(--mta-ace)", "var(--mta-bdfm)", "var(--mta-nqrw)",
-  "var(--mta-g)", "var(--mta-jz)", "var(--mta-l)", "var(--mta-s)",
-];
-
 const SAMPLE_LINES = ["1", "2", "3", "A", "C", "E", "N", "Q", "R", "L", "7", "G", "J", "Z", "B", "D", "F", "M", "4", "5", "6"];
 
 export default function OfflineState({ onRetry, loading, lastUpdated }) {
@@ -18,13 +12,9 @@ export default function OfflineState({ onRetry, loading, lastUpdated }) {
 
   return (
     <div className="min-h-dvh antialiased" style={{ backgroundColor: "var(--color-tunnel)", color: "var(--color-platform)" }}>
-      {/* Masthead, same as the live page */}
+      {/* Masthead, same monochrome chrome as the live page: a single 1px
+          Concrete hairline, no color stripe (color is data only). */}
       <div style={{ borderBottom: "1px solid var(--color-concrete)" }}>
-        <div className="h-1 w-full flex">
-          {MTA_COLORS.map((c, i) => (
-            <div key={i} className="flex-1" style={{ backgroundColor: c }} />
-          ))}
-        </div>
         <div className="px-4 py-3 max-w-[672px] mx-auto">
           <h1 className="font-display leading-none" style={{ fontSize: "22px", letterSpacing: "0.3em", color: "var(--color-platform)" }}>
             THE LOW LINE

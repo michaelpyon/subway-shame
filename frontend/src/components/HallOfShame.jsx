@@ -9,6 +9,13 @@ import LineBadge from "./LineBadge";
 const HOF_KEY = "subway-shame-hof";
 const HOF_MAX = 50;
 
+// Today in New York, as YYYY-MM-DD. The subway is an ET system and the masthead
+// shows the ET date, so the Hall key must be ET too. Plain toISOString is UTC
+// and rolls a day ahead after about 8pm ET, which would contradict the masthead.
+function todayET() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+}
+
 function loadHof() {
   try {
     const raw = localStorage.getItem(HOF_KEY);
@@ -20,7 +27,7 @@ function loadHof() {
 
 function saveToHof(winner) {
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayET();
     const existing = loadHof();
     const idx = existing.findIndex((e) => e.date === today);
     const entry = { date: today, lineId: winner.id, score: winner.daily_score };

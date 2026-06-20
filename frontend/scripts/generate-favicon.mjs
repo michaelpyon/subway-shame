@@ -82,6 +82,8 @@ for (const [name, size] of [
   ["favicon-16.png", 16],
   ["favicon-32.png", 32],
   ["apple-touch-icon.png", 180],
+  ["icon-192.png", 192],
+  ["icon-512.png", 512],
 ]) {
   const buf = await pngAt(size);
   await writeFile(join(pub, name), buf);
