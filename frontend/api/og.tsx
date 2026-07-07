@@ -14,10 +14,22 @@
 // shows. If the fetch fails or returns no winner, we draw the fallback card.
 
 import { ImageResponse } from "@vercel/og";
+import { INTER_REGULAR, INTER_BOLD } from "./_fonts.js";
 
 export const config = { runtime: "edge" };
 
 const STATUS_URL = "https://subway-shame.vercel.app/api/status";
+
+// The card draws text at weights 400 through 900. @vercel/og 0.6.8 (satori)
+// renders nothing without an explicit font, so we hand it a real regular and a
+// real bold TrueType face and let it approximate the in-between weights. These
+// are bundled as base64 in _fonts.js, so the render never depends on a font CDN
+// at request time. Every text style below uses fontFamily "Inter".
+const FONT_FAMILY = "Inter";
+const FONTS = [
+  { name: FONT_FAMILY, data: INTER_REGULAR, weight: 400 as const, style: "normal" as const },
+  { name: FONT_FAMILY, data: INTER_BOLD, weight: 700 as const, style: "normal" as const },
+];
 
 // Brand palette (mirrors the app's CSS tokens).
 const TUNNEL = "#000000";
@@ -153,7 +165,7 @@ function liveCard(status) {
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
           <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: 3, textTransform: "uppercase", color: NEWSPRINT }}>
-            Data as of {clock}
+            {`Data as of ${clock}`}
           </div>
           <div style={{ fontSize: 22, color: "#5a5446", letterSpacing: 2, marginTop: 6 }}>
             subway-shame.vercel.app
@@ -201,7 +213,7 @@ function shell() {
     backgroundColor: TUNNEL,
     boxShadow: `inset 0 0 0 2px ${CONCRETE}`,
     padding: "56px 64px",
-    fontFamily: "sans-serif",
+    fontFamily: FONT_FAMILY,
     position: "relative",
   };
 }
@@ -209,6 +221,17 @@ function shell() {
 const brandText = { fontSize: 36, fontWeight: 800, letterSpacing: 9, color: PLATFORM };
 
 // --- handler ----------------------------------------------------------------
+
+// Build the card element from a status payload. Exported so a local harness can
+// render the exact same JSX the live route does.
+export function buildElement(status) {
+  if (status && status.winner) return liveCard(status);
+  // Clean day: no line scored. Stay honest and on-brand.
+  return fallbackCard(status && status.date, "All clear right now");
+}
+
+// Shared render options: real fonts (required) plus the fixed card size.
+export const IMAGE_OPTIONS = { width: 1200, height: 630, fonts: FONTS };
 
 export default async function handler() {
   const headers = {
@@ -222,16 +245,11 @@ export default async function handler() {
     const resp = await fetch(STATUS_URL, { headers: { accept: "application/json" } });
     if (!resp.ok) throw new Error(`status ${resp.status}`);
     const status = await resp.json();
-    if (status && status.winner) {
-      element = liveCard(status);
-    } else {
-      // Clean day: no line scored. Stay honest and on-brand.
-      element = fallbackCard(status && status.date, "All clear right now");
-    }
+    element = buildElement(status);
   } catch (err) {
     console.error("og handler failed:", err);
     element = fallbackCard(null, "Live MTA data, scored and ranked");
   }
 
-  return new ImageResponse(element, { width: 1200, height: 630, headers });
+  return new ImageResponse(element, { ...IMAGE_OPTIONS, headers });
 }
